@@ -46,7 +46,7 @@ function PaymentsContent() {
   const search = get("search") ?? "";
   const method = get("method") ?? "";
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["payments", { search, method, page }],
     queryFn: () =>
       api.get<Paginated<PaymentRow>>("/payments/", {
@@ -164,18 +164,29 @@ function PaymentsContent() {
         loading={isLoading}
         onPageChange={(p) => set({ page: p })}
         empty={
-          <EmptyState
-            message={isError ? "Payments couldn't be loaded. Refresh to try again." : "No customer payments have been recorded yet or matched the filter."}
-            action={
-              <Button
-                onClick={() => setRecordOpen(true)}
-                className="gap-1.5 bg-brand text-white hover:bg-brand/90"
-              >
-                <Plus className="h-4 w-4" />
-                Record payment
-              </Button>
-            }
-          />
+          isError ? (
+            <EmptyState
+              message="Payments couldn't be loaded."
+              action={
+                <Button variant="outline" onClick={() => refetch()}>
+                  Try again
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              message="No customer payments have been recorded yet or matched the filter."
+              action={
+                <Button
+                  onClick={() => setRecordOpen(true)}
+                  className="gap-1.5 bg-brand text-white hover:bg-brand/90"
+                >
+                  <Plus className="h-4 w-4" />
+                  Record payment
+                </Button>
+              }
+            />
+          )
         }
       />
 

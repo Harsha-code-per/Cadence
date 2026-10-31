@@ -91,6 +91,7 @@ function DraftFields({ subscription }: { subscription: Subscription }) {
         <select
           value={discount}
           onChange={(e) => setDiscount(e.target.value)}
+          disabled={discounts.isLoading || discounts.isError}
           className="h-9 rounded-md border bg-background px-3 font-normal"
         >
           <option value="">None</option>
@@ -100,7 +101,22 @@ function DraftFields({ subscription }: { subscription: Subscription }) {
             </option>
           ))}
         </select>
-        <span className="font-normal text-ink-2">Discounts without a code apply on their own at billing.</span>
+        {discounts.isError ? (
+          <p role="alert" className="flex items-center justify-between text-xs text-destructive">
+            <span>Could not load discounts.</span>
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-destructive underline"
+              onClick={() => discounts.refetch()}
+            >
+              Try again
+            </Button>
+          </p>
+        ) : (
+          <span className="font-normal text-ink-2">Discounts without a code apply on their own at billing.</span>
+        )}
       </label>
       <label className="grid gap-1.5 text-sm font-medium sm:col-span-2">
         Notes
@@ -308,6 +324,20 @@ function AddLine({ subscriptionId }: { subscriptionId: string }) {
             Next
           </Button>
         </span>
+        {products.isError && (
+          <p role="alert" className="mt-1 flex items-center justify-between text-xs text-destructive">
+            <span>Could not load products.</span>
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-destructive underline"
+              onClick={() => products.refetch()}
+            >
+              Try again
+            </Button>
+          </p>
+        )}
       </div>
       <div className="grid content-start gap-1.5 text-sm font-medium">
         <label htmlFor="line-variant">Variant (optional)</label>
@@ -325,6 +355,20 @@ function AddLine({ subscriptionId }: { subscriptionId: string }) {
             </option>
           ))}
         </select>
+        {variants.isError && (
+          <p role="alert" className="mt-1 flex items-center justify-between text-xs text-destructive">
+            <span>Could not load variants.</span>
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-destructive underline"
+              onClick={() => variants.refetch()}
+            >
+              Try again
+            </Button>
+          </p>
+        )}
         {product && (
           <span className="flex items-center gap-2 font-normal">
             <Button

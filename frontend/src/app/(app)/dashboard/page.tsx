@@ -7,6 +7,7 @@ import { KpiTile } from "@/components/data/KpiTile";
 import { Money } from "@/components/data/Money";
 import { RevenueChart, type SeriesPoint } from "@/components/dashboard/RevenueChart";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, type Paginated } from "@/lib/api";
 import { useOptions } from "@/lib/crud";
@@ -108,7 +109,14 @@ export default function DashboardPage() {
 
       {summary.isError ? (
         <div className="rounded-lg border bg-surface">
-          <EmptyState message="The finance summary isn't available yet." />
+          <EmptyState
+            message="The finance summary couldn't be loaded."
+            action={
+              <Button variant="outline" size="sm" onClick={() => summary.refetch()}>
+                Try again
+              </Button>
+            }
+          />
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
@@ -127,7 +135,22 @@ export default function DashboardPage() {
               </span>
             }
           >
-            {series.isLoading ? <Skeleton className="h-[240px]" /> : series.data && series.data.length ? <RevenueChart data={series.data} /> : <EmptyState message="No invoices in this range yet." />}
+            {series.isLoading ? (
+              <Skeleton className="h-[240px]" />
+            ) : series.isError ? (
+              <EmptyState
+                message="Revenue series couldn't be loaded."
+                action={
+                  <Button variant="outline" size="sm" onClick={() => series.refetch()}>
+                    Try again
+                  </Button>
+                }
+              />
+            ) : series.data && series.data.length ? (
+              <RevenueChart data={series.data} />
+            ) : (
+              <EmptyState message="No invoices in this range yet." />
+            )}
           </Panel>
         </div>
 
@@ -135,6 +158,15 @@ export default function DashboardPage() {
           <Panel title="Status breakdown">
             {breakdown.isLoading ? (
               <Skeleton className="h-40" />
+            ) : breakdown.isError ? (
+              <EmptyState
+                message="Status breakdown couldn't be loaded."
+                action={
+                  <Button variant="outline" size="sm" onClick={() => breakdown.refetch()}>
+                    Try again
+                  </Button>
+                }
+              />
             ) : breakdown.data ? (
               <div className="flex flex-col gap-5 text-sm">
                 {(["subscriptions", "invoices"] as const).map((k) => {
@@ -171,6 +203,15 @@ export default function DashboardPage() {
         <Panel title="Overdue, by age">
           {aging.isLoading ? (
             <Skeleton className="h-24" />
+          ) : aging.isError ? (
+            <EmptyState
+              message="Overdue ages couldn't be loaded."
+              action={
+                <Button variant="outline" size="sm" onClick={() => aging.refetch()}>
+                  Try again
+                </Button>
+              }
+            />
           ) : aging.data ? (
             <ul className="flex flex-col gap-4">
               {aging.data.map((row) => (
@@ -204,8 +245,17 @@ export default function DashboardPage() {
                 </li>
               ))}
             </ul>
+          ) : overdue.isError ? (
+            <EmptyState
+              message="Overdue invoices couldn't be loaded."
+              action={
+                <Button variant="outline" size="sm" onClick={() => overdue.refetch()}>
+                  Try again
+                </Button>
+              }
+            />
           ) : (
-            <EmptyState message={overdue.isError ? "Overdue invoices couldn't be loaded." : "Nothing is overdue."} />
+            <EmptyState message="Nothing is overdue." />
           )}
         </Panel>
       </div>

@@ -54,7 +54,7 @@ export function RecordPaymentDialog({ open, onOpenChange, invoice }: Props) {
   const [search, setSearch] = useState("");
   const term = useDeferredValue(search.trim());
 
-  const { data: invoicesData } = useQuery({
+  const { data: invoicesData, isError: invoicesError, refetch: refetchInvoices } = useQuery({
     queryKey: ["invoices", "confirmed-for-payment", term],
     queryFn: () => api.get<Paginated<InvoiceOption>>("/invoices/", { status: "confirmed", search: term, page_size: 25 }),
     enabled: open && !invoice,
@@ -144,10 +144,15 @@ export function RecordPaymentDialog({ open, onOpenChange, invoice }: Props) {
                 aria-label="Matching invoices"
                 value={selectedInvoiceId || ""}
                 onChange={(e) => handleInvoiceChange(Number(e.target.value))}
+                disabled={invoicesError}
                 className="mt-2 h-9 w-full rounded-lg border border-input bg-surface px-3 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <option value="" disabled>
-                  {invoices.length ? "Select a confirmed invoice" : "No matching invoices"}
+                  {invoicesError
+                    ? "Could not load invoices"
+                    : invoices.length
+                      ? "Select a confirmed invoice"
+                      : "No matching invoices"}
                 </option>
                 {invoices.map((inv) => (
                   <option key={inv.id} value={inv.id}>
@@ -155,6 +160,20 @@ export function RecordPaymentDialog({ open, onOpenChange, invoice }: Props) {
                   </option>
                 ))}
               </select>
+              {invoicesError && (
+                <p role="alert" className="mt-1 flex items-center justify-between text-xs text-destructive">
+                  <span>Could not load invoices.</span>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-destructive underline"
+                    onClick={() => refetchInvoices()}
+                  >
+                    Try again
+                  </Button>
+                </p>
+              )}
             </Field>
           )}
 

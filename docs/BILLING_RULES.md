@@ -21,7 +21,7 @@ active/closed ──renew──▶ (new subscription in quotation, renewed_from 
 | `confirm` | quotation | `valid_until ≥ today` (else `quotation_expired`) | |
 | `activate` | confirmed | `start_date ≤ today` (the billing run also activates confirmed subs whose start date arrives) | `next_invoice_date = start_date`; **bill the first period immediately** |
 | `pause` | active | `plan.pausable` | not billed while paused |
-| `resume` | paused | | `next_invoice_date = max(next_invoice_date, today)` |
+| `resume` | paused | | **shift by the paused duration**: `next_invoice_date += today − paused_at` (`paused_at` = time of the latest `→ paused` SubscriptionEvent; no extra column). The customer never pays for paused days and never loses paid days. |
 | `close` | active, paused | `plan.closable` (staff/admin can always close draft/quotation as *cancel*) | `close_reason` stored |
 | auto-close | active, paused | `plan.auto_close AND expiration_date < today` | done by the billing run, actor = system |
 | `renew` | active, closed | `plan.renewable` | new subscription, status `quotation`, lines copied, `start_date = old.expiration_date + 1 day` (or today) |
@@ -32,8 +32,10 @@ Editing lines/plan/customer is only allowed in `draft` (and `quotation`, which b
 
 ## 2. Billing periods
 - `period_start = next_invoice_date`
-- `period_end = period_start + interval_count × billing_period − 1 day` using `dateutil.relativedelta` (month-end safe: 31 Jan + 1 month → 28/29 Feb).
-- After invoicing: `next_invoice_date = period_end + 1 day`.
+- **Anchor day, no drift.** The anchor is `start_date.day`. For monthly and yearly plans, the next period start is `period_start + relativedelta(months=n, day=anchor)` (or `years=n`). `relativedelta(day=31)` clamps to the month's last day, so a 31 Jan start bills **31 Jan → 28/29 Feb → 31 Mar → 30 Apr**, never drifting to the 28th forever. Daily and weekly plans use `days=` / `weeks=`.
+- `period_end = next_period_start − 1 day`.
+- After invoicing: `next_invoice_date = next_period_start`.
+- Unit-test the anchor: start 31 Jan monthly → starts 31 Jan, 29 Feb (2028), 31 Mar.
 - No invoice is generated for a period starting after `expiration_date`.
 - `invoice_date = period_start` (billing in advance); `due_date = invoice_date + payment_term.due_days`.
 
@@ -89,11 +91,13 @@ Guarantees:
 - **Never skipped**: the catch-up loop bills every missed period up to today; the scheduler runs every 15 min *and* admins have a "Run billing now" button.
 - **Concurrent runs** don't block each other (`skip_locked`).
 
+**Billing-day simulator (demo superpower).** `run_due_billing(today, dry_run=True)` runs the exact same code inside `transaction.atomic()` and then rolls back (raise a private `_DryRun` exception carrying the counts, catch it outside the atomic block). It returns what *would* happen: `{activated, closed, invoiced, skipped, total_billed, discounts_applied}`. The admin UI's "Run billing now" dialog takes a **"Bill as of" date** (default today) and has a **Preview** button (dry run) next to **Run billing**. Judges can bill next month live in seconds, then preview again and see `invoiced: 0`.
+
 Triggers (all call `run_due_billing`):
 | Trigger | Who |
 |---|---|
 | `python manage.py run_billing [--date YYYY-MM-DD]` | dev / demo |
-| `POST /api/billing/run/` | admin button on the Invoices page |
+| `POST /api/billing/run/ {date?, dry_run?}` | admin dialog on the Invoices page (Preview / Run billing, "Bill as of" date) |
 | `POST /api/internal/billing/run/` with `Authorization: Bearer $SCHEDULER_SECRET` | GitHub Actions cron `*/15 * * * *` (`.github/workflows/scheduler.yml`) |
 
 ## 5. Invoice lifecycle and payments
@@ -122,5 +126,17 @@ draft ──confirm──▶ confirmed ──(payments sum = total)──▶ pai
 
 All aggregates run as single SQL queries (`aggregate`/`annotate` with `Sum`, `Count`, `filter=Q(...)`), never Python loops.
 
-## 7. Insights (P2, rule-based, no LLM)
+## 7. Gross margin guardrail (cost price has a job)
+The brief asks for a product's cost price. We use it:
+- Variant margin: `margin % = (price − cost_price) ÷ price × 100`, shown on the product and variant forms (M2).
+- Subscription line margin after discount: `(unit_price − line discount per unit − cost_price) ÷ (unit_price − discount per unit)`, shown per line on the subscription detail (M3).
+- **Warning, not a block**: when a discount would take any line's net price below `cost_price`, the discount form and the subscription detail show an amber "Below cost on Brightloop CRM: −₹120 per seat" notice. `cost_price` is **never** sent to customers (portal serializers exclude it).
+
+## 8. Receivables aging (M4)
+Overdue confirmed invoices are bucketed by days past `due_date`: **1–7, 8–30, 31–60, 60+**. One SQL query with `Case/When` over `idx_inv_open_due`. Shown on the dashboard's overdue panel with counts and amounts; each bucket links to the filtered invoice list (`?overdue=true&aging=8-30`).
+
+## 9. "Why did my bill change?" (M3 detail page, M4 portal)
+On an invoice, compare it to the previous non-cancelled invoice of the same subscription and list the differences in plain words: quantity changes, a new or removed line, a discount that started, expired or ran out, a tax rate change. Computed on read (`GET /api/invoices/{id}/` → `changes: [{kind, description, amount_delta}]`), not stored. This answers the customer's first question before they email anyone.
+
+## 10. Insights (P2, rule-based, no LLM)
 Churn-risk score per active subscription (0–100) from: number of overdue invoices, days past due, recent pause events, expiration within 30 days with no renewal, and a decrease in quantity. Show the top 10 with the reasons listed. Deterministic and explainable.

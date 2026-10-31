@@ -66,7 +66,7 @@ export default function QuotationTemplatesPage() {
       { name: "plan", label: "Plan", kind: "select", required: true, options: (plans.data?.results ?? []).map((p) => ({ value: p.id, label: p.name })) },
       { name: "payment_term", label: "Payment term", kind: "select", options: (terms.data?.results ?? []).map((t) => ({ value: t.id, label: t.name })) },
       { name: "validity_days", label: "Quote valid for (days)", kind: "number", required: true },
-      { name: "lines", label: "Products", kind: "custom", render: (v, c) => <LinesEditor value={v} onChange={c} products={products.data?.results ?? []} /> },
+      { name: "lines", label: "Products", kind: "custom", emptyValue: [], render: (v, c) => <LinesEditor value={v} onChange={c} products={products.data?.results ?? []} /> },
       { name: "notes", label: "Notes", kind: "textarea" },
     ],
     [plans.data, terms.data, products.data],

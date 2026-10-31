@@ -42,6 +42,14 @@ def test_lifecycle_and_activation_rollback(draft):
 
 
 @pytest.mark.django_db
+def test_send_error_shows_plan_minimum(draft):
+    draft.plan.min_quantity = 5
+    draft.plan.save(update_fields=["min_quantity"])
+    with pytest.raises(ValidationError, match="at least 5 units"):
+        transition_subscription(draft.pk, "send", today=TODAY)
+
+
+@pytest.mark.django_db
 def test_guards_and_expired_quotation(draft):
     with pytest.raises(ValidationError):
         transition_subscription(draft.pk, "pause", today=TODAY)

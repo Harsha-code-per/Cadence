@@ -78,7 +78,10 @@ def transition_subscription(subscription_id, action, *, actor=None, note="", tod
         ):
             _invalid("The plan is not available today.", "validation_error")
         if quantity < plan.min_quantity:
-            _invalid("Add lines meeting the plan's minimum quantity.", "validation_error")
+            _invalid(
+                f"Add at least {plan.min_quantity} units to meet the plan's minimum quantity.",
+                "validation_error",
+            )
         days = sub.quotation_template.validity_days if sub.quotation_template else 30
         sub.valid_until = today + timedelta(days=days)
     elif action == "revise":

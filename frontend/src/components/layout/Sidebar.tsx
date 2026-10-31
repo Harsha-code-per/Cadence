@@ -33,7 +33,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       >
         <CycleMark /> Cadence
       </Link>
-      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4">
+      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-4 [scrollbar-color:var(--sidebar-border)_transparent] [scrollbar-width:thin]">
         {NAV.map((group) => {
           // Until /auth/me/ answers, show everything; the backend enforces roles regardless.
           const items = group.items.filter((i) => !i.roles || !me || i.roles.includes(me.role));

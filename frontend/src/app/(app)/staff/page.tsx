@@ -1,6 +1,7 @@
 "use client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { PasswordInput } from "@/components/auth/PasswordInput";
+import { RoleGate } from "@/components/auth/RoleGate";
 import { CatalogPage } from "@/components/data/CatalogPage";
 import { ActiveBadge } from "@/components/data/StatusBadge";
 import type { FieldDef } from "@/components/forms/ResourceDialog";
@@ -44,6 +45,7 @@ const fields: FieldDef[] = [
 /** Brief: "Only the admin can add a new member of staff." The page is admin-only in the nav and the API. */
 export default function StaffPage() {
   return (
+    <RoleGate allow={["admin"]} nested>
     <CatalogPage<Staff>
       title="Staff"
       description="People who run Brightloop's day-to-day billing. Only admins can add or change them."
@@ -54,5 +56,6 @@ export default function StaffPage() {
       deleteLabel="Deactivate"
       toInitial={(u) => ({ full_name: u.full_name, email: u.email, role: u.role, is_active: u.is_active, password: "" })}
     />
+    </RoleGate>
   );
 }

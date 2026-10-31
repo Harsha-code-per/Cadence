@@ -73,7 +73,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               <button className="flex w-full items-center gap-2.5 rounded-md p-2 text-left hover:bg-sidebar-accent/60 focus-visible:outline-2 focus-visible:outline-sidebar-ring" />
             }
           >
-            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-plum text-[13px] font-semibold text-white">
+            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-plum text-[13px] font-semibold text-primary-foreground">
               {(me?.full_name ?? "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
             </span>
             <span className="min-w-0">

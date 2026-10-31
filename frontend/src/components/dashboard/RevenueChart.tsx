@@ -11,7 +11,19 @@ const monthLabel = (m: string) => new Date(`${m.slice(0, 7)}-01T00:00:00`).toLoc
 export function RevenueChart({ data }: { data: SeriesPoint[] }) {
   const rows = data.map((d) => ({ month: monthLabel(d.month), invoiced: Number(d.invoiced), collected: Number(d.collected) }));
   return (
-    <div className="h-[240px]" role="img" aria-label="Invoiced and collected revenue per month">
+    <div className="h-[240px]">
+      <table className="sr-only">
+        <caption>Invoiced and collected revenue per month</caption>
+        <thead>
+          <tr><th>Month</th><th>Invoiced</th><th>Collected</th></tr>
+        </thead>
+        <tbody>
+          {data.map((d) => (
+            <tr key={d.month}><td>{d.month}</td><td>{formatMoney(d.invoiced)}</td><td>{formatMoney(d.collected)}</td></tr>
+          ))}
+        </tbody>
+      </table>
+      <div aria-hidden className="h-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={rows} barGap={3} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--line)" />
@@ -26,6 +38,7 @@ export function RevenueChart({ data }: { data: SeriesPoint[] }) {
           <Bar dataKey="collected" name="Collected" fill="var(--teal)" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }

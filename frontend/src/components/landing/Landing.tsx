@@ -46,6 +46,7 @@ export function Landing() {
         </nav>
       </header>
 
+      <main>
       <section className={`${wrap} flex flex-wrap items-center gap-12 pb-24 pt-10 md:pt-16`}>
         <div className="flex min-w-0 flex-[1_1_480px] flex-col gap-7">
           <h1 className="rise font-display text-[clamp(3.5rem,7vw,7rem)] font-bold leading-[0.98] tracking-[-0.035em]">
@@ -69,7 +70,7 @@ export function Landing() {
           <h2 className="max-w-[760px] font-display text-4xl font-bold leading-[1.02] tracking-[-0.03em] md:text-[56px]">A month at Brightloop, without the spreadsheet</h2>
           <p className="max-w-[620px] text-lg leading-[1.55] text-sidebar-foreground">Scroll sideways through one billing month. Each scene is a problem the team faced, and the screen that now handles it.</p>
         </Reveal>
-        <div className="mt-12 flex scroll-px-6 snap-x snap-mandatory gap-6 md:scroll-px-10 overflow-x-auto px-6 pb-4 md:px-10" tabIndex={0} aria-label="A billing month, scrolls sideways">
+        <div className="mt-12 flex scroll-px-6 snap-x snap-mandatory gap-6 md:scroll-px-10 overflow-x-auto px-6 pb-4 md:px-10" tabIndex={0} role="region" aria-label="A billing month, scrolls sideways">
           {DAYS.map((d) => (
             <article key={d.day} className="flex w-[340px] shrink-0 snap-start flex-col gap-4 rounded-[20px] bg-sidebar-accent p-7">
               <span className="font-display text-[40px] font-bold text-marigold">{d.day}</span>
@@ -130,6 +131,8 @@ export function Landing() {
           <Link href="/login" className={primary}>Open the live demo</Link>
         </Reveal>
       </section>
+
+      </main>
 
       <footer className={`${wrap} flex flex-wrap items-center justify-between gap-4 border-t border-sidebar-border py-8 text-sm text-sidebar-muted`}>
         <span>Cadence, built for the Odoo Hackathon by Harsha, Loktrishal, Sanjjith and Cholan.</span>

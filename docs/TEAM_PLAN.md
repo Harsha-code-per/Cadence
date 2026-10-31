@@ -1,6 +1,6 @@
 # Team Plan (31 Oct 2026, 09:30 to 17:00 IST)
 
-> **Everyone reads this first.** Ownership here is mirrored in [`.github/CODEOWNERS`](../.github/CODEOWNERS). Git rules: [CONTRIBUTING](../CONTRIBUTING.md).
+> **Everyone reads this first**, then [ENGINEERING_STANDARDS](ENGINEERING_STANDARDS.md): the six pillars every PR is reviewed against. Ownership here is mirrored in [`.github/CODEOWNERS`](../.github/CODEOWNERS). Git rules: [CONTRIBUTING](../CONTRIBUTING.md).
 
 ## Roles: vertical slices (each member owns a Django app *and* its Next.js pages)
 
@@ -54,6 +54,7 @@ Only the owner edits these paths. Need a change elsewhere? Ask the owner, or ope
 4. **Migrations**: after M1's initial set, only the app owner runs `makemigrations <their_app>`. Rebase before generating one.
 5. **Commit from your own account at least once an hour**, and merge at least one PR per hour. **Rebase-merge only, never squash.**
 6. Stuck for more than 15 min? Say so in the team chat.
+7. **Six pillars on every PR**: code quality, problem-statement alignment, security, accessibility, performance, testing ([ENGINEERING_STANDARDS](ENGINEERING_STANDARDS.md)).
 
 ## Timeline
 

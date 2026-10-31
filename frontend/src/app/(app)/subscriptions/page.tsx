@@ -208,6 +208,9 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
+          <Link href="/subscriptions/new" className="self-center text-sm text-plum underline-offset-4 hover:underline">
+            Create without a template
+          </Link>
         </div>
       </form>
     </section>

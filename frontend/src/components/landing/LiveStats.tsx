@@ -35,11 +35,11 @@ export default function LiveStats() {
   ];
 
   return (
-    <section aria-label="Live numbers" className="border-y border-[var(--l-raised)]">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:grid-cols-3 sm:px-10" aria-live="polite">
+    <section aria-label="Live numbers" >
+      <div className="mx-auto grid max-w-[1500px] gap-8 px-4 py-16 sm:grid-cols-3 sm:px-10" aria-live="polite">
         {items.map((item) => (
           <div key={item.label} className="flex flex-col gap-1.5">
-            <span className="display num text-5xl font-bold sm:text-6xl">
+            <span className="display num lift text-[clamp(3rem,6vw,6rem)] font-bold leading-none">
               {item.value ?? (failed ? '—' : <span className="inline-block h-12 w-40 animate-pulse rounded bg-[var(--l-raised)]" />)}
             </span>
             <span className="text-[15px] text-[var(--l-text-2)]">{item.label}</span>
@@ -47,7 +47,7 @@ export default function LiveStats() {
         ))}
       </div>
       {failed && (
-        <p className="mx-auto max-w-7xl px-4 pb-8 text-sm text-[var(--l-text-3)] sm:px-10">
+        <p className="mx-auto max-w-[1500px] px-4 pb-8 text-sm text-[var(--l-text-3)] sm:px-10">
           Live numbers show up when the demo API is reachable.
         </p>
       )}

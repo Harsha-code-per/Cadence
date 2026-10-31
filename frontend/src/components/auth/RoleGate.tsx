@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { DemoBanner } from "@/components/auth/DemoBanner";
 import { useMe, type Role } from "@/hooks/useMe";
 import { ApiError } from "@/lib/api";
 import { homeFor } from "@/lib/auth";
@@ -29,5 +30,10 @@ export function RoleGate({ allow, children }: { allow: Role[]; children: React.R
       </div>
     );
   }
-  return children;
+  return (
+    <>
+      {me?.is_demo && <DemoBanner />}
+      {children}
+    </>
+  );
 }

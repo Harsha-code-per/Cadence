@@ -88,10 +88,10 @@ export default function BillingDay() {
   );
 
   return (
-    <section ref={root} aria-labelledby="billing-title" className="group/billing relative overflow-hidden border-t border-[var(--l-raised)] py-24 lg:flex lg:min-h-screen lg:items-center lg:py-0">
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-14 px-4 sm:px-10 lg:grid-cols-[0.9fr_1.1fr]">
+    <section ref={root} data-chapter="2" aria-labelledby="billing-title" className="group/billing relative overflow-hidden py-24 lg:flex lg:min-h-screen lg:items-center lg:py-0">
+      <div className="mx-auto grid w-full max-w-[1500px] items-center gap-14 px-4 sm:px-10 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-6">
-          <h2 id="billing-title" className="display text-4xl font-bold leading-[1.02] sm:text-6xl">
+          <h2 id="billing-title" className="display lift text-[clamp(2.5rem,5.4vw,5.5rem)] font-bold leading-[1]">
             Billing day, without the dread
           </h2>
           <div className="relative group-[.is-scrubbed]/billing:min-h-[150px]">
@@ -105,11 +105,11 @@ export default function BillingDay() {
         </div>
 
         <div className="relative grid grid-cols-2 gap-6" aria-hidden="true">
-          <div className="rounded-[20px] bg-[var(--l-raised)] p-5">
+          <div className="glass rounded-3xl p-5">
             <p className="mb-4 text-sm text-[var(--l-text-3)]">Due today</p>
             <ul className="space-y-2.5">
               {DUE.map(([name, plan, amount], i) => (
-                <li key={name} data-chip className="flex items-center justify-between rounded-lg bg-[var(--l-bg)] px-3 py-2.5 text-[13px]" style={{ zIndex: DUE.length - i }}>
+                <li key={name} data-chip className="flex items-center justify-between rounded-lg bg-white/[0.07] px-3 py-2.5 text-[13px]" style={{ zIndex: DUE.length - i }}>
                   <span>
                     <span className="block font-medium">{name}</span>
                     <span className="text-[var(--l-text-3)]">{plan}</span>
@@ -119,7 +119,7 @@ export default function BillingDay() {
               ))}
             </ul>
           </div>
-          <div className="flex flex-col rounded-[20px] bg-[var(--l-mist)] p-5 text-[var(--l-ink)]">
+          <div className="flex flex-col rounded-3xl bg-[#fff8ea] p-5 text-[var(--l-ink)] shadow-[0_0_90px_-20px_rgb(255_194_71/0.6)]">
             <div className="mb-4 flex items-baseline justify-between">
               <p className="text-sm text-[#5e4b66]">Invoices created</p>
               <span ref={counter} className="display num text-4xl font-bold">412</span>

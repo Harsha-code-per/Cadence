@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { DemoLogins } from "@/components/auth/DemoLogins";
 import { FormAlert } from "@/components/auth/FormAlert";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { Field, applyServerErrors } from "@/components/forms/Field";
@@ -24,7 +25,7 @@ export function LoginForm() {
   const params = useSearchParams();
   const qc = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
-  const { register, handleSubmit, setError, formState } = useForm<Values>({ resolver: zodResolver(schema) });
+  const { register, handleSubmit, setError, setValue, formState } = useForm<Values>({ resolver: zodResolver(schema) });
   const { errors, isSubmitting } = formState;
 
   async function onSubmit(values: Values) {
@@ -46,7 +47,7 @@ export function LoginForm() {
       footer={
         <>
           New to Cadence?{" "}
-          <Link href="/signup" className="font-medium text-plum underline-offset-4 hover:underline">
+          <Link href="/signup" className="font-medium text-[var(--l-marigold-text)] underline-offset-4 hover:underline">
             Create an account
           </Link>
         </>
@@ -64,15 +65,22 @@ export function LoginForm() {
             <PasswordInput autoComplete="current-password" aria-invalid={!!errors.password} {...register("password")} />
           </Field>
           <div className="flex justify-end">
-            <Link href="/forgot-password" className="text-sm font-medium text-plum underline-offset-4 hover:underline">
+            <Link href="/forgot-password" className="text-sm font-medium text-[var(--l-marigold-text)] underline-offset-4 hover:underline">
               Forgot password?
             </Link>
           </div>
         </div>
-        <Button type="submit" className="h-11 w-full text-[15px]" disabled={isSubmitting}>
+        <Button type="submit" className="h-11 w-full bg-[var(--l-marigold)] text-[15px] font-semibold text-[#2a1730] hover:bg-[#ffd47a]" disabled={isSubmitting}>
           {isSubmitting ? "Logging in…" : "Log in"}
         </Button>
       </form>
+      <DemoLogins
+        onUse={(email, password) => {
+          setValue("email", email, { shouldValidate: true });
+          setValue("password", password, { shouldValidate: true });
+          void handleSubmit(onSubmit)();
+        }}
+      />
     </AuthShell>
   );
 }

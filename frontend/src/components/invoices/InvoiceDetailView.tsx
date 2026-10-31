@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, Send } from "lucide-react";
+import { ArrowLeft, Check, Printer, Send } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import { useHydrated } from "@/components/invoices/useHydrated";
 import { DateText, Money } from "@/components/data/Money";
 import { StatusBadge } from "@/components/data/StatusBadge";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useMe } from "@/hooks/useMe";
@@ -159,25 +159,34 @@ export function InvoiceDetailView({ id }: { id: string }) {
           invoice.period_start,
         )} – ${formatDate(invoice.period_end)}`}
         actions={
-          internal ? (
-            <div className="flex flex-wrap items-center gap-2">
-              {canSend && (
-                <Button variant="outline" onClick={() => openAction("send")}>
-                  <Send aria-hidden /> {invoice.sent_at ? "Resend invoice" : "Send invoice"}
-                </Button>
-              )}
-              {canCancel && (
-                <Button variant="outline" onClick={() => openAction("cancel")}>
-                  Cancel invoice
-                </Button>
-              )}
-              {canConfirm && (
-                <Button onClick={() => openAction("confirm")}>
-                  <Check aria-hidden /> Confirm invoice
-                </Button>
-              )}
-            </div>
-          ) : undefined
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Link
+              href={`/invoices/${invoice.id}/print`}
+              className={buttonVariants({ variant: "outline" })}
+              aria-label={`Print invoice ${invoice.number}`}
+            >
+              <Printer aria-hidden /> Print
+            </Link>
+            {internal && (
+              <>
+                {canSend && (
+                  <Button variant="outline" onClick={() => openAction("send")}>
+                    <Send aria-hidden /> {invoice.sent_at ? "Resend invoice" : "Send invoice"}
+                  </Button>
+                )}
+                {canCancel && (
+                  <Button variant="outline" onClick={() => openAction("cancel")}>
+                    Cancel invoice
+                  </Button>
+                )}
+                {canConfirm && (
+                  <Button onClick={() => openAction("confirm")}>
+                    <Check aria-hidden /> Confirm invoice
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         }
       />
 

@@ -77,6 +77,11 @@ export function SidebarNav({
     window.location.assign("/login");
   }
 
+  // Highlight only the most specific match, so /subscriptions/board lights Pipeline and not Subscriptions too.
+  const activeHref = NAV.flatMap((g) => g.items.map((i) => i.href))
+    .filter((h) => pathname === h || pathname.startsWith(`${h}/`))
+    .sort((a, b) => b.length - a.length)[0];
+
   const initials = (me?.full_name ?? "?")
     .split(" ")
     .map((w) => w[0])
@@ -121,7 +126,7 @@ export function SidebarNav({
               )}
               <ul className="space-y-0.5">
                 {items.map(({ href, label, icon: Icon }) => {
-                  const active = pathname === href || pathname.startsWith(`${href}/`);
+                  const active = href === activeHref;
                   return (
                     <li key={href}>
                       <Labelled label={label} show={collapsed}>
@@ -153,27 +158,13 @@ export function SidebarNav({
         })}
       </nav>
 
-      <div className={cn("space-y-1 border-t border-sidebar-border py-2", collapsed ? "px-2" : "px-3")}>
-        {onToggle && (
-          <Labelled label="Expand sidebar" show={collapsed}>
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-expanded={!collapsed}
-              className={cn(row, "h-[34px] w-full gap-3 text-sidebar-muted hover:text-sidebar-accent-foreground", collapsed ? "justify-center" : "px-3")}
-            >
-              {collapsed ? <PanelLeftOpen size={18} strokeWidth={1.75} /> : <PanelLeftClose size={18} strokeWidth={1.75} />}
-              {!collapsed && "Collapse"}
-            </button>
-          </Labelled>
-        )}
+      <div className={cn("flex gap-1 border-t border-sidebar-border py-2", collapsed ? "flex-col-reverse px-2" : "items-center px-3")}>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
               <button
                 aria-label="Account menu"
-                className={cn(row, "w-full gap-2.5 p-2 text-left", collapsed && "justify-center")}
+                className={cn(row, "min-w-0 flex-1 gap-2.5 p-2 text-left", collapsed && "w-full flex-none justify-center")}
               />
             }
           >
@@ -196,6 +187,19 @@ export function SidebarNav({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        {onToggle && (
+          <Labelled label="Expand sidebar" show={collapsed}>
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={!collapsed}
+              className={cn(row, "size-9 shrink-0 justify-center text-sidebar-muted hover:text-sidebar-accent-foreground", collapsed && "w-full")}
+            >
+              {collapsed ? <PanelLeftOpen size={18} strokeWidth={1.75} /> : <PanelLeftClose size={18} strokeWidth={1.75} />}
+            </button>
+          </Labelled>
+        )}
       </div>
     </div>
   );

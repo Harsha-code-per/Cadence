@@ -89,3 +89,61 @@ def test_used_up_discount_is_not_applied(subscription):
     subscription.save()
     assert generate_invoice(subscription.pk, date(2026, 1, 1)).discount_total == 50
     assert generate_invoice(subscription.pk, date(2026, 2, 1)).discount_total == 0
+
+
+def _add_line(subscription, price="1000.00", quantity=1):
+    product = Product.objects.create(name=f"Seat {price}", sales_price=price, cost_price=0)
+    SubscriptionLine.objects.create(
+        subscription=subscription, product=product, quantity=quantity, unit_price=price
+    )
+    return product
+
+
+def test_rules_without_a_code_reach_the_invoice_on_their_own(subscription):
+    _add_line(subscription, quantity=10)
+    Discount.objects.create(
+        name="Bulk",
+        discount_type="percent",
+        value=Decimal("10"),
+        min_quantity=5,
+        start_date=date(2026, 1, 1),
+    )
+    invoice = generate_invoice(subscription.pk, date(2026, 1, 1))
+    assert invoice.discount_total == Decimal("1010.00")  # 10% of 100 plan + 10,000 seats
+    assert DiscountRedemption.objects.filter(invoice=invoice).count() == 1
+
+
+def test_automatic_rules_respect_quantity_scope_expiry_and_limits(subscription):
+    other = Product.objects.create(name="Other", sales_price=1, cost_price=0)
+    _add_line(subscription)
+    common = {"discount_type": "fixed", "value": Decimal("50"), "start_date": date(2026, 1, 1)}
+    Discount.objects.create(name="Too few seats", min_quantity=50, **common)
+    Discount.objects.create(name="Coded", code="SAVE50", **common)
+    Discount.objects.create(
+        name="Expired", **{**common, "start_date": date(2025, 1, 1)}, end_date=date(2025, 2, 1)
+    )
+    scoped = Discount.objects.create(name="Other product", scope="product", **common)
+    scoped.products.add(other)
+
+    assert generate_invoice(subscription.pk, date(2026, 1, 1)).discount_total == 0
+
+    # A rule stops by itself once its uses run out.
+    Discount.objects.create(name="Once", usage_limit=1, **common)
+    assert generate_invoice(subscription.pk, date(2026, 2, 1)).discount_total == Decimal("50.00")
+    assert generate_invoice(subscription.pk, date(2026, 3, 1)).discount_total == 0
+
+
+def test_the_customer_gets_the_biggest_saving_including_an_attached_code(subscription):
+    _add_line(subscription)
+    Discount.objects.create(
+        name="Small", discount_type="fixed", value=Decimal("20"), start_date=date(2026, 1, 1)
+    )
+    subscription.discount = Discount.objects.create(
+        name="Big",
+        code="BIG",
+        discount_type="fixed",
+        value=Decimal("70"),
+        start_date=date(2026, 1, 1),
+    )
+    subscription.save()
+    assert generate_invoice(subscription.pk, date(2026, 1, 1)).discount_total == Decimal("70.00")

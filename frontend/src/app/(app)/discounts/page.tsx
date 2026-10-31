@@ -37,7 +37,7 @@ export default function DiscountsPage() {
   const fields = useMemo<FieldDef[]>(
     () => [
       { name: "name", label: "Name", kind: "text", required: true },
-      { name: "code", label: "Code", kind: "text" },
+      { name: "code", label: "Code", kind: "text", hint: "Leave empty to apply on its own to every subscription that qualifies. With a code, staff attach it to a draft." },
       { name: "discount_type", label: "Type", kind: "select", required: true, options: [{ value: "percent", label: "Percentage" }, { value: "fixed", label: "Fixed amount" }] },
       { name: "value", label: "Value", kind: "money", required: true, hint: "Percent or rupees, depending on the type." },
       { name: "scope", label: "Applies to", kind: "select", required: true, options: [{ value: "subscription", label: "Whole subscription" }, { value: "product", label: "Selected products" }] },

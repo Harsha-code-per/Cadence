@@ -120,6 +120,16 @@ export function Landing() {
           scrollTrigger: { trigger: '[data-hero]', start: 'top top', end: 'bottom 30%', scrub: true },
         });
 
+        // Scrolling off the hero pulls the galaxy of invoices into the ledger.
+        ScrollTrigger.create({
+          trigger: '[data-hero]',
+          start: 'top top',
+          end: 'bottom 12%',
+          onUpdate: (self) => {
+            world.form = self.progress;
+          },
+        });
+
         // Each chapter transforms the world as it scrolls in.
         ScrollTrigger.create({
           trigger: '[data-hero]',
@@ -132,10 +142,12 @@ export function Landing() {
           const n = Number(el.dataset.chapter);
           ScrollTrigger.create({
             trigger: el,
-            start: n === 6 ? 'top 70%' : 'top 95%', // let the revenue bars hold before the finale
-            end: n === 6 ? 'top 5%' : 'top 15%',
+            // The ledger has to finish forming before it fans out, and the revenue bars hold before the finale.
+            start: n === 1 ? 'top top' : n === 6 ? 'top 70%' : 'top 95%',
+            end: n === 1 ? '+=700' : n === 6 ? 'top 5%' : 'top 15%',
             onUpdate: (self) => {
               world.morph = n - 1 + self.progress;
+              if (n === 6) world.form = 1 - self.progress; // and it scatters back into a galaxy
             },
           });
         });

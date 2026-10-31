@@ -4,6 +4,7 @@ import { Layers, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CatalogPage } from "@/components/data/CatalogPage";
 import { Money } from "@/components/data/Money";
+import { SegmentedTabs } from "@/components/data/SegmentedTabs";
 import { VariantsDialog } from "@/components/data/VariantsDialog";
 import type { FieldDef } from "@/components/forms/ResourceDialog";
 import { Button } from "@/components/ui/button";
@@ -89,18 +90,19 @@ export default function ProductsPage() {
   );
 
   const switcher = (
-    <div className="mb-4 inline-flex rounded-md border bg-surface p-0.5" role="tablist" aria-label="Products and attributes">
-      {(["products", "attributes"] as const).map((t) => (
-        <Button key={t} role="tab" aria-selected={tab === t} size="sm" variant={tab === t ? "secondary" : "ghost"} onClick={() => setTab(t)}>
-          {t === "products" ? "Products" : "Attributes"}
-        </Button>
-      ))}
-    </div>
+    <SegmentedTabs
+      label="Products and attributes"
+      value={tab}
+      onChange={setTab}
+      options={[
+        { value: "products", label: "Products" },
+        { value: "attributes", label: "Attributes" },
+      ]}
+    />
   );
 
   return (
     <>
-      {switcher}
       {tab === "products" ? (
         <CatalogPage<Product>
           key="products"
@@ -110,6 +112,7 @@ export default function ProductsPage() {
           noun="Product"
           columns={columns}
           fields={fields}
+          belowHeader={switcher}
           rowActions={(p) => (
             <Button variant="ghost" size="icon" aria-label={`Variants of ${p.name}`} onClick={() => setVariantsOf(p)}>
               <Layers size={16} />
@@ -125,6 +128,7 @@ export default function ProductsPage() {
           noun="Attribute"
           columns={attributeColumns}
           fields={attributeFields}
+          belowHeader={switcher}
         />
       )}
       <VariantsDialog product={variantsOf} canWrite={me?.role === "admin"} onClose={() => setVariantsOf(null)} />

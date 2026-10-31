@@ -29,6 +29,7 @@ export function CatalogPage<T extends Row>({
   toInitial,
   rowActions,
   headerActions,
+  belowHeader,
 }: {
   title: string;
   description?: string;
@@ -41,6 +42,7 @@ export function CatalogPage<T extends Row>({
   toInitial?: (row: T) => Record<string, unknown>;
   rowActions?: (row: T) => React.ReactNode;
   headerActions?: React.ReactNode;
+  belowHeader?: React.ReactNode;
 }) {
   const url = useUrlState();
   const { data: me } = useMe();
@@ -90,6 +92,7 @@ export function CatalogPage<T extends Row>({
   return (
     <>
       <PageHeader title={title} description={description} actions={<>{headerActions}{canWrite ? create : null}</>} />
+      {belowHeader}
       <FilterBar placeholder={`Search ${title.toLowerCase()}`}>{filters}</FilterBar>
       {list.isError ? (
         <EmptyState message={list.error instanceof ApiError ? list.error.message : "Could not load this list."} action={<Button variant="outline" onClick={() => list.refetch()}>Try again</Button>} />

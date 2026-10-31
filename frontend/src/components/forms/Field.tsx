@@ -7,7 +7,7 @@ import { ApiError } from "@/lib/api";
 export function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       {children}
       {hint && !error && <p className="text-xs text-ink-2">{hint}</p>}
       {error && (

@@ -127,8 +127,8 @@ export function ResourceDialog({
         </DialogHeader>
         <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2" noValidate>
           {fields.map((f) => (
-            <div key={f.name} className={cn(f.wide || f.kind === "textarea" || f.kind === "multi" || f.kind === "custom" ? "sm:col-span-2" : "")}>
-              <Field label={f.label + (f.required ? "" : " (optional)")} error={errorOf(errors, f.name)} hint={f.hint}>
+            <div key={f.name} className={cn(f.wide || f.kind === "textarea" || f.kind === "multi" || f.kind === "custom" ? "sm:col-span-2" : "", f.kind === "checkbox" && "sm:self-end sm:pb-2.5")}>
+              <Field label={f.kind === "checkbox" ? "" : f.label + (f.required ? "" : " (optional)")} error={errorOf(errors, f.name)} hint={f.hint}>
                 <Controller
                   control={form.control}
                   name={f.name}
@@ -145,7 +145,7 @@ export function ResourceDialog({
                       case "select":
                         return (
                           <select
-                            className="h-9 w-full rounded-md border border-input bg-surface px-2.5 text-base focus-visible:outline-2 focus-visible:outline-ring"
+                            className="h-11 w-full rounded-md border border-input bg-surface px-3 text-base focus-visible:outline-2 focus-visible:outline-ring"
                             {...field}
                           >
                             {(!f.required || f.allowEmpty) && <option value="">None</option>}

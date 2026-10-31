@@ -3,7 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { CatalogPage } from "@/components/data/CatalogPage";
 import type { FieldDef } from "@/components/forms/ResourceDialog";
-import { Button } from "@/components/ui/button";
+import { SegmentedTabs } from "@/components/data/SegmentedTabs";
 import { formatPercent } from "@/lib/format";
 import type { components } from "@/lib/api-types";
 
@@ -33,21 +33,22 @@ const termFields: FieldDef[] = [
 export default function TaxesPage() {
   const [tab, setTab] = useState<"taxes" | "terms">("taxes");
   const switcher = (
-    <div className="mb-4 inline-flex rounded-md border bg-surface p-0.5" role="tablist" aria-label="Taxes and payment terms">
-      {(["taxes", "terms"] as const).map((t) => (
-        <Button key={t} role="tab" aria-selected={tab === t} size="sm" variant={tab === t ? "secondary" : "ghost"} onClick={() => setTab(t)}>
-          {t === "taxes" ? "Taxes" : "Payment terms"}
-        </Button>
-      ))}
-    </div>
+    <SegmentedTabs
+      label="Taxes and payment terms"
+      value={tab}
+      onChange={setTab}
+      options={[
+        { value: "taxes", label: "Taxes" },
+        { value: "terms", label: "Payment terms" },
+      ]}
+    />
   );
   return (
     <>
-      {switcher}
       {tab === "taxes" ? (
-        <CatalogPage<Tax> key="taxes" title="Taxes" description="Rates applied to invoice lines." resource="taxes" noun="Tax" columns={taxColumns} fields={taxFields} />
+        <CatalogPage<Tax> key="taxes" title="Taxes" description="Rates applied to invoice lines." resource="taxes" noun="Tax" columns={taxColumns} fields={taxFields} belowHeader={switcher} />
       ) : (
-        <CatalogPage<Term> key="terms" title="Payment terms" description="When an invoice falls due." resource="payment-terms" noun="Payment term" columns={termColumns} fields={termFields} />
+        <CatalogPage<Term> key="terms" title="Payment terms" description="When an invoice falls due." resource="payment-terms" noun="Payment term" columns={termColumns} fields={termFields} belowHeader={switcher} />
       )}
     </>
   );

@@ -26,6 +26,7 @@ type Subscription = {
   id: number;
   number: string;
   status: string;
+  discount: { id: number } | null;
   start_date: string;
   expiration_date: string | null;
   notes: string;
@@ -54,12 +55,19 @@ function DraftFields({ subscription }: { subscription: Subscription }) {
   const [startDate, setStartDate] = useState(subscription.start_date);
   const [endDate, setEndDate] = useState(subscription.expiration_date ?? "");
   const [notes, setNotes] = useState(subscription.notes);
+  const [discount, setDiscount] = useState(subscription.discount ? String(subscription.discount.id) : "");
+  const discounts = useQuery({
+    queryKey: ["draft-discounts"],
+    queryFn: () => api.get<Paginated<{ id: number; name: string; code: string | null }>>("/discounts/", { is_active: true, page_size: 100 }),
+  });
+  const coded = discounts.data?.results.filter((item) => item.code) ?? [];
   const save = useMutation({
     mutationFn: () =>
       api.patch(`/subscriptions/${subscription.id}/`, {
         start_date: startDate,
         expiration_date: endDate || null,
         notes,
+        discount: discount ? Number(discount) : null,
       }),
     onSuccess: () => client.invalidateQueries({ queryKey: ["subscription", String(subscription.id)] }),
   });
@@ -77,6 +85,22 @@ function DraftFields({ subscription }: { subscription: Subscription }) {
       <label className="grid gap-1.5 text-sm font-medium">
         End date (optional)
         <Input type="date" min={startDate} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+      </label>
+      <label className="grid gap-1.5 text-sm font-medium sm:col-span-2">
+        Discount code (optional)
+        <select
+          value={discount}
+          onChange={(e) => setDiscount(e.target.value)}
+          className="h-9 rounded-md border bg-background px-3 font-normal"
+        >
+          <option value="">None</option>
+          {coded.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.code} · {item.name}
+            </option>
+          ))}
+        </select>
+        <span className="font-normal text-ink-2">Discounts without a code apply on their own at billing.</span>
       </label>
       <label className="grid gap-1.5 text-sm font-medium sm:col-span-2">
         Notes

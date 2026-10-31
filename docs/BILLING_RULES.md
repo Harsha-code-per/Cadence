@@ -42,8 +42,8 @@ Editing lines/plan/customer is only allowed in `draft` (and `quotation`, which b
 ## 3. Invoice calculation (`apps/billing/pricing.py`, pure functions, unit-tested)
 For each billable line (the plan-fee line first if `plan.price > 0`, then every subscription line):
 1. `amount = quantity × unit_price`
-2. **Discount** (at most one discount per invoice: the subscription's `discount`):
-   - Eligible if: `is_active`; `start_date ≤ invoice_date ≤ end_date (or no end)`; `usage_limit` is null or `redemptions < usage_limit` (checked with the discount row **locked**); invoice subtotal ≥ `min_amount`; Σ quantity ≥ `min_quantity`.
+2. **Discount** (at most one per invoice). Rules without a code apply on their own to every subscription that qualifies, so nobody has to remember them; a coded discount applies once attached to the subscription. Of everything eligible, the customer gets the biggest saving:
+   - Eligible if: `is_active`; `start_date ≤ invoice_date ≤ end_date (or no end)`; `usage_limit` is null or `redemptions < usage_limit` (checked with the discount rows **locked**); invoice subtotal ≥ `min_amount`; Σ quantity ≥ `min_quantity`.
    - `scope = product`: applies only to lines whose product is in `discount.products`.
    - `scope = subscription`: applies to all lines.
    - `percent`: `discount_amount = round(amount × value / 100)` per line.

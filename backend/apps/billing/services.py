@@ -42,6 +42,66 @@ def period_end(start, plan, anchor):
     return start + delta - timedelta(days=1)
 
 
+def allocate_discount(discount, lines):
+    """Each line's share of this discount, in line order."""
+    product_ids = (
+        set(discount.products.values_list("id", flat=True)) if discount.scope == "product" else None
+    )
+    eligible = [
+        index
+        for index, line in enumerate(lines)
+        if product_ids is None
+        or (line["product"] is not None and line["product"].pk in product_ids)
+    ]
+    shares = [ZERO] * len(lines)
+    eligible_total = sum((lines[index]["amount"] for index in eligible), ZERO)
+    if discount.discount_type == "percent":
+        for index in eligible:
+            amount = lines[index]["amount"]
+            shares[index] = min(amount, rounded(amount * discount.value / 100))
+    elif eligible_total:
+        remaining = min(discount.value, eligible_total)
+        # Allocate proportionally against the remaining amount and base, avoiding
+        # negative remainders when several small rounded shares accumulate.
+        remaining_base = eligible_total
+        for index in eligible:
+            amount = lines[index]["amount"]
+            share = min(amount, remaining, rounded(remaining * amount / remaining_base))
+            shares[index] = share
+            remaining -= share
+            remaining_base -= amount
+    return shares
+
+
+def best_discount(sub, start, lines):
+    """The discount this invoice gets, with each line's share.
+
+    Rules without a code apply on their own to anything that qualifies; a coded discount only
+    applies once attached. The customer gets whichever saves them the most, and the rows stay
+    locked so two invoices can't both take the last use of a limited rule.
+    """
+    subtotal = sum((line["amount"] for line in lines), ZERO)
+    quantity = sum(line["quantity"] for line in lines)
+    candidates = (
+        Discount.objects.select_for_update()
+        .filter(Q(pk=sub.discount_id) | Q(code__isnull=True) | Q(code=""))
+        .filter(is_active=True, start_date__lte=start, min_amount__lte=subtotal)
+        .filter(min_quantity__lte=quantity)
+        .filter(Q(end_date__isnull=True) | Q(end_date__gte=start))
+        .order_by("id")
+    )
+    best, best_shares, best_total = None, [ZERO] * len(lines), ZERO
+    for candidate in candidates:
+        used = candidate.redemptions.count() if candidate.usage_limit else 0
+        if candidate.usage_limit and used >= candidate.usage_limit:
+            continue
+        shares = allocate_discount(candidate, lines)
+        total = sum(shares, ZERO)
+        if total > best_total:
+            best, best_shares, best_total = candidate, shares, total
+    return best, best_shares
+
+
 @transaction.atomic
 def generate_invoice(subscription_id, today):
     """Generate one due period and advance its cursor; return None when not due."""
@@ -93,56 +153,9 @@ def generate_invoice(subscription_id, today):
         line["amount"] = rounded(line["unit_price"] * line["quantity"])
         line["discount"] = ZERO
     subtotal = sum((line["amount"] for line in lines), ZERO)
-    quantity = sum(line["quantity"] for line in lines)
-    discount = None
-    if sub.discount_id:
-        candidate = Discount.objects.select_for_update().get(pk=sub.discount_id)
-        uses = candidate.redemptions.count()
-        if (
-            candidate.is_active
-            and candidate.start_date <= start
-            and (candidate.end_date is None or candidate.end_date >= start)
-            and (candidate.usage_limit is None or uses < candidate.usage_limit)
-            and subtotal >= candidate.min_amount
-            and quantity >= candidate.min_quantity
-        ):
-            discount = candidate
-    if discount:
-        product_ids = (
-            set(discount.products.values_list("id", flat=True))
-            if discount.scope == "product"
-            else None
-        )
-        eligible = [
-            line
-            for line in lines
-            if product_ids is None
-            or (line["product"] is not None and line["product"].pk in product_ids)
-        ]
-        eligible_total = sum((line["amount"] for line in eligible), ZERO)
-        if discount.discount_type == "percent":
-            for line in eligible:
-                line["discount"] = min(
-                    line["amount"], rounded(line["amount"] * discount.value / 100)
-                )
-        elif eligible_total:
-            remaining = min(discount.value, eligible_total)
-            # Allocate proportionally against the remaining amount and base, avoiding
-            # negative remainders when several small rounded shares accumulate.
-            remaining_base = eligible_total
-            for line in eligible:
-                share = (
-                    min(
-                        line["amount"],
-                        remaining,
-                        rounded(remaining * line["amount"] / remaining_base),
-                    )
-                    if remaining_base
-                    else ZERO
-                )
-                line["discount"] = share
-                remaining -= share
-                remaining_base -= line["amount"]
+    discount, shares = best_discount(sub, start, lines)
+    for line, share in zip(lines, shares, strict=True):
+        line["discount"] = share
 
     subtotal_discount = sum((line["discount"] for line in lines), ZERO)
     tax_total = ZERO

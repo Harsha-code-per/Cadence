@@ -17,7 +17,7 @@ def send_password_reset_email(email: str) -> None:
     user = User.objects.filter(email__iexact=clean_email, is_active=True).first()
     if not user:
         user = _claimable_customer_user(clean_email)
-    if not user:
+    if not user or user.is_demo:  # the demo password is public and must stay what it says
         return
 
     uid = urlsafe_base64_encode(force_bytes(user.pk))

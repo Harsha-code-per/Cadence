@@ -6,9 +6,20 @@ Built for the **Odoo Hackathon** problem statement *Subscription Management Syst
 
 | | |
 |---|---|
-| Live app | _added after first deploy_ |
-| API docs | `<api>/api/docs/` (OpenAPI / Swagger) |
+| Live app | https://cadence-brightloop.vercel.app |
+| API docs | https://cadence-api-g6af.onrender.com/api/docs/ (OpenAPI / Swagger) |
 | Demo video | _added at submission_ |
+
+## Try it: demo logins
+Open the [live app](https://cadence-brightloop.vercel.app/login), or use **Show demo logins** on the login page.
+
+| Role | Email | Password | What you'll see |
+|---|---|---|---|
+| Admin | `demo.admin@brightloop.test` | `Cadence@Demo2026` | Everything: dashboard, pipeline, catalog, staff, billing preview |
+| Staff | `demo.staff@brightloop.test` | `Cadence@Demo2026` | Day-to-day work, no settings or staff management |
+| Customer | `asha@raotraders.test` | `Cadence@Demo2026` | Only Asha's own subscriptions and invoices |
+
+These logins are **read-only by design**: the server refuses every change they attempt, password reset and account lockout don't apply to them, and they can't reach the Django admin. The billing preview still works because it rolls back. To try saving changes, create your own account. Your signup gets a normal customer login. The API may take up to a minute to wake on the free tier the first time.
 
 ## Why it exists
 At Brightloop, subscriptions live in a spreadsheet, renewals depend on whoever remembers, invoices are typed by hand, payments are matched by scrolling bank statements, and nobody can say what the recurring revenue is. Cadence replaces each of those with a system that bills every subscription **exactly once, on time**, and shows the money picture live.

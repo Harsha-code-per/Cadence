@@ -17,6 +17,7 @@ Only `main` is supported.
 | Login CSRF | Login, signup and reset endpoints enforce Django CSRF even for anonymous users, so a malicious site can't log a victim into another account |
 | Account claiming | Signup never links an existing (staff-created) customer record. The owner claims it via “Forgot password”: receiving the email proves ownership. `Customer.user` is read-only in the API |
 | Admin safety | Admins can't demote or deactivate themselves; the Django admin site is off in production (`ENABLE_DJANGO_ADMIN`) |
+| Public demo logins | `User.is_demo` accounts are read-only: `DemoReadOnlyMiddleware` refuses every API write in one place (a test walks the URL table so new endpoints stay covered). Only login, logout and a rate-limited billing dry run pass. No password reset, no lockout (strangers can't shut judges out), no Django admin |
 | Authorization | Role checks on every endpoint (admin / staff / customer); customer data is filtered at the queryset level (`CustomerScopedMixin`), and out-of-scope objects return 404 (OWASP API1: BOLA) |
 | State integrity | Status fields are read-only in the API; transitions only through validated service actions; money computed server-side only |
 | Data integrity | Database CHECK constraints, a partial unique index against double billing, row locks (`select_for_update`) for payments, sequences and discount usage |

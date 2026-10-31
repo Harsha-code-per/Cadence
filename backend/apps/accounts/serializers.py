@@ -15,8 +15,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "email", "full_name", "role", "is_active", "date_joined", "customer_id"]
-        read_only_fields = ["id", "is_active", "date_joined", "customer_id"]
+        fields = [
+            "id",
+            "email",
+            "full_name",
+            "role",
+            "is_active",
+            "is_demo",
+            "date_joined",
+            "customer_id",
+        ]
+        read_only_fields = ["id", "is_active", "is_demo", "date_joined", "customer_id"]
 
     def get_customer_id(self, obj: User) -> int | None:
         customer = getattr(obj, "customer", None)

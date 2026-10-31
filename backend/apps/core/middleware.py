@@ -6,9 +6,12 @@ Browsers expose it to same-origin JS (PerformanceResourceTiming.serverTiming), s
 frontend can show a small "11 ms · 3 queries" badge without any extra endpoint.
 """
 
+import json
 import time
 
+from django.core.cache import cache
 from django.db import connection
+from django.http import JsonResponse
 
 
 class ServerTimingMiddleware:
@@ -38,3 +41,55 @@ class ServerTimingMiddleware:
             f"app;dur={total_ms:.1f}"
         )
         return response
+
+
+class DemoReadOnlyMiddleware:
+    """Public demo logins can look at everything their role can and change nothing.
+
+    One chokepoint on purpose: every write to the API passes here, so an endpoint added
+    later is read-only for demo users without anyone remembering to protect it.
+    """
+
+    ALWAYS_ALLOWED = {"/api/auth/login/", "/api/auth/logout/"}
+    DRY_RUN_PATH = "/api/billing/run/"
+    DRY_RUN_COOLDOWN_SECONDS = 30
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if (
+            request.method not in ("GET", "HEAD", "OPTIONS")
+            and request.path.startswith("/api/")
+            and request.path not in self.ALWAYS_ALLOWED
+            and getattr(request.user, "is_demo", False)
+        ):
+            return self._refuse_or_allow_preview(request)
+        return self.get_response(request)
+
+    def _refuse_or_allow_preview(self, request):
+        if request.path == self.DRY_RUN_PATH and self._is_dry_run(request):
+            # A preview rolls back, so it changes nothing, but it is heavy: rate-limit it.
+            if cache.add("demo-dry-run", 1, self.DRY_RUN_COOLDOWN_SECONDS):
+                return self.get_response(request)
+            return _error(
+                "demo_rate_limited", "Previews run once every 30 seconds in the demo.", 429
+            )
+        return _error(
+            "demo_read_only",
+            "This is a read-only demo account, so nothing was changed. Create your own "
+            "account to try saving changes.",
+            403,
+        )
+
+    @staticmethod
+    def _is_dry_run(request) -> bool:
+        try:
+            return json.loads(request.body).get("dry_run") is True
+        except (ValueError, AttributeError):
+            return False
+
+
+def _error(code: str, message: str, status: int) -> JsonResponse:
+    body = {"error": {"code": code, "message": message, "field_errors": {}}}
+    return JsonResponse(body, status=status)

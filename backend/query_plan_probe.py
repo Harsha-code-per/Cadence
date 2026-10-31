@@ -7,7 +7,7 @@ django.setup()
 
 from datetime import date
 
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import F, Q
 
 from apps.billing.models import Invoice
@@ -25,7 +25,9 @@ activate = Q(status="confirmed", start_date__lte=today) & (
 )
 expire = Q(status__in=["active", "paused"], plan__auto_close=True, expiration_date__lt=today)
 queries = {
-    "billing runner": Subscription.objects.filter(due | activate | expire).order_by("pk")[:500],
+    "billing runner": Subscription.objects.filter(due | activate | expire)
+    .order_by("pk")
+    .select_for_update(skip_locked=True, of=("self",))[:500],
     "due active": Subscription.objects.filter(due),
     "overdue invoices": Invoice.objects.filter(status="confirmed", due_date__lt=today),
     "subscription search": Subscription.objects.filter(
@@ -36,4 +38,5 @@ queries = {
 }
 for name, query in queries.items():
     print("QUERY PLAN:", name, flush=True)
-    print(query.explain(analyze=True, buffers=True), flush=True)
+    with transaction.atomic():
+        print(query.explain(analyze=True, buffers=True), flush=True)

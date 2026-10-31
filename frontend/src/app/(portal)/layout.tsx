@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { RoleGate } from "@/components/auth/RoleGate";
@@ -38,7 +38,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
               </span>
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {me && (
                 <div className="flex items-center gap-2 text-xs text-ink-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-line/60 text-ink">
@@ -47,6 +47,15 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                   <span className="hidden font-medium sm:inline">{me.full_name}</span>
                 </div>
               )}
+
+              <Link
+                href="/portal/settings"
+                className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-ink-2 hover:bg-surface hover:text-ink transition-colors"
+                title="Account Settings"
+              >
+                <Settings className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Settings</span>
+              </Link>
 
               <Button
                 variant="ghost"

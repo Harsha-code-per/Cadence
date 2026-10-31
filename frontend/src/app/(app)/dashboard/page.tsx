@@ -48,7 +48,7 @@ const selectCls =
 
 function Panel({ title, legend, children }: { title: string; legend?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="flex min-w-0 flex-col gap-4 rounded-lg border bg-surface p-5">
+    <section className="flex h-full min-w-0 flex-col gap-4 rounded-lg border bg-surface p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-sans text-[17px] font-semibold leading-tight">{title}</h2>
         {legend}

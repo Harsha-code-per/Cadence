@@ -112,7 +112,7 @@ export default function SubscriptionBoardPage() {
         }
       />
 
-      <div className="grid min-w-0 grid-cols-1 items-start gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6" role="list" aria-label="Subscription stages">
+      <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6" role="list" aria-label="Subscription stages">
         {STAGES.map((stage) => {
           const canDrop = !!dragging && !!moveFor(dragging, stage.status);
           return (
@@ -148,9 +148,9 @@ export default function SubscriptionBoardPage() {
                     {totals[stage.status]?.count?.toLocaleString("en-IN") ?? "…"}
                   </span>
                 </div>
-                <p className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-ink-2">
-                  <span>{stage.hint}</span>
-                  <span className="tabular-nums font-medium text-ink">{totals[stage.status] ? `${formatMoneyCompact(totals[stage.status]!.recurring_value)}/cycle` : ""}</span>
+                <p className="truncate text-xs text-ink-2">{stage.hint}</p>
+                <p className="h-5 text-sm font-semibold tabular-nums text-ink">
+                  {totals[stage.status] ? `${formatMoneyCompact(totals[stage.status]!.recurring_value)}/cycle` : ""}
                 </p>
               </header>
               <Column
@@ -243,7 +243,7 @@ function Column({
   const cards = list.data.results;
 
   return (
-    <ul className="flex max-h-[26rem] min-h-24 flex-col gap-2 overflow-y-auto p-2.5" aria-label={`${stage} subscriptions`}>
+    <ul className="flex h-[26rem] flex-col gap-2 overflow-y-auto p-2.5 [scrollbar-width:thin] 2xl:h-[calc(100dvh-19rem)] 2xl:min-h-[26rem]" aria-label={`${stage} subscriptions`}>
       {cards.length === 0 && <li className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-ink-2">Nothing here right now.</li>}
       {cards.map((card) => (
         <SubscriptionCard key={card.id} card={card} onDragStart={onDragStart} onDragEnd={onDragEnd} onMove={onMove} pending={pending === card.id} />

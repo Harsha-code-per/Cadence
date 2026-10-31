@@ -67,6 +67,7 @@ function Picker({
       {!options.isLoading && !options.isError && options.data?.results.length === 0 && (
         <p className="font-normal text-ink-2">No options available.</p>
       )}
+      {(page > 1 || options.data?.next) && (
       <div className="flex items-center gap-2 font-normal">
         <Button
           type="button"
@@ -88,6 +89,7 @@ function Picker({
           Next
         </Button>
       </div>
+      )}
     </div>
   );
 }

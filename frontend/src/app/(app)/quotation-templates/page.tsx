@@ -23,12 +23,12 @@ function LinesEditor({ value, onChange, products }: { value: unknown; onChange: 
       {rows.map((r, i) => {
         const variants = products.find((p) => p.id === r.product)?.variants ?? [];
         return (
-          <div key={i} className="grid grid-cols-[1fr_1fr_5rem_auto] gap-2">
-            <select aria-label="Product" className="h-9 rounded-md border border-input bg-surface px-2" value={r.product} onChange={(e) => set(i, { product: Number(e.target.value), variant: null })}>
+          <div key={i} className="grid grid-cols-[minmax(0,1fr)_5rem_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_5rem_auto]">
+            <select aria-label="Product" className="col-span-3 h-11 min-w-0 rounded-md border border-input bg-surface px-3 sm:col-span-1" value={r.product} onChange={(e) => set(i, { product: Number(e.target.value), variant: null })}>
               <option value="" disabled>Product…</option>
               {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
-            <select aria-label="Variant" className="h-9 rounded-md border border-input bg-surface px-2" value={r.variant ?? ""} onChange={(e) => set(i, { variant: e.target.value ? Number(e.target.value) : null })}>
+            <select aria-label="Variant" className="h-11 min-w-0 rounded-md border border-input bg-surface px-3" value={r.variant ?? ""} onChange={(e) => set(i, { variant: e.target.value ? Number(e.target.value) : null })}>
               <option value="">No variant</option>
               {variants.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
             </select>

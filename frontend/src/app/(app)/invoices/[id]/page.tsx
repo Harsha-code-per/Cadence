@@ -1,7 +1,8 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { InvoiceDetailView } from "@/components/invoices/InvoiceDetailView";
 
 export const metadata = { title: "Invoice" };
 
-export default function InvoiceDetailPage() {
-  return <PageHeader title="Invoice" description="This page is being built." />;
+export default async function InvoiceDetailPage({ params }: PageProps<"/invoices/[id]">) {
+  const { id } = await params;
+  return <InvoiceDetailView id={id} />;
 }

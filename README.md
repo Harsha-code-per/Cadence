@@ -10,7 +10,7 @@ The system of record for subscription businesses: plans, quotations, recurring i
 [![Frontend CI](https://github.com/Harsha-code-per/Cadence/actions/workflows/frontend.yml/badge.svg)](https://github.com/Harsha-code-per/Cadence/actions/workflows/frontend.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0e7a63.svg)](LICENSE)
 
-[Live app](https://cadence-brightloop.vercel.app) · [API reference](https://cadence-api-g6af.onrender.com/api/docs/) · [Architecture](docs/ARCHITECTURE.md) · [Data model](docs/DATA_MODEL.md)
+[Live app](https://cadence-brightloop-two.vercel.app) · [API reference](https://cadence-api-g6af.onrender.com/api/docs/) · [Architecture](docs/ARCHITECTURE.md) · [Data model](docs/DATA_MODEL.md)
 
 ![Cadence landing page](docs/images/landing.jpeg)
 
@@ -26,7 +26,7 @@ Built for the Odoo Hackathon problem statement *Subscription Management System* 
 
 ## Try it
 
-Sign in at the [live app](https://cadence-brightloop.vercel.app/login), or use **Show demo logins** on the login page.
+Sign in at the [live app](https://cadence-brightloop-two.vercel.app/login), or use **Show demo logins** on the login page.
 
 | Role | Email | Password | Access |
 |---|---|---|---|
@@ -36,7 +36,7 @@ Sign in at the [live app](https://cadence-brightloop.vercel.app/login), or use *
 
 These logins are public, so the server makes them **read-only**: every change is refused, and they never see real people's contact details. To try the full write flow, [run Cadence locally](#getting-started).
 
-The API runs on a free tier, so the first request after a quiet period can take a little longer.
+The API runs on a free tier and sleeps when idle, so **the first request after a quiet period can take up to about a minute**. If the page seems stuck, wait for it or open the [health check](https://cadence-api-g6af.onrender.com/api/health/) once and retry. See [Deployment](#deployment-and-free-tier-limits).
 
 ## Product
 
@@ -132,6 +132,29 @@ Measured in production on 31 October 2026 with 5,000 subscriptions and 18,032 in
 - Keyboard navigation, reduced-motion support and layouts tested at phone width
 
 See the [engineering standards](docs/ENGINEERING_STANDARDS.md) and the [QA matrix](docs/DEMO.md).
+
+## Deployment and free-tier limits
+
+Everything runs on free plans, with no backend-as-a-service: Django owns the schema, auth and business rules, and the database is plain PostgreSQL.
+
+| Part | Where | Notes |
+|---|---|---|
+| Frontend | Vercel (Hobby), [cadence-brightloop-two.vercel.app](https://cadence-brightloop-two.vercel.app) | Proxies `/api/*` to the API on the same origin, so session cookies and CSRF work without CORS |
+| API | Render free web service, [cadence-api-g6af.onrender.com](https://cadence-api-g6af.onrender.com/api/docs/) | Defined in [`render.yaml`](render.yaml); runs migrations on start, then gunicorn with two workers |
+| Database | Neon free PostgreSQL 17 (Singapore) | Seeded with 5,000 subscriptions and 18,000+ invoices |
+| Email | Brevo SMTP relay on port 2525 | Render's free plan blocks ports 25, 465 and 587 |
+| Billing schedule | GitHub Actions cron, every 15 minutes | Signed request to the API; missed periods are caught up on the next run |
+
+**What judges should know about the free tiers**
+
+- **Render sleeps when idle.** A free web service stops after about 15 minutes without traffic and takes up to roughly a minute to wake. The first request, including logging in, can be slow; everything after it is fast. The timings above exclude this cold start. The scheduled ping helps keep the API warm but GitHub may delay it, so it is not a guarantee.
+- **Render's disk is temporary.** The app stores nothing on disk: no uploads, and invoices print from HTML.
+- **Rate limits are per process.** Ask Cadence's question limit and the demo accounts' preview cooldown are counted in each of the two workers separately. A shared cache would make them exact; we did not add one.
+- **Vercel hit its daily deployment limit on submission day.** We pushed well over 100 commits and preview builds, and the Hobby plan stopped deploying. The frontend was therefore redeployed once from a second Vercel account, which is why the live URL differs from earlier links in the repository history. The API and database are unchanged. The `main` branch is the single source of truth, and the deployed frontend was built from it.
+- **Neon scales to zero.** The first database query after a quiet period can take about a second longer.
+- **Demo logins are read-only by design**, so judges cannot change shared data. Record or test write flows on a local copy (see Getting started).
+
+The full setup, environment variables and CI details are in the [deployment guide](docs/DEPLOYMENT.md).
 
 ## Getting started
 

@@ -6,7 +6,7 @@
 ## Environments
 | | Local | Production |
 |---|---|---|
-| Frontend | `npm run dev` → http://localhost:3000 | **Vercel** Hobby → `https://cadence-<team>.vercel.app` |
+| Frontend | `npm run dev` → http://localhost:3000 | **Vercel** Hobby → `https://cadence-brightloop-two.vercel.app` |
 | Backend | `python manage.py runserver` → http://localhost:8000 (`/api/docs/`) | **Render** free web service (`render.yaml`) |
 | Database | PostgreSQL 17 in **Docker** (`docker compose up -d db`) | **Neon** free Postgres (only a `DATABASE_URL`) |
 | Email | console backend (printed in the runserver log) | **Brevo** SMTP relay `smtp-relay.brevo.com:2525` (Render free blocks 25/465/587) |
@@ -74,3 +74,4 @@ Branch protection on `main`: require PR + green checks, allow rebase-merge and m
 - Render's filesystem is ephemeral: we store nothing on disk (no uploads; invoices print from HTML).
 - GitHub cron can be delayed by minutes; that's fine because the billing engine catches up missed periods and admins have "Run billing now".
 - Neon scales to zero; the first query after idle is slower (~1 s).
+- Vercel Hobby allows about 100 deployments a day, counting every preview. On 31 October the limit was reached, so the frontend was deployed once from a second account (`vercel deploy --prod` from a clean copy of `frontend/`, with `API_URL` as both build and runtime variable). For a new frontend origin, set `FRONTEND_URL` and `EXTRA_TRUSTED_ORIGINS` on Render, or login fails with `csrf_failed`.

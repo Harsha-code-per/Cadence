@@ -36,7 +36,7 @@ QUESTION_VOCABULARY = (
     "revenue revenues summary mrr arr active subscriptions subscription invoice invoices "
     "invoiced collected collections outstanding overdue aging aged old older paid unpaid "
     "confirmed draft quotation quotations paused closed cancelled status breakdown "
-    "pipeline recurring value values stages stage balance balances trend trends compare "
+    "pipeline recurring value values stages stage balance balances trend trends compare each per "
     "versus vs been not yet money rupees inr percent percentage payment payments "
     "january february march april may june july august september october november december"
 )
@@ -90,7 +90,8 @@ def _provider(system: str, payload: dict) -> str:
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(payload)},
         ],
-        "max_tokens": 300,
+        # Reasoning-capable compatible models share this budget with their final text.
+        "max_tokens": 2048,
     }
     try:
         endpoint = urlsplit(settings.ASSISTANT_API_URL)
@@ -102,6 +103,7 @@ def _provider(system: str, payload: dict) -> str:
             headers={
                 "Authorization": f"Bearer {settings.ASSISTANT_API_KEY}",
                 "Content-Type": "application/json",
+                "User-Agent": "Cadence/1.0",
             },
             method="POST",
         )
@@ -153,7 +155,8 @@ def ask(question: str, user_id: int) -> dict:
         "Keep the tool's time scope explicit: summary totals are all-time except current "
         "subscription/outstanding/overdue metrics; revenue_series covers 12 months; "
         "aging and pipeline are current. Aging 60+ means strictly more than 60 days. "
-        "If the numbers cannot answer the question, say so. Money is INR. Plain text only.",
+        "Answer in at most 150 words. If the numbers cannot answer the question, say so. "
+        "Money is INR. Plain text only.",
         {"question": question, "tool": tool, "numbers": numbers},
     )
     return {"answer": answer, "tool": tool, "numbers": numbers}

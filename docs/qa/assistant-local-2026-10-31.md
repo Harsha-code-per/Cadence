@@ -58,7 +58,37 @@ numbers remain visible for verification.
 - Ruff initially flagged an unused exception variable and a literal vocabulary split;
   both fixed and full checks rerun.
 - An initial timing invocation used an unallowed test host; rerun used localhost.
-- A live provider key was not available. Real routing/wording, provider compatibility,
-  live-provider latency and production deployment are **not verified**.
+- Initial verification had no live key; the subsequent live Groq checks are recorded below.
+  Production deployment remains unverified.
 - No Lighthouse/contrast audit or physical-device test was performed.
 - Test environment emits existing staticfiles/email deprecation warnings.
+
+## Live Groq follow-up
+
+The user configured a key in the ignored local environment. No key or environment
+file was committed. Groq's default-urllib requests returned 403; a `Cadence/1.0`
+User-Agent resolved that rejection. The initially suggested Llama model was not
+available to this account. The local configuration now uses the available
+`openai/gpt-oss-20b` at `https://api.groq.com/openai/v1/chat/completions`.
+
+The initial 300-token completion budget was too small for some reasoning-model
+responses. It is now 2048 tokens, with answers requested in at most 150 words;
+the existing byte/content limits and 10-second timeout remain. Common finance
+question words “each” and “per” are now retained by the privacy filter.
+
+Five final local APIClient requests used the **real provider**, selecting all five
+tools and returning HTTP 200 with nonempty answers and the database aggregates:
+
+| Question / tool | End-to-end time |
+|---|---|
+| More than 60 days overdue / aging | 1355.58 ms |
+| MRR / summary | 1250.99 ms |
+| Revenue for last 12 months / revenue_series | 1332.27 ms |
+| Subscriptions in each status / status_breakdown | 1099.87 ms |
+| Subscription pipeline / pipeline | 1530.76 ms |
+
+The aging answer matched the 60+ bucket: INR 1,749,915.90. The MRR answer matched
+INR 3,448,988.50. These are local seeded-data observations, not production or
+5,000-subscription benchmarks. An unsupported weather question also returned the
+capability explanation during the live checks. This remains a text feature;
+speech recognition and voice output are not implemented.

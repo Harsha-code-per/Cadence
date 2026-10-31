@@ -1,5 +1,5 @@
 import django_filters
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.response import Response
 
 from apps.core.permissions import CustomerScopedMixin, InternalOrCustomerReadOnly, IsAdminOrStaff
@@ -17,7 +17,16 @@ class PaymentFilter(django_filters.FilterSet):
         fields = ["invoice", "method", "customer", "payment_date__gte", "payment_date__lte"]
 
 
-class PaymentViewSet(CustomerScopedMixin, viewsets.ModelViewSet):
+class PaymentViewSet(
+    CustomerScopedMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Payments are an append-only ledger: editing or deleting one would desync
+    invoice.amount_paid, so only list, retrieve and create are exposed."""
+
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     customer_lookup = "invoice__customer"

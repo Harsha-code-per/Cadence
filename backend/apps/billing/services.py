@@ -20,14 +20,14 @@ def rounded(value):
     return value.quantize(CENT, rounding=ROUND_HALF_UP)
 
 
-def period_end(start, plan):
-    """Return inclusive period end, preserving calendar-month behavior."""
+def period_end(start, plan, anchor_day):
+    """Return the inclusive period end, anchored to the subscription's start day."""
     units = {"daily": "days", "weekly": "weeks", "monthly": "months", "yearly": "years"}
-    return (
-        start
-        + relativedelta(**{units[plan.billing_period]: plan.interval_count})
-        - timedelta(days=1)
-    )
+    unit = units[plan.billing_period]
+    delta = relativedelta(**{unit: plan.interval_count})
+    if unit in {"months", "years"}:
+        delta += relativedelta(day=anchor_day)
+    return start + delta - timedelta(days=1)
 
 
 @transaction.atomic
@@ -46,7 +46,7 @@ def generate_invoice(subscription_id, today):
         or (sub.expiration_date and start > sub.expiration_date)
     ):
         return None
-    end = period_end(start, sub.plan)
+    end = period_end(start, sub.plan, sub.start_date.day)
     if (
         Invoice.objects.filter(subscription=sub, period_start=start)
         .exclude(status="cancelled")

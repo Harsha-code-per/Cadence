@@ -51,12 +51,28 @@ def test_expired_discount_and_month_end(subscription):
         end_date=date(2025, 12, 31),
     )
     subscription.discount = discount
+    subscription.start_date = date(2026, 1, 31)
     subscription.next_invoice_date = date(2026, 1, 31)
     subscription.save()
     invoice = generate_invoice(subscription.pk, date(2026, 1, 31))
     assert invoice.discount_total == 0
     assert invoice.period_end == date(2026, 2, 27)
-    assert period_end(date(2024, 1, 31), subscription.plan) == date(2024, 2, 28)
+    assert period_end(date(2024, 1, 31), subscription.plan, 31) == date(2024, 2, 28)
+
+
+@pytest.mark.django_db
+def test_month_end_billing_keeps_original_anchor(subscription):
+    subscription.start_date = date(2028, 1, 31)
+    subscription.next_invoice_date = subscription.start_date
+    subscription.save()
+    first = generate_invoice(subscription.pk, date(2028, 1, 31))
+    second = generate_invoice(subscription.pk, date(2028, 2, 29))
+    third = generate_invoice(subscription.pk, date(2028, 3, 31))
+    assert [invoice.period_start for invoice in (first, second, third)] == [
+        date(2028, 1, 31),
+        date(2028, 2, 29),
+        date(2028, 3, 31),
+    ]
 
 
 @pytest.mark.django_db

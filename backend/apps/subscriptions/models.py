@@ -70,6 +70,10 @@ class Subscription(TimeStampedModel):
     def __str__(self) -> str:
         return self.number
 
+    @property
+    def effective_end(self):
+        return self.expiration_date or (self.plan.end_date if self.plan.auto_close else None)
+
 
 class SubscriptionLine(models.Model):
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, related_name="lines")

@@ -149,3 +149,12 @@ def test_payment_api_permissions_and_scoping(api, make_user, confirmed_invoice):
 
     other_detail = api.get(f"/api/payments/{payment_id}/")
     assert other_detail.status_code == 404
+
+
+@pytest.mark.django_db
+def test_payments_cannot_be_edited_or_deleted(api, make_user):
+    """Append-only ledger: PUT/PATCH/DELETE are not routed (405)."""
+    staff = make_user("ledger-staff@example.test", role="staff")
+    api.force_authenticate(staff)
+    for method in ("put", "patch", "delete"):
+        assert getattr(api, method)("/api/payments/1/").status_code == 405

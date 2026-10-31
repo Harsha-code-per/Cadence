@@ -30,6 +30,7 @@ export function CatalogPage<T extends Row>({
   toInitial,
   rowActions,
   headerActions,
+  belowHeader,
   writeRoles = ["admin"],
   deleteLabel,
 }: {
@@ -44,6 +45,7 @@ export function CatalogPage<T extends Row>({
   toInitial?: (row: T) => Record<string, unknown>;
   rowActions?: (row: T) => React.ReactNode;
   headerActions?: React.ReactNode;
+  belowHeader?: React.ReactNode;
   /** Roles that may create/edit/delete. */
   writeRoles?: Role[];
   /** Overrides the delete wording, e.g. "Deactivate". */
@@ -97,6 +99,7 @@ export function CatalogPage<T extends Row>({
   return (
     <>
       <PageHeader title={title} description={description} actions={<>{headerActions}{canWrite ? create : null}</>} />
+      {belowHeader}
       <FilterBar placeholder={`Search ${title.toLowerCase()}`}>{filters}</FilterBar>
       {list.isError ? (
         <EmptyState message={list.error instanceof ApiError ? list.error.message : "Could not load this list."} action={<Button variant="outline" onClick={() => list.refetch()}>Try again</Button>} />

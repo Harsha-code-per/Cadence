@@ -1,7 +1,7 @@
 """Invoice API: scoping, detail, filters, confirm/cancel/send and bulk confirm (M3)."""
 
 import itertools
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -559,3 +559,32 @@ def test_unauthenticated_requests_are_rejected(api, db):
     response = api.get("/api/invoices/")
     assert response.status_code == 401
     assert response.json()["error"]["code"] == "not_authenticated"
+
+
+def test_invoice_csv_export_is_internal_filtered_and_formula_safe(api, make_user, subscription):
+    subscription.customer.name = "=HYPERLINK(1)"
+    subscription.customer.save()
+    for number, status in (("INV/1", "confirmed"), ("INV/2", "paid")):
+        Invoice.objects.create(
+            number=number,
+            subscription=subscription,
+            customer=subscription.customer,
+            status=status,
+            invoice_date=date(2026, 1, 1),
+            due_date=date(2026, 1, 15),
+            period_start=date(2026, 1, 1) if status == "paid" else date(2026, 2, 1),
+            period_end=date(2026, 1, 31) if status == "paid" else date(2026, 2, 28),
+            subtotal=Decimal("100.00"),
+            total=Decimal("100.00"),
+            amount_paid=Decimal("100.00") if status == "paid" else Decimal("0.00"),
+        )
+
+    api.force_authenticate(make_user("c@example.test"))
+    assert api.get("/api/invoices/export/").status_code == 403
+
+    api.force_authenticate(make_user("s@example.test", role=Role.STAFF))
+    response = api.get("/api/invoices/export/", {"status": "paid"})
+    assert response.status_code == 200 and response["Content-Type"] == "text/csv"
+    body = b"".join(response.streaming_content).decode()
+    assert "INV/2" in body and "INV/1" not in body
+    assert "'=HYPERLINK(1)" in body

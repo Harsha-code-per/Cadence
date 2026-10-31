@@ -137,7 +137,11 @@ def transition_subscription(subscription_id, action, *, actor=None, note="", tod
     if action == "activate":
         sub.next_invoice_date = sub.start_date
     elif action == "resume":
-        sub.next_invoice_date = max(sub.next_invoice_date or today, today)
+        # The customer never pays for paused days and never loses days already paid for.
+        paused = sub.events.filter(to_status=SubscriptionStatus.PAUSED).order_by("-id").first()
+        paused_on = timezone.localdate(paused.created_at) if paused else today
+        shifted = (sub.next_invoice_date or today) + (today - paused_on)
+        sub.next_invoice_date = max(shifted, today)
     elif action in {"close", "cancel", "auto_close"}:
         sub.close_reason = note
     sub.save()

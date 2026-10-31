@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Play } from "lucide-react";
+import { Download, Play } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,11 +16,11 @@ import { formatDateTime, sentence } from "@/components/invoices/format";
 import type { CustomerOption, Invoice, LastBillingRun } from "@/components/invoices/types";
 import { useHydrated } from "@/components/invoices/useHydrated";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useMe } from "@/hooks/useMe";
 import { useUrlState } from "@/hooks/useUrlState";
-import { api, type Paginated } from "@/lib/api";
+import { api, qs, type Paginated } from "@/lib/api";
 
 const STATUSES = ["draft", "confirmed", "paid", "cancelled"] as const;
 
@@ -143,28 +143,34 @@ export function InvoicesView() {
         title="Invoices"
         description="Every bill in one place: drafts, confirmed invoices, what has been paid and what is still owed."
         actions={
-          isAdmin ? (
-            <Button onClick={() => setBillingOpen(true)}>
-              <Play aria-hidden /> Run billing now
-            </Button>
+          internal ? (
+            <>
+              <a
+                className={buttonVariants({ variant: "outline" })}
+                href={`/api/invoices/export/${qs({
+                  search,
+                  status,
+                  customer,
+                  overdue: overdue ? "true" : undefined,
+                  invoice_date__gte: rangeInvalid ? undefined : from,
+                  invoice_date__lte: rangeInvalid ? undefined : to,
+                })}`}
+              >
+                <Download aria-hidden /> Export CSV
+              </a>
+              {isAdmin && (
+                <Button onClick={() => setBillingOpen(true)}>
+                  <Play aria-hidden /> Run billing now
+                </Button>
+              )}
+            </>
           ) : undefined
         }
       />
 
-      {internal && (
+      {internal && last && (
         <div className="mb-4 rounded-lg border bg-surface px-4 py-3 text-sm text-ink-2">
-          {lastRun.isLoading ? (
-            "Checking the last billing run…"
-          ) : lastRun.isError ? (
-            "Billing run history is unavailable."
-          ) : last ? (
-            <>
-              Last billing run {formatDateTime(last.ran_at)} · {last.invoiced} invoiced · {last.skipped} skipped ·{" "}
-              {sentence(last.triggered_by)}
-            </>
-          ) : (
-            "Billing has not run yet."
-          )}
+          Last billing run {formatDateTime(last.ran_at)} · {last.invoiced} invoiced · {last.skipped} skipped · {sentence(last.triggered_by)}
         </div>
       )}
 

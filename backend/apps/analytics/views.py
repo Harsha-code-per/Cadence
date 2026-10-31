@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import Customer
 from apps.analytics.serializers import (
+    AgingBucketSerializer,
     AnalyticsSummarySerializer,
     InsightItemSerializer,
     PortalSummarySerializer,
@@ -16,6 +17,7 @@ from apps.analytics.serializers import (
     StatusBreakdownSerializer,
 )
 from apps.analytics.services import (
+    get_aging,
     get_analytics_summary,
     get_insights,
     get_pipeline,
@@ -89,6 +91,14 @@ class StatusBreakdownView(APIView):
     def get(self, request):
         data = get_status_breakdown()
         return Response(data)
+
+
+class AgingView(APIView):
+    permission_classes = [IsAdminOrStaff]
+
+    @extend_schema(responses={200: AgingBucketSerializer(many=True)})
+    def get(self, request):
+        return Response(get_aging())
 
 
 class InsightsView(APIView):

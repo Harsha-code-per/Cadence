@@ -4,7 +4,7 @@ import "@/components/landing/landing.css";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CycleMark } from "@/components/layout/CycleMark";
+import { LedgerMark } from "@/components/layout/LedgerMark";
 import type { LedgerState } from "@/components/landing/Ledger";
 import { canUseWebGL } from "@/components/landing/support";
 
@@ -27,7 +27,7 @@ export function AuthShell({ title, subtitle, children, footer }: { title: string
       </div>
       <div className="relative z-10 mx-auto flex min-h-svh max-w-[1500px] flex-col px-4 py-6 sm:px-10">
         <Link href="/" className="flex w-fit items-center gap-2.5" aria-label="Cadence home">
-          <CycleMark size={30} />
+          <LedgerMark size={30} />
           <span className="display text-[22px] font-bold">Cadence</span>
         </Link>
         <main className="flex flex-1 items-center py-8">

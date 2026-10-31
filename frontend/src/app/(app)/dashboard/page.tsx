@@ -25,6 +25,7 @@ type Summary = {
 };
 type Breakdown = { subscriptions?: Record<string, number>; invoices?: Record<string, number> };
 type OverdueInvoice = { id: number; number: string; customer?: { name: string; company?: string }; outstanding?: string };
+type AgingBucket = { bucket: string; count: number; amount: string };
 type Plan = components["schemas"]["Plan"];
 
 // Status → token, per docs/DESIGN.md "Status mapping" (never generic chart colours: green must mean active/paid).
@@ -71,6 +72,8 @@ export default function DashboardPage() {
   const summary = useQuery({ queryKey: ["analytics", "summary", plan], queryFn: () => api.get<Summary>("/analytics/summary/", { plan: plan || undefined }) });
   const series = useQuery({ queryKey: ["analytics", "series", months], queryFn: () => api.get<SeriesPoint[]>("/analytics/revenue-series/", { months }) });
   const breakdown = useQuery({ queryKey: ["analytics", "status"], queryFn: () => api.get<Breakdown>("/analytics/status-breakdown/") });
+  const aging = useQuery({ queryKey: ["analytics", "aging"], queryFn: () => api.get<AgingBucket[]>("/analytics/aging/") });
+  const oldestAmount = Math.max(1, ...(aging.data ?? []).map((row) => Number(row.amount)));
   const overdue = useQuery({ queryKey: ["invoices", "overdue"], queryFn: () => api.get<Paginated<OverdueInvoice>>("/invoices/", { overdue: true, page_size: 5 }) });
 
   const s = summary.data;
@@ -164,7 +167,30 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_2fr]">
+        <Panel title="Overdue, by age">
+          {aging.isLoading ? (
+            <Skeleton className="h-24" />
+          ) : aging.data ? (
+            <ul className="flex flex-col gap-4">
+              {aging.data.map((row) => (
+                <li key={row.bucket} className="text-sm">
+                  <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                    <span>{row.bucket} days</span>
+                    <span className="tabular-nums text-ink-2">
+                      {row.count.toLocaleString("en-IN")} · <span className="font-medium text-ink">{formatMoneyCompact(row.amount)}</span>
+                    </span>
+                  </div>
+                  <div aria-hidden className="h-2 rounded-full bg-brand-soft">
+                    <div className="h-full rounded-full bg-rose" style={{ width: `${(Number(row.amount) / oldestAmount) * 100}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState message="Overdue ages couldn't be loaded." />
+          )}
+        </Panel>
         <Panel title="Overdue invoices" legend={<Link href="/invoices?overdue=true" className="text-sm text-brand hover:underline">View all</Link>}>
           {overdue.isLoading ? (
             <Skeleton className="h-24" />

@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/analytics/aging/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["analytics_aging_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/analytics/insights/": {
         parameters: {
             query?: never;
@@ -12,6 +28,23 @@ export interface paths {
             cookie?: never;
         };
         get: operations["analytics_insights_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/analytics/pipeline/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Kanban column totals: count and recurring value per subscription stage. */
+        get: operations["analytics_pipeline_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -495,6 +528,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/invoices/export/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Download the current filtered list; streamed, so size doesn't matter. */
+        get: operations["invoices_export_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payment-terms/": {
         parameters: {
             query?: never;
@@ -836,6 +886,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/subscriptions/{id}/invoice-now/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bill the period that is due today, through the normal billing engine. */
+        post: operations["subscriptions_invoice_now_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/subscriptions/{id}/lines/": {
         parameters: {
             query?: never;
@@ -1042,6 +1109,12 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AgingBucket: {
+            bucket: string;
+            count: number;
+            /** Format: decimal */
+            amount: string;
+        };
         AnalyticsSummary: {
             active_subscriptions: number;
             mrr: string;
@@ -1106,6 +1179,11 @@ export interface components {
             status: string;
             csrf_token: string;
         };
+        /**
+         * @description The demo password is public, so demo logins never see real contact details.
+         *
+         *     Seeded records all use the reserved .test domain; anything else belongs to a real person.
+         */
         Customer: {
             readonly id: number;
             readonly user: number | null;
@@ -1122,6 +1200,11 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        /**
+         * @description The demo password is public, so demo logins never see real contact details.
+         *
+         *     Seeded records all use the reserved .test domain; anything else belongs to a real person.
+         */
         CustomerRequest: {
             name: string;
             company?: string;
@@ -1562,6 +1645,11 @@ export interface components {
             name?: string;
             values?: components["schemas"]["AttributeValueRequest"][];
         };
+        /**
+         * @description The demo password is public, so demo logins never see real contact details.
+         *
+         *     Seeded records all use the reserved .test domain; anything else belongs to a real person.
+         */
         PatchedCustomerRequest: {
             name?: string;
             company?: string;
@@ -1636,7 +1724,7 @@ export interface components {
         };
         PatchedStaffUpdateRequest: {
             full_name?: string;
-            role?: components["schemas"]["RoleCa8Enum"];
+            role?: components["schemas"]["RoleEnum"];
             is_active?: boolean;
         };
         /** @description One line in a create payload or a line PATCH (docs/API.md). */
@@ -1731,6 +1819,12 @@ export interface components {
             readonly id: number;
             name: string;
             due_days?: number;
+        };
+        PipelineStage: {
+            status: string;
+            count: number;
+            /** Format: decimal */
+            recurring_value: string;
         };
         Plan: {
             readonly id: number;
@@ -1865,11 +1959,12 @@ export interface components {
             collected: string;
         };
         /**
-         * @description * `admin` - admin
-         *     * `staff` - staff
+         * @description * `admin` - Admin
+         *     * `staff` - Internal staff
+         *     * `customer` - Customer
          * @enum {string}
          */
-        RoleCa8Enum: "admin" | "staff";
+        RoleEnum: "admin" | "staff" | "customer";
         /**
          * @description * `subscription` - Whole subscription
          *     * `product` - Specific products
@@ -1889,7 +1984,7 @@ export interface components {
             email: string;
             full_name: string;
             /** @default staff */
-            role: components["schemas"]["RoleCa8Enum"];
+            role: components["schemas"]["RoleEnum"];
             is_active?: boolean;
             /** Format: date-time */
             readonly date_joined: string;
@@ -1899,7 +1994,7 @@ export interface components {
             email: string;
             full_name: string;
             /** @default staff */
-            role: components["schemas"]["RoleCa8Enum"];
+            role: components["schemas"]["RoleEnum"];
             password: string;
             is_active?: boolean;
         };
@@ -1908,12 +2003,12 @@ export interface components {
             /** Format: email */
             readonly email: string;
             full_name: string;
-            role?: components["schemas"]["RoleCa8Enum"];
+            role?: components["schemas"]["RoleEnum"];
             is_active?: boolean;
         };
         StaffUpdateRequest: {
             full_name: string;
-            role?: components["schemas"]["RoleCa8Enum"];
+            role?: components["schemas"]["RoleEnum"];
             is_active?: boolean;
         };
         /**
@@ -2069,24 +2164,24 @@ export interface components {
             quantity?: number;
             description?: string;
         };
+        /**
+         * @description The demo password is public, so demo logins never see real contact details.
+         *
+         *     Seeded records all use the reserved .test domain; anything else belongs to a real person.
+         */
         User: {
             readonly id: number;
             /** Format: email */
             email: string;
             full_name: string;
-            role?: components["schemas"]["UserRoleEnum"];
+            role?: components["schemas"]["RoleEnum"];
             readonly is_active: boolean;
+            /** @description Public demo login: may read everything its role can, change nothing. */
+            readonly is_demo: boolean;
             /** Format: date-time */
             readonly date_joined: string;
             readonly customer_id: number | null;
         };
-        /**
-         * @description * `admin` - Admin
-         *     * `staff` - Internal staff
-         *     * `customer` - Customer
-         * @enum {string}
-         */
-        UserRoleEnum: "admin" | "staff" | "customer";
         /** @description Internal users referenced by a subscription; no email exposed to customers. */
         UserSummary: {
             readonly id: number;
@@ -2125,6 +2220,25 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    analytics_aging_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgingBucket"][];
+                };
+            };
+        };
+    };
     analytics_insights_list: {
         parameters: {
             query?: never;
@@ -2140,6 +2254,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InsightItem"][];
+                };
+            };
+        };
+    };
+    analytics_pipeline_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineStage"][];
                 };
             };
         };
@@ -3094,6 +3227,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvoiceBulkConfirmResponse"];
+                };
+            };
+        };
+    };
+    invoices_export_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
                 };
             };
         };
@@ -4247,6 +4399,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedSubscriptionEventList"];
+                };
+            };
+        };
+    };
+    subscriptions_invoice_now_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invoice"];
                 };
             };
         };

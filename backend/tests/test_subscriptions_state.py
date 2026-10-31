@@ -1,7 +1,8 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
+from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 
 from apps.catalog.models import Product
@@ -69,3 +70,27 @@ def test_pause_close_and_renew(subscription):
     renewal = transition_subscription(subscription.pk, "renew", today=TODAY)
     assert renewal.status == "quotation" and renewal.renewed_from_id == subscription.pk
     assert Subscription.objects.get(pk=subscription.pk).close_reason == "Requested"
+
+
+def test_resume_shifts_billing_by_the_paused_days_and_keeps_full_periods(subscription):
+    from apps.billing.services import generate_invoice
+
+    subscription.plan.pausable = True
+    subscription.plan.save()
+    subscription.next_invoice_date = date(2026, 3, 1)
+    subscription.save()
+
+    transition_subscription(subscription.pk, "pause", today=date(2026, 2, 10))
+    SubscriptionEvent.objects.filter(to_status="paused").update(
+        created_at=timezone.make_aware(datetime(2026, 2, 10, 12))
+    )
+    transition_subscription(subscription.pk, "resume", today=date(2026, 2, 20))
+    subscription.refresh_from_db()
+    assert subscription.next_invoice_date == date(2026, 3, 11)
+
+    # The next period is a whole month from the new date, not cut short by the old anchor.
+    invoice = generate_invoice(subscription.pk, date(2026, 3, 11))
+    assert (invoice.period_start, invoice.period_end) == (date(2026, 3, 11), date(2026, 4, 10))
+    subscription.refresh_from_db()
+    assert subscription.next_invoice_date == date(2026, 4, 11)
+    assert date(2026, 4, 10) + timedelta(days=1) == subscription.next_invoice_date

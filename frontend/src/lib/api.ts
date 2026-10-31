@@ -27,6 +27,24 @@ async function ensureCsrf() {
   await csrfReady;
 }
 
+// Latest Server-Timing from the backend, for the footer badge: live proof of the < 2 s rule.
+let timing = "";
+const timingListeners = new Set<() => void>();
+export const serverTiming = {
+  get: () => timing,
+  subscribe(listener: () => void) {
+    timingListeners.add(listener);
+    return () => void timingListeners.delete(listener);
+  },
+};
+function noteTiming(header: string | null) {
+  const ms = header?.match(/app;dur=([\d.]+)/)?.[1];
+  if (!ms) return;
+  const queries = header?.match(/desc="(\d+) quer/)?.[1] ?? "0";
+  timing = `${Math.round(Number(ms))} ms · ${queries} ${queries === "1" ? "query" : "queries"}`;
+  timingListeners.forEach((listener) => listener());
+}
+
 type Query = Record<string, string | number | boolean | undefined | null>;
 
 export function qs(params?: Query) {
@@ -49,6 +67,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
+  noteTiming(res.headers.get("server-timing"));
   if (res.status === 204) return undefined as T;
   const data = await res.json().catch(() => null);
   if (!res.ok) {

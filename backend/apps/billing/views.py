@@ -5,6 +5,7 @@ in apps.billing.lifecycle. Invoice generation and the billing runner stay in
 apps.billing.services (owned by the parallel billing PRs and out of scope here).
 """
 
+from django.http import StreamingHttpResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
@@ -15,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.billing import lifecycle
+from apps.billing.exports import invoice_csv
 from apps.billing.models import Invoice, InvoiceStatus
 from apps.billing.serializers import (
     InvoiceBulkConfirmResponseSerializer,
@@ -58,7 +60,7 @@ class InvoiceViewSet(
     ordering_fields = ["invoice_date", "due_date", "total", "number", "status", "created_at"]
     customer_lookup = "customer"
 
-    INTERNAL_ONLY_ACTIONS = frozenset({"confirm", "cancel", "send", "confirm_bulk"})
+    INTERNAL_ONLY_ACTIONS = frozenset({"confirm", "cancel", "send", "confirm_bulk", "export"})
     DETAIL_ACTIONS = frozenset({"retrieve", "confirm", "cancel", "send"})
 
     def get_permissions(self):
@@ -85,6 +87,15 @@ class InvoiceViewSet(
         if self.action in self.DETAIL_ACTIONS:
             return InvoiceDetailSerializer
         return InvoiceSerializer
+
+    @extend_schema(responses={(200, "text/csv"): str})
+    @action(detail=False, methods=["get"])
+    def export(self, request):
+        """Download the current filtered list; streamed, so size doesn't matter."""
+        rows = self.filter_queryset(self.get_queryset()).iterator(chunk_size=2000)
+        response = StreamingHttpResponse(invoice_csv(rows), content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="invoices.csv"'
+        return response
 
     @extend_schema(request=None, responses=InvoiceDetailSerializer)
     @action(detail=True, methods=["post"])

@@ -39,3 +39,9 @@ class PortalSummarySerializer(serializers.Serializer):
     outstanding = serializers.CharField()
     recent_invoices = serializers.ListField(child=serializers.DictField())
     recent_payments = serializers.ListField(child=serializers.DictField())
+
+
+class AgingBucketSerializer(serializers.Serializer):
+    bucket = serializers.CharField()
+    count = serializers.IntegerField()
+    amount = serializers.DecimalField(max_digits=14, decimal_places=2)

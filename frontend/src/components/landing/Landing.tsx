@@ -11,6 +11,8 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 import BillingDay from './BillingDay';
+import { LedgerMark } from '@/components/layout/LedgerMark';
+
 import { canUseWebGL } from './support';
 import { world } from './world';
 import LiveStats from './LiveStats';
@@ -45,11 +47,7 @@ const secondaryCta =
 
 function Logo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
-      <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="3" />
-      <circle cx="20" cy="20" r="16" fill="none" stroke="#0E7A63" strokeWidth="3" strokeDasharray="25 100" strokeLinecap="round" transform="rotate(-90 20 20)" />
-      <circle cx="20" cy="20" r="3" fill="currentColor" />
-    </svg>
+    <LedgerMark size={32} />
   );
 }
 

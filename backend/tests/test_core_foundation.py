@@ -107,3 +107,8 @@ def test_scheduler_endpoint_rejects_wrong_secret(api, db):
     response = api.post("/api/internal/billing/run/", HTTP_AUTHORIZATION="Bearer nope")
     assert response.status_code == 403
     assert response.json()["error"]["code"] == "permission_denied"
+
+
+def test_api_responses_carry_server_timing(api, db):
+    header = api.get("/api/health/")["Server-Timing"]
+    assert header.startswith("db;dur=") and 'desc="1 queries"' in header and "app;dur=" in header

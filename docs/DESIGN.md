@@ -116,6 +116,18 @@ Quality floor: responsive down to 360px (the hero dial moves behind the text at 
 - Shared components: `PageHeader`, `FilterBar`, `DataTable`, `StatusBadge`, `Money`, `DateText`, `EmptyState` (sentence: what's missing + the action to create it), `ConfirmDialog`, `CycleRing`, `KpiTile`.
 - Icons: lucide-react, 16px in tables, 18px in nav, stroke 1.75.
 
+### As built (M2)
+- Tokens live in `frontend/src/app/globals.css`; shadcn variables are mapped onto them, so `bg-surface`, `text-ink-2`, `border-line`, `text-plum` etc. are Tailwind utilities. Floating layers use `shadow-float`.
+- Dialogs and sheets animate in 160 ms ease-out; `prefers-reduced-motion` collapses all animation.
+- `DataTable` is server-driven (one page at a time). Density is URL-synced (`?density=compact` = 36px rows) and below 768px rows become stacked cards labelled from the column headers.
+- Catalog screens are built from `CatalogPage` + `ResourceDialog` (field list in, form + validation + server `field_errors` out). Writes are shown to admins only; the API enforces it regardless.
+- `skipTrailingSlashRedirect` and the slashed `/api/:path*/` rewrite in `next.config.ts` are required because Django routes end in `/`.
+
 ## 9. Claude Design reference
-- Design system artifact: _link added by M1 after generation_
-- Landing concept artifact: _link added by M1 after generation_
+Claude Design canvas: https://claude.ai/artifact/FWF3YVnpekm2kSAtVxTcUt (private until M1 shares it; ask in chat). Four artboards:
+- **Design system**: palette, type, status badges, actions, CycleRing, shape and space
+- **Landing page**: hero cycle dial, the "month at Brightloop" strip, DB guarantees, roles, live band, CTA
+- **App · Subscriptions**: sidebar with the marigold active bar, filter pills, data table
+- **App · Finance dashboard**: KPI tiles, invoiced vs collected, overdue list with "Record payment"
+
+Where the canvas and this file disagree, **this file wins**.

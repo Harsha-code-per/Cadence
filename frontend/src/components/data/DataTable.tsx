@@ -1,6 +1,7 @@
 "use client";
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useUrlState } from "@/hooks/useUrlState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -22,6 +23,7 @@ type Props<T> = {
 export function DataTable<T>({ columns, data, count, page, pageSize = 20, loading, onPageChange, onRowClick, empty }: Props<T>) {
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel(), manualPagination: true });
+  const compact = useUrlState().get("density") === "compact";
   const from = count === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, count);
   const align = (meta: unknown) => ((meta as { align?: string } | undefined)?.align === "right" ? "text-right" : "");
@@ -31,7 +33,7 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((hg) => (
-            <TableRow key={hg.id} className="hover:bg-transparent">
+            <TableRow key={hg.id} className="hover:bg-transparent max-md:hidden">
               {hg.headers.map((h) => (
                 <TableHead key={h.id} className={cn("h-10 text-ink-2", align(h.column.columnDef.meta))}>
                   {flexRender(h.column.columnDef.header, h.getContext())}
@@ -64,10 +66,14 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
                 tabIndex={onRowClick ? 0 : undefined}
                 onClick={() => onRowClick?.(row.original)}
                 onKeyDown={(e) => e.key === "Enter" && onRowClick?.(row.original)}
-                className={cn("h-11", onRowClick && "cursor-pointer focus-visible:bg-plum-soft")}
+                className={cn(compact ? "h-9" : "h-11", "max-md:grid max-md:grid-cols-2 max-md:gap-x-3 max-md:border-b max-md:p-3", onRowClick && "cursor-pointer focus-visible:bg-plum-soft")}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={align(cell.column.columnDef.meta)}>
+                  <TableCell
+                    key={cell.id}
+                    data-label={typeof cell.column.columnDef.header === "string" ? cell.column.columnDef.header : undefined}
+                    className={cn(align(cell.column.columnDef.meta), compact && "py-1", "max-md:p-0 max-md:py-0.5 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]")}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

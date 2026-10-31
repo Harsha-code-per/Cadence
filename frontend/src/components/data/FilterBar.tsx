@@ -1,5 +1,6 @@
 "use client";
-import { Search } from "lucide-react";
+import { Rows3, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useDebounced } from "@/hooks/useDebounced";
@@ -23,6 +24,15 @@ export function FilterBar({ placeholder = "Search", children }: { placeholder?: 
         <Input aria-label={placeholder} className="pl-8" placeholder={placeholder} value={text} onChange={(e) => setText(e.target.value)} />
       </div>
       {children}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="ml-auto"
+        aria-pressed={url.get("density") === "compact"}
+        onClick={() => url.set({ density: url.get("density") === "compact" ? undefined : "compact", page: url.page })}
+      >
+        <Rows3 size={16} /> Compact rows
+      </Button>
     </div>
   );
 }

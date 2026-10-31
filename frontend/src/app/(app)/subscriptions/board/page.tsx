@@ -290,7 +290,7 @@ function SubscriptionCard({
     >
       <div className="flex items-start justify-between gap-2">
         <Link href={`/subscriptions/${card.id}`} className="min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-brand">
-          <span className="block break-all text-xs font-medium text-brand">{card.number}</span>
+          <span className="block whitespace-nowrap text-[11px] font-medium tracking-tighter text-brand">{card.number}</span>
           <span className="block break-words text-sm font-medium text-ink">{card.customer.name}</span>
           {card.customer.company && <span className="block break-words text-xs text-ink-2">{card.customer.company}</span>}
         </Link>
@@ -299,7 +299,7 @@ function SubscriptionCard({
             <DropdownMenuTrigger
               render={
                 <button
-                  className="-mr-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-2 hover:bg-brand-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-brand [@media(pointer:coarse)]:size-11"
+                  className="-mr-1.5 -mt-1 inline-flex size-6 shrink-0 items-center justify-center rounded-md text-ink-2 hover:bg-brand-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-brand [@media(pointer:coarse)]:size-11"
                   aria-label={`Move ${card.number}`}
                 />
               }

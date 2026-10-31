@@ -1,7 +1,8 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ResetForm } from "./ResetForm";
 
-export const metadata = { title: "Reset password" };
+export const metadata = { title: "Choose a new password" };
 
-export default function ResetPasswordPage() {
-  return <PageHeader title="Reset password" description="This page is being built." />;
+export default async function ResetPasswordPage({ params }: PageProps<"/reset-password/[uid]/[token]">) {
+  const { uid, token } = await params;
+  return <ResetForm uid={uid} token={token} />;
 }

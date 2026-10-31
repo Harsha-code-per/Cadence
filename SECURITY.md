@@ -13,7 +13,10 @@ Only `main` is supported.
 | Accounts | One account per email (case-insensitive unique constraint); only admins create staff accounts |
 | Sessions | httpOnly, Secure (prod), SameSite=Lax session cookie; CSRF token on every unsafe request; session rotated on login; invalidated on logout and password change |
 | Password reset | Single-use, time-limited token (Django `PasswordResetTokenGenerator`, 1 h); the response is identical whether or not the email exists |
-| Brute force | DRF scoped throttles on login, signup and password reset |
+| Brute force | DRF scoped throttles on login, signup and password reset, plus a **per-account lockout** (5 failures → 15 min) that can't be dodged with spoofed proxy headers |
+| Login CSRF | Login, signup and reset endpoints enforce Django CSRF even for anonymous users, so a malicious site can't log a victim into another account |
+| Account claiming | Signup never links an existing (staff-created) customer record. The owner claims it via “Forgot password”: receiving the email proves ownership. `Customer.user` is read-only in the API |
+| Admin safety | Admins can't demote or deactivate themselves; the Django admin site is off in production (`ENABLE_DJANGO_ADMIN`) |
 | Authorization | Role checks on every endpoint (admin / staff / customer); customer data is filtered at the queryset level (`CustomerScopedMixin`), and out-of-scope objects return 404 (OWASP API1: BOLA) |
 | State integrity | Status fields are read-only in the API; transitions only through validated service actions; money computed server-side only |
 | Data integrity | Database CHECK constraints, a partial unique index against double billing, row locks (`select_for_update`) for payments, sequences and discount usage |

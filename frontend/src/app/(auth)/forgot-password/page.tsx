@@ -1,7 +1,7 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ForgotForm } from "./ForgotForm";
 
-export const metadata = { title: "Forgot password" };
+export const metadata = { title: "Reset your password" };
 
 export default function ForgotPasswordPage() {
-  return <PageHeader title="Forgot password" description="This page is being built." />;
+  return <ForgotForm />;
 }

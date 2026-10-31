@@ -27,7 +27,7 @@ export function FilterBar({ placeholder = "Search", children }: { placeholder?: 
       <Button
         variant="ghost"
         size="sm"
-        className="ml-auto"
+        className="ml-auto max-md:hidden"
         aria-pressed={url.get("density") === "compact"}
         onClick={() => url.set({ density: url.get("density") === "compact" ? undefined : "compact", page: url.page })}
       >

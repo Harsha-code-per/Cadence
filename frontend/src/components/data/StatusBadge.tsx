@@ -9,12 +9,12 @@ const TONES = {
 } as const satisfies Record<string, Record<string, Tone>>;
 
 const STYLE: Record<Tone, string> = {
-  slate: "bg-[color-mix(in_oklab,var(--slate)_13%,var(--surface))] text-slate",
+  slate: "bg-[color-mix(in_oklab,var(--slate)_13%,var(--surface))] text-[color-mix(in_oklab,var(--slate)_72%,var(--ink))]",
   plum: "bg-plum-soft text-plum",
   "plum-solid": "bg-plum text-primary-foreground",
-  teal: "bg-[color-mix(in_oklab,var(--teal)_13%,var(--surface))] text-teal",
-  amber: "bg-[color-mix(in_oklab,var(--amber)_13%,var(--surface))] text-amber",
-  rose: "bg-[color-mix(in_oklab,var(--rose)_13%,var(--surface))] text-rose",
+  teal: "bg-[color-mix(in_oklab,var(--teal)_13%,var(--surface))] text-[color-mix(in_oklab,var(--teal)_72%,var(--ink))]",
+  amber: "bg-[color-mix(in_oklab,var(--amber)_13%,var(--surface))] text-[color-mix(in_oklab,var(--amber)_72%,var(--ink))]",
+  rose: "bg-[color-mix(in_oklab,var(--rose)_13%,var(--surface))] text-[color-mix(in_oklab,var(--rose)_72%,var(--ink))]",
   muted: "bg-[color-mix(in_oklab,var(--slate)_13%,var(--surface))] text-slate/80",
 };
 
@@ -42,4 +42,9 @@ export function StatusBadge({
       {label ?? sentence(status)}
     </span>
   );
+}
+
+/** Catalog on/off state: teal "Active" or slate "Inactive", dot plus label. */
+export function ActiveBadge({ active }: { active: boolean }) {
+  return <StatusBadge domain="subscription" status={active ? "active" : "closed"} label={active ? "Active" : "Inactive"} />;
 }

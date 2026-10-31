@@ -43,8 +43,10 @@ ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
 if env("RENDER_EXTERNAL_HOSTNAME"):  # set by Render for every web service
     ALLOWED_HOSTS.append(env("RENDER_EXTERNAL_HOSTNAME"))
 FRONTEND_URL = env("FRONTEND_URL", "http://localhost:3000").rstrip("/")
-CSRF_TRUSTED_ORIGINS = [FRONTEND_URL]
+CSRF_TRUSTED_ORIGINS = [FRONTEND_URL, *env_list("EXTRA_TRUSTED_ORIGINS")]
+CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
 SCHEDULER_SECRET = env("SCHEDULER_SECRET")
+ENABLE_DJANGO_ADMIN = env_bool("ENABLE_DJANGO_ADMIN", DEBUG)
 
 INSTALLED_APPS = [
     "django.contrib.admin",

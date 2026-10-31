@@ -125,7 +125,7 @@ export function ResourceDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2" noValidate>
+        <form onSubmit={submit} autoComplete="off" className="grid grid-cols-1 gap-4 sm:grid-cols-2" noValidate>
           {fields.map((f) => (
             <div key={f.name} className={cn(f.wide || f.kind === "textarea" || f.kind === "multi" || f.kind === "custom" ? "sm:col-span-2" : "")}>
               <Field label={f.label + (f.required ? "" : " (optional)")} error={errorOf(errors, f.name)} hint={f.hint}>

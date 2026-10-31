@@ -1,6 +1,8 @@
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 
-router = SimpleRouter()
-# router.register("resource", ResourceViewSet, basename="resource")
+from apps.payments.views import PaymentViewSet
+
+router = DefaultRouter()
+router.register("payments", PaymentViewSet, basename="payment")
 
 urlpatterns = [*router.urls]

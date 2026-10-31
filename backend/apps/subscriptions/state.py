@@ -61,7 +61,7 @@ def transition_subscription(subscription_id, action, *, actor=None, note="", tod
     """
     today = today or timezone.localdate()
     sub = (
-        Subscription.objects.select_for_update()
+        Subscription.objects.select_for_update(of=("self",))
         .select_related("plan", "quotation_template")
         .get(pk=subscription_id)
     )

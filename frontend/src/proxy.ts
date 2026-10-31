@@ -1,3 +1,6 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
 export type UserRole = "admin" | "staff" | "customer";
 
 export interface GuardUser {
@@ -57,3 +60,30 @@ export function getRedirectDestination(user: GuardUser | null, pathname: string)
 
   return null;
 }
+
+export function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  const session = request.cookies.get("cadence_session");
+  const isPublic = isPublicRoute(pathname);
+
+  if (!session && !isPublic) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

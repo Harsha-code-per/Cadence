@@ -30,6 +30,32 @@
 - **cost_price** is returned to admin/staff only; never in customer-visible payloads.
 - **Roles**: `A` admin · `S` staff · `C` customer (scoped to own records).
 
+## Ask Cadence (optional)
+| Method | Path | Roles | Notes |
+|---|---|---|---|
+| GET | `/api/assistant/status/` | A,S | `{enabled: boolean}`; enabled only when all three assistant environment variables are set |
+| GET | `/api/assistant/ask/?q=...` | A,S | 1–300 character question; 10 attempts per user per 60 seconds; returns `{answer, tool, numbers}` |
+
+`tool` is `summary`, `aging`, `revenue_series`, `status_breakdown`, `pipeline`, or
+null for unsupported questions (with a capability explanation and null numbers).
+Only the selected existing analytics aggregate runs; no SQL or customer rows are
+sent to the provider. Personal-lookup questions are refused locally; unknown words
+in question text are redacted using a fixed finance vocabulary before either call.
+This deliberately limits supported wording rather than forwarding personal details.
+Summary uses default/all-time scope, revenue series the last
+12 months; aging/status/pipeline are current. No custom filters or customer lookups.
+Money remains decimal strings. Both responses are private/non-cacheable. GET also
+works for read-only demo admin/staff accounts.
+
+Configure server-only `ASSISTANT_API_KEY`, `ASSISTANT_API_URL` (full OpenAI-compatible
+HTTPS chat completions endpoint) and `ASSISTANT_MODEL`. Redirects are refused so
+authorization cannot be forwarded to another host. With no configuration the Insights
+box stays hidden. Each of the two provider calls has a 10-second timeout. Provider
+failures return 503 `assistant_unavailable`, disabled asks 503 `assistant_disabled`,
+invalid tool selections 400 `assistant_invalid_tool`, and rate limits 429 `throttled`,
+all in the standard error shape. The counter uses Django's configured cache;
+the current LocMemCache is process-local (a shared cache is needed across workers).
+
 ---
 
 ## Health / public (M1)

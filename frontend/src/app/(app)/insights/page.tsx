@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowRight, CheckCircle, ShieldAlert } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/PageHeader";
+import { AskCadence } from "@/components/insights/AskCadence";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
@@ -31,6 +32,8 @@ export default function InsightsPage() {
         title="Risk & Retention Insights"
         description="Explainable, rule-based indicators identifying subscriptions at risk of churn or non-payment."
       />
+
+      <AskCadence />
 
       {isLoading ? (
         <div className="space-y-4">

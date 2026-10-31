@@ -155,4 +155,5 @@ def transition_subscription(subscription_id, action, *, actor=None, note="", tod
             raise BillingUnavailable(
                 "The first invoice could not be created; activation was rolled back."
             )
+        sub.refresh_from_db()  # billing advanced next_invoice_date on the row
     return sub

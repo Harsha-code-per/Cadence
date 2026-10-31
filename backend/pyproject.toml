@@ -1,0 +1,13 @@
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ", "SIM"]
+ignore = ["DJ001", "DJ008", "E501"]  # blank CharFields intended; line models need no __str__; formatter owns length
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+addopts = "--reuse-db -p no:cacheprovider"

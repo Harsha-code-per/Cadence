@@ -47,15 +47,41 @@ def test_signup_duplicate_email_case_insensitive(api, make_user):
     assert "email" in response.data["error"]["field_errors"]
 
 
-def test_signup_weak_password_rejected(api, db):
-    payload = {
-        "full_name": "Weak User",
-        "email": "weak@brightloop.test",
-        "password": "weak",
-    }
-    response = api.post("/api/auth/signup/", payload)
-    assert response.status_code == 400
-    assert "password" in response.data["error"]["field_errors"]
+def test_signup_password_rules_matrix(api, db):
+    # 1. 'abcdefgh' (8 chars, no uppercase, no special)
+    r1 = api.post(
+        "/api/auth/signup/",
+        {"full_name": "User 1", "email": "u1@brightloop.test", "password": "abcdefgh"},
+    )
+    assert r1.status_code == 400
+    errs1 = str(r1.data["error"]["field_errors"]["password"])
+    assert "more than 8 characters" in errs1.lower()
+    assert "uppercase" in errs1.lower()
+    assert "special character" in errs1.lower()
+
+    # 2. 'Abcdefgh1' (9 chars, uppercase, lowercase, number, but no special)
+    r2 = api.post(
+        "/api/auth/signup/",
+        {"full_name": "User 2", "email": "u2@brightloop.test", "password": "Abcdefgh1"},
+    )
+    assert r2.status_code == 400
+    errs2 = str(r2.data["error"]["field_errors"]["password"])
+    assert "special character" in errs2.lower()
+
+    # 3. 'Abcdefg!' (8 chars: len <= 8)
+    r3 = api.post(
+        "/api/auth/signup/",
+        {"full_name": "User 3", "email": "u3@brightloop.test", "password": "Abcdefg!"},
+    )
+    assert r3.status_code == 400
+    assert "more than 8 characters" in str(r3.data["error"]["field_errors"]["password"]).lower()
+
+    # 4. 'Abcdefgh!x' (10 chars, meets all rules) -> accepted
+    r4 = api.post(
+        "/api/auth/signup/",
+        {"full_name": "User 4", "email": "u4@brightloop.test", "password": "Abcdefgh!x"},
+    )
+    assert r4.status_code == 201
 
 
 def test_login_and_logout(api, make_user):

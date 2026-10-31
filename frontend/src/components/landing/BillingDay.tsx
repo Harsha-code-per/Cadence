@@ -10,6 +10,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef } from 'react';
 
 import { world } from './world';
+import { pinDistance } from './scroll-distance';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -40,9 +41,10 @@ export default function BillingDay() {
             scrollTrigger: {
               trigger: root.current,
               start: 'top top',
-              end: '+=2400',
+              end: () => `+=${pinDistance('billing', window.innerHeight)}`,
               pin: true,
-              scrub: 0.7,
+              scrub: 0.3,
+              invalidateOnRefresh: true,
               onUpdate: (self) => {
                 world.sub = Math.min(1, self.progress / 0.8);
               },

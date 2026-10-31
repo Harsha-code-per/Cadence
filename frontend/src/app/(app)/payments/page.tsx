@@ -41,13 +41,12 @@ const methodLabels: Record<string, string> = {
 
 function PaymentsContent() {
   const [recordOpen, setRecordOpen] = useState(false);
-  const { get, set } = useUrlState();
+  const { get, set, page } = useUrlState();
 
   const search = get("search") ?? "";
   const method = get("method") ?? "";
-  const page = parseInt(get("page") ?? "1", 10);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["payments", { search, method, page }],
     queryFn: () =>
       api.get<Paginated<PaymentRow>>("/payments/", {
@@ -63,7 +62,7 @@ function PaymentsContent() {
       accessorKey: "number",
       header: "Payment #",
       cell: ({ row }) => (
-        <span className="font-mono text-sm font-semibold text-ink">
+        <span className="tabular-nums text-sm font-semibold text-ink">
           {row.original.number}
         </span>
       ),
@@ -74,7 +73,7 @@ function PaymentsContent() {
       cell: ({ row }) => (
         <Link
           href={`/invoices/${row.original.invoice}`}
-          className="font-mono text-xs font-medium text-brand hover:underline"
+          className="tabular-nums text-xs font-medium text-brand hover:underline"
         >
           {row.original.invoice_number}
         </Link>
@@ -119,7 +118,7 @@ function PaymentsContent() {
       cell: ({ row }) => (
         <Money
           value={row.original.amount}
-          className="font-mono text-sm font-semibold text-teal"
+          className="tabular-nums text-sm font-semibold text-teal"
         />
       ),
     },
@@ -166,7 +165,7 @@ function PaymentsContent() {
         onPageChange={(p) => set({ page: p })}
         empty={
           <EmptyState
-            message="No customer payments have been recorded yet or matched the filter."
+            message={isError ? "Payments couldn't be loaded. Refresh to try again." : "No customer payments have been recorded yet or matched the filter."}
             action={
               <Button
                 onClick={() => setRecordOpen(true)}

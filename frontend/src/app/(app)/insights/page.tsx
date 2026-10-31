@@ -63,7 +63,7 @@ export default function InsightsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/subscriptions/${item.subscription_id}`}
-                      className="font-mono text-base font-bold text-ink hover:text-brand hover:underline"
+                      className="tabular-nums text-base font-bold text-ink hover:text-brand hover:underline"
                     >
                       {item.number}
                     </Link>

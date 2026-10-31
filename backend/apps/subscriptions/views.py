@@ -4,6 +4,7 @@ Thin DRF views: auth, scoping, validation and serialization only; rules live in
 apps.subscriptions.services and apps.subscriptions.state.
 """
 
+from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -16,11 +17,14 @@ from rest_framework.response import Response
 
 from apps.billing.serializers import InvoiceSerializer
 from apps.billing.services import generate_invoice_now
+from apps.catalog.models import Product, ProductType
 from apps.core.pagination import StandardPagination
 from apps.core.permissions import CustomerScopedMixin, IsAdminOrStaff
 from apps.subscriptions import services
-from apps.subscriptions.models import Subscription
+from apps.subscriptions.models import Subscription, SubscriptionLine
 from apps.subscriptions.serializers import (
+    AddonSerializer,
+    AddonWriteSerializer,
     SubscriptionActionSerializer,
     SubscriptionCreateSerializer,
     SubscriptionEventSerializer,
@@ -130,6 +134,39 @@ class SubscriptionViewSet(
         page = self.paginate_queryset(queryset)
         serializer = SubscriptionEventSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+    @extend_schema(methods=["GET"], responses=AddonSerializer(many=True))
+    @extend_schema(methods=["POST"], request=AddonWriteSerializer, responses={204: None})
+    @action(detail=True, methods=["get", "post"], pagination_class=None)
+    def addons(self, request, pk=None):
+        subscription = self.get_object()
+        if request.method == "GET":
+            products = Product.objects.filter(
+                is_active=True, product_type=ProductType.ADDON
+            ).annotate(
+                on=Exists(
+                    SubscriptionLine.objects.filter(
+                        subscription=subscription, product_id=OuterRef("pk")
+                    )
+                )
+            )
+            return Response(AddonSerializer(products, many=True).data)
+        serializer = AddonWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        services.set_addon(
+            subscription.pk,
+            serializer.validated_data["product"],
+            enabled=True,
+            actor=request.user,
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=True, methods=["delete"], url_path=r"addons/(?P<product_id>\d+)")
+    def addon_detail(self, request, pk=None, product_id=None):
+        subscription = self.get_object()
+        services.set_addon(subscription.pk, int(product_id), enabled=False, actor=request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(methods=["GET"], responses=SubscriptionLineSerializer(many=True))
     @extend_schema(

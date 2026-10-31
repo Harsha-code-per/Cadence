@@ -867,6 +867,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/subscriptions/{id}/addons/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        get: operations["subscriptions_addons_list"];
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_addons_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/addons/{product_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        delete: operations["subscriptions_addons_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/subscriptions/{id}/close/": {
         parameters: {
             query?: never;
@@ -1141,6 +1176,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Addon: {
+            id: number;
+            name: string;
+            /** Format: decimal */
+            sales_price: string;
+            on: boolean;
+        };
+        AddonWriteRequest: {
+            product: number;
+        };
         AgingBucket: {
             bucket: string;
             count: number;
@@ -1270,12 +1315,16 @@ export interface components {
             product_ids?: number[];
             /** Format: decimal */
             min_amount?: string;
+            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
             /** Format: date */
             end_date?: string | null;
-            /** @description Empty = unlimited */
+            /**
+             * Format: int64
+             * @description Empty = unlimited
+             */
             usage_limit?: number | null;
             /** @default 0 */
             readonly times_used: number;
@@ -1291,12 +1340,16 @@ export interface components {
             product_ids?: number[];
             /** Format: decimal */
             min_amount?: string;
+            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
             /** Format: date */
             end_date?: string | null;
-            /** @description Empty = unlimited */
+            /**
+             * Format: int64
+             * @description Empty = unlimited
+             */
             usage_limit?: number | null;
             is_active?: boolean;
         };
@@ -1411,6 +1464,7 @@ export interface components {
             product?: number | null;
             readonly product_name: string;
             description: string;
+            /** Format: int64 */
             quantity?: number;
             /** Format: decimal */
             unit_price?: string;
@@ -1711,17 +1765,22 @@ export interface components {
             product_ids?: number[];
             /** Format: decimal */
             min_amount?: string;
+            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date?: string;
             /** Format: date */
             end_date?: string | null;
-            /** @description Empty = unlimited */
+            /**
+             * Format: int64
+             * @description Empty = unlimited
+             */
             usage_limit?: number | null;
             is_active?: boolean;
         };
         PatchedPaymentTermRequest: {
             name?: string;
+            /** Format: int64 */
             due_days?: number;
         };
         PatchedPlanRequest: {
@@ -1732,7 +1791,9 @@ export interface components {
              */
             price?: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
+            /** Format: int64 */
             interval_count?: number;
+            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date?: string;
@@ -1758,6 +1819,7 @@ export interface components {
         };
         PatchedQuotationTemplateRequest: {
             name?: string;
+            /** Format: int64 */
             validity_days?: number;
             plan?: number;
             payment_term?: number | null;
@@ -1851,15 +1913,18 @@ export interface components {
         PaymentTerm: {
             readonly id: number;
             name: string;
+            /** Format: int64 */
             due_days?: number;
         };
         PaymentTermRequest: {
             name: string;
+            /** Format: int64 */
             due_days?: number;
         };
         PaymentTermSummary: {
             readonly id: number;
             name: string;
+            /** Format: int64 */
             due_days?: number;
         };
         PipelineStage: {
@@ -1877,7 +1942,9 @@ export interface components {
              */
             price?: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
+            /** Format: int64 */
             interval_count?: number;
+            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
@@ -1898,7 +1965,9 @@ export interface components {
              */
             price?: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
+            /** Format: int64 */
             interval_count?: number;
+            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
@@ -1915,12 +1984,14 @@ export interface components {
             readonly id: number;
             name: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
+            /** Format: int64 */
             interval_count?: number;
             /**
              * Format: decimal
              * @description Recurring plan fee per period; 0 = products only
              */
             price?: string;
+            /** Format: int64 */
             min_quantity?: number;
             auto_close?: boolean;
             closable?: boolean;
@@ -1981,6 +2052,7 @@ export interface components {
         QuotationTemplate: {
             readonly id: number;
             name: string;
+            /** Format: int64 */
             validity_days?: number;
             plan: number;
             payment_term?: number | null;
@@ -1989,6 +2061,7 @@ export interface components {
         };
         QuotationTemplateRequest: {
             name: string;
+            /** Format: int64 */
             validity_days?: number;
             plan: number;
             payment_term?: number | null;
@@ -2140,6 +2213,7 @@ export interface components {
             variant?: number | null;
             readonly variant_label: string | null;
             description?: string;
+            /** Format: int64 */
             quantity?: number;
             /**
              * Format: decimal
@@ -2197,12 +2271,14 @@ export interface components {
         TemplateLine: {
             product: number;
             variant?: number | null;
+            /** Format: int64 */
             quantity?: number;
             description?: string;
         };
         TemplateLineRequest: {
             product: number;
             variant?: number | null;
+            /** Format: int64 */
             quantity?: number;
             description?: string;
         };
@@ -4390,6 +4466,96 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Subscription"];
                 };
+            };
+        };
+    };
+    subscriptions_addons_list: {
+        parameters: {
+            query?: {
+                customer?: number;
+                next_invoice_date?: string;
+                next_invoice_date__gte?: string;
+                next_invoice_date__lte?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                plan?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `draft` - Draft
+                 *     * `quotation` - Quotation
+                 *     * `confirmed` - Confirmed
+                 *     * `active` - Active
+                 *     * `paused` - Paused
+                 *     * `closed` - Closed
+                 */
+                status?: "active" | "closed" | "confirmed" | "draft" | "paused" | "quotation";
+            };
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Addon"][];
+                };
+            };
+        };
+    };
+    subscriptions_addons_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddonWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AddonWriteRequest"];
+                "multipart/form-data": components["schemas"]["AddonWriteRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    subscriptions_addons_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

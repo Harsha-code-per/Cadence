@@ -112,6 +112,9 @@ Example product with variant:
 | GET | `/api/subscriptions/` | A,S,C(own) | filters `status, customer, plan, next_invoice_date__lte, search` (number / customer name) |
 | POST | `/api/subscriptions/` | A,S | create draft `{customer, plan, start_date, expiration_date?, payment_term, discount?, notes, lines:[{product, variant?, quantity, unit_price?, tax_ids?}]}` (unit_price defaults to the variant/product price) |
 | POST | `/api/subscriptions/from-template/` | A,S | `{template, customer, start_date}` → draft with the template's plan and lines |
+| GET | `/api/subscriptions/{id}/addons/` | A,S,C (own) | Active add-ons as `{id, name, sales_price, on}`; cost is never returned |
+| POST | `/api/subscriptions/{id}/addons/` | A,S,C (own) | `{product: id}` enables an add-on on an active subscription |
+| DELETE | `/api/subscriptions/{id}/addons/{product_id}/` | A,S,C (own) | Disables an add-on on an active subscription; existing invoices remain unchanged |
 | GET/PATCH | `/api/subscriptions/{id}/` | A,S (C read own) | PATCH only in draft; `status` is read-only |
 | POST | `/api/subscriptions/{id}/{action}/` | see below | `action ∈ send, revise, confirm, activate, pause, resume, close, renew`; body `{note?, reason?}` → updated Subscription |
 | GET | `/api/subscriptions/{id}/events/` | A,S,C(own) | timeline |

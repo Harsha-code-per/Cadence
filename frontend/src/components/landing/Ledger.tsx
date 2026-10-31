@@ -192,6 +192,20 @@ function causticTexture() {
   return texture;
 }
 
+function softShadowTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const c = canvas.getContext('2d')!;
+  const g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, 'rgba(10,58,46,0.42)');
+  g.addColorStop(1, 'rgba(10,58,46,0)');
+  c.fillStyle = g;
+  c.fillRect(0, 0, 256, 256);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
 /** A soft diagonal band of light that slides across the front pane. */
 function sheenTexture() {
   const canvas = document.createElement('canvas');
@@ -263,7 +277,7 @@ const GALAXY_FRAGMENT = /* glsl */ `
 
 /** Every particle knows two homes: a place in the spiral, and a place on a slab of the ledger. */
 function buildGalaxy() {
-  const count = window.innerWidth < 1024 ? 10000 : 30000;
+  const count = window.innerWidth < 1024 ? 8000 : 24000;
   const position = new Float32Array(count * 3);
   const galaxy = new Float32Array(count * 3);
   const seed = new Float32Array(count * 2);
@@ -335,21 +349,17 @@ function build() {
   frameGeometry.translate(0, 0, -DEPTH * 0.6);
   const printGeometry = new THREE.PlaneGeometry(WIDTH - 0.3, HEIGHT - 0.3);
 
-  const glass = new THREE.MeshPhysicalMaterial({
+  const glass = new THREE.MeshStandardMaterial({
     color: '#eefaf3',
     roughness: 0.04,
     transparent: true,
     opacity: 0.13,
-    clearcoat: 1,
-    clearcoatRoughness: 0.03,
-    envMapIntensity: 1.5,
+    envMapIntensity: 1.7,
     depthWrite: false,
-    side: THREE.DoubleSide,
   });
-  const frame = new THREE.MeshPhysicalMaterial({
+  const frame = new THREE.MeshStandardMaterial({
     color: '#0a5a48',
     roughness: 0.08,
-    clearcoat: 1,
     transparent: true,
     opacity: 0.5,
     envMapIntensity: 1.8,
@@ -364,7 +374,6 @@ function build() {
   for (let i = 0; i < COUNT; i++) {
     const slab = new THREE.Group();
     const body = new THREE.Mesh(bodyGeometry, glass);
-    body.castShadow = true;
     slab.add(body, new THREE.Mesh(frameGeometry, frame));
 
     const print = new THREE.MeshBasicMaterial({ map: invoiceTexture(i), transparent: true, depthWrite: false, toneMapped: false, opacity: 0.94 });
@@ -385,7 +394,7 @@ function build() {
   const accents = new THREE.Group();
   const beadGeometry = new THREE.SphereGeometry(1, 40, 28);
   const beadMaterials = ['#ffffff', MINT, '#0e7a63'].map(
-    (color) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.1, envMapIntensity: 1.1 }),
+    (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.18, envMapIntensity: 1.2 }),
   );
   const floaters: { mesh: THREE.Mesh; base: THREE.Vector3; speed: number; phase: number }[] = [];
   for (let i = 0; i < 7; i++) {
@@ -399,11 +408,12 @@ function build() {
   }
 
   // Floor: invisible except for the shadow and the light that lands on it.
-  const floorGeometry = new THREE.PlaneGeometry(60, 60);
-  const shadow = new THREE.Mesh(floorGeometry, new THREE.ShadowMaterial({ color: '#0a3a2e', opacity: 0.2 }));
+  const floorGeometry = new THREE.PlaneGeometry(13, 7);
+  // A painted shadow: real-time shadows cost more than this whole scene is worth.
+  const shadowMap = softShadowTexture();
+  const shadow = new THREE.Mesh(floorGeometry, new THREE.MeshBasicMaterial({ map: shadowMap, transparent: true, depthWrite: false, toneMapped: false }));
   shadow.rotation.x = -Math.PI / 2;
   shadow.position.y = FLOOR + 0.005;
-  shadow.receiveShadow = true;
   const causticMap = causticTexture();
   const glow = new THREE.Mesh(new THREE.PlaneGeometry(17, 11), new THREE.MeshBasicMaterial({ map: causticMap, transparent: true, depthWrite: false, toneMapped: false }));
   glow.rotation.x = -Math.PI / 2;
@@ -419,18 +429,20 @@ function build() {
     for (const g of [bodyGeometry, frameGeometry, printGeometry, beadGeometry, floorGeometry, glow.geometry]) g.dispose();
     for (const m of [glass, frame, sheen, ...beadMaterials, ...prints]) m.dispose();
     for (const m of prints) m.map?.dispose();
-    for (const t of [sheenMap, causticMap]) t.dispose();
+    for (const t of [sheenMap, causticMap, shadowMap]) t.dispose();
   };
 
   return { root, slabs, prints, floaters, accents, shadow, glow, sheenMap, glass, frame, sheen, galaxy, dispose };
 }
 
-function Scene({ world }: { world: LedgerState }) {
+function Scene({ world, still }: { world: LedgerState; still: boolean }) {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
   const pointer = useRef(new THREE.Vector2());
+  const load = useRef({ time: 0, frames: 0 });
+  const invalidate = useThree((s) => s.invalidate);
   const parts = useMemo(() => build(), []);
   const cam = useMemo(() => ({ from: new THREE.Vector3(), to: new THREE.Vector3(), look: new THREE.Vector3(), lookTo: new THREE.Vector3(), target: new THREE.Vector3(0, 0, 0) }), []);
 
@@ -439,6 +451,7 @@ function Scene({ world }: { world: LedgerState }) {
     const room = new RoomEnvironment();
     const env = pmrem.fromScene(room, 0.03).texture;
     scene.environment = env;
+    invalidate();
     return () => {
       scene.environment = null;
       env.dispose();
@@ -446,7 +459,7 @@ function Scene({ world }: { world: LedgerState }) {
       pmrem.dispose();
       parts.dispose();
     };
-  }, [gl, scene, parts]);
+  }, [gl, scene, parts, invalidate]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => pointer.current.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
@@ -469,7 +482,6 @@ function Scene({ world }: { world: LedgerState }) {
     parts.glass.opacity = 0.13 * glassIn;
     parts.frame.opacity = 0.5 * glassIn;
     parts.sheen.opacity = glassIn;
-    (parts.shadow.material as THREE.ShadowMaterial).opacity = 0.2 * glassIn;
     parts.accents.scale.setScalar(glassIn);
 
     const uniforms = (parts.galaxy.material as THREE.ShaderMaterial).uniforms;
@@ -496,7 +508,9 @@ function Scene({ world }: { world: LedgerState }) {
       // Solid chapters print only the front invoice; the rest stay pure glass.
       const flip = k === 3 || (k === 2 && f > 0.5) ? Math.exp(-((world.sub * 13 - 1 - i) ** 2) / 0.9) : 0;
       const shown = Math.max(1 - solid, flip, i === COUNT - 1 ? frontPrint : 0);
-      parts.prints[i].opacity = (0.03 + shown * 0.93) * glassIn;
+      const print = parts.prints[i];
+      print.opacity = shown * 0.96 * glassIn;
+      print.visible = print.opacity > 0.01; // a hidden layer costs nothing to draw
     });
     parts.sheenMap.offset.x = (t * 0.07) % 1;
 
@@ -519,6 +533,7 @@ function Scene({ world }: { world: LedgerState }) {
     cam.look.fromArray(SHOTS[k][1]).lerp(cam.lookTo.fromArray(SHOTS[k + 1][1]), eased);
     const yearFocus = 1 - Math.min(1, Math.abs(m - 2) * 1.4);
     const pan = (world.track - 0.5) * 42 * yearFocus;
+    (parts.shadow.material as THREE.MeshBasicMaterial).opacity = glassIn * (1 - yearFocus);
     cam.from.x += pan;
     cam.look.x += pan;
     // Phones: centre the object above the text instead of beside it.
@@ -528,28 +543,26 @@ function Scene({ world }: { world: LedgerState }) {
     cam.from.z += (1 - form) * 3; // the galaxy is seen from further out
     cam.from.x += pointer.current.x * 0.4;
     cam.from.y += pointer.current.y * 0.25;
-    camera.position.lerp(cam.from, 1 - Math.exp(-delta * 4.5));
-    cam.target.lerp(cam.look, 1 - Math.exp(-delta * 4.5));
+    const ease = still ? 1 : 1 - Math.exp(-delta * 4.5);
+    camera.position.lerp(cam.from, ease);
+    cam.target.lerp(cam.look, ease);
     camera.lookAt(cam.target);
+
+    // Slow machine? Trade sharpness for smoothness instead of dropping frames.
+    if (!still && delta < 0.25 && t > 4) { // start-up frames are always slow, so they don't count
+      load.current.time += delta;
+      if (++load.current.frames === 45) {
+        const slow = load.current.time / 45 > 1 / 42;
+        if (slow && state.viewport.dpr > 0.75) state.setDpr(Math.max(0.75, state.viewport.dpr - 0.25));
+        load.current = { time: 0, frames: 0 };
+      }
+    }
   });
 
   return (
     <>
       <ambientLight intensity={0.35} />
-      <directionalLight
-        position={[-9, 7, -5]}
-        intensity={0.9}
-        castShadow
-        shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-30}
-        shadow-camera-right={30}
-        shadow-camera-top={14}
-        shadow-camera-bottom={-14}
-        shadow-camera-near={1}
-        shadow-camera-far={40}
-        shadow-radius={14}
-        shadow-bias={-0.0004}
-      />
+      <directionalLight position={[-9, 7, -5]} intensity={0.9} />
       <primitive object={parts.glow} />
       <primitive object={parts.shadow} />
       <primitive object={parts.root} />
@@ -558,17 +571,18 @@ function Scene({ world }: { world: LedgerState }) {
   );
 }
 
-export default function Ledger({ world }: { world: LedgerState }) {
+/** `still` draws one frame and stops: for pages where the object is a backdrop, not a story. */
+export default function Ledger({ world, still = false }: { world: LedgerState; still?: boolean }) {
   return (
     <Canvas
-      dpr={[1, 1.75]}
-      shadows="soft"
+      dpr={[1, 1.25]}
+      frameloop={still ? 'demand' : 'always'}
       flat
       camera={{ position: [0.6, -0.5, 17], fov: 28, near: 0.1, far: 120 }}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       aria-hidden="true"
     >
-      <Scene world={world} />
+      <Scene world={world} still={still} />
     </Canvas>
   );
 }

@@ -7,3 +7,13 @@ export function canUseWebGL() {
     return false;
   }
 }
+
+/** Run after the browser finishes its first work; returns a cancel function. */
+export function whenIdle(run: () => void) {
+  if ('requestIdleCallback' in window) {
+    const id = window.requestIdleCallback(run, { timeout: 1200 });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = setTimeout(run, 300); // Safari
+  return () => clearTimeout(id);
+}

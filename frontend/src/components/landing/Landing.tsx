@@ -8,12 +8,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import BillingDay from './BillingDay';
 import { LedgerMark } from '@/components/layout/LedgerMark';
 
-import { canUseWebGL } from './support';
+import { canUseWebGL, whenIdle } from './support';
 import { world } from './world';
 import LiveStats from './LiveStats';
 import MonthStrip from './MonthStrip';
@@ -51,10 +51,10 @@ function Logo() {
   );
 }
 
-function Words({ words }: { words: string[] }) {
-  return words.map((word) => (
+function Words({ words, first = 0 }: { words: string[]; first?: number }) {
+  return words.map((word, index) => (
     <span key={word} className="mr-[0.22em] inline-block overflow-hidden pb-[0.12em] align-bottom" aria-hidden="true">
-      <span data-word className="inline-block">{word}</span>
+      <span className="hero-word" style={{ '--i': first + index } as CSSProperties}>{word}</span>
     </span>
   ));
 }
@@ -65,9 +65,10 @@ export function Landing() {
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check only exists in the browser
-    setThree(!reduced && canUseWebGL());
     if (reduced) return;
+
+    // The page paints first; the 3D scene is heavy to set up, so it waits for a quiet moment.
+    const cancelIdle = whenIdle(() => setThree(canUseWebGL()));
 
     // Smooth scroll, driven by GSAP's ticker so ScrollTrigger stays in sync.
     const lenis = new Lenis({ autoRaf: false, lerp: 0.085 });
@@ -94,6 +95,7 @@ export function Landing() {
       });
     }
     return () => {
+      cancelIdle();
       cleanups.forEach((c) => c());
       gsap.ticker.remove(tick);
       lenis.destroy();
@@ -104,12 +106,6 @@ export function Landing() {
     () => {
       const mm = gsap.matchMedia();
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        // The opening: the headline rises into place, word by word.
-        gsap
-          .timeline({ defaults: { ease: 'expo.out' }, delay: 0.35 })
-          .from('[data-word]', { yPercent: 118, rotate: 3, duration: 1.5, stagger: 0.09 })
-          .from('[data-hero-fade]', { autoAlpha: 0, y: 22, duration: 1, stagger: 0.1 }, '-=0.95');
-
         // Leaving the hero, the type drifts up and away as the camera moves on.
         gsap.to('[data-hero-copy]', {
           yPercent: -16,
@@ -145,18 +141,21 @@ export function Landing() {
             end: n === 1 ? '+=700' : n === 6 ? 'top 5%' : 'top 15%',
             onUpdate: (self) => {
               world.morph = n - 1 + self.progress;
-              if (n === 6) world.form = 1 - self.progress; // and it scatters back into a galaxy
+              if (n === 6) world.form = 1 - Math.max(0, self.progress - 0.5) * 2; // it scatters back once the live numbers have passed
             },
           });
         });
 
         // The header steps aside while reading, and comes back when you scroll up.
         const header = root.current?.querySelector('header');
+        let hidden = false;
         ScrollTrigger.create({
           start: 'top top',
           end: 'max',
           onUpdate: (self) => {
             const hide = self.direction === 1 && self.scroll() > window.innerHeight * 0.6;
+            if (hide === hidden) return;
+            hidden = hide;
             gsap.to(header ?? [], { yPercent: hide ? -110 : 0, duration: 0.4, ease: 'power3.out', overwrite: 'auto' });
           },
         });
@@ -201,13 +200,13 @@ export function Landing() {
           <div data-hero-copy className="mx-auto w-full max-w-[1500px] px-4 pb-10 sm:px-10 lg:pb-0">
             <h1 id="hero-title" aria-label="Recurring revenue, kept in time." className="display max-w-[760px] text-[clamp(3.25rem,6.6vw,7rem)] font-bold leading-[0.96]">
               <span className="block"><Words words={LINE_ONE} /></span>
-              <span className="block"><Words words={LINE_TWO} /></span>
+              <span className="block"><Words words={LINE_TWO} first={LINE_ONE.length} /></span>
             </h1>
             <div className="mt-7 flex max-w-[560px] flex-col gap-7">
-              <p data-hero-fade className="max-w-[32rem] text-lg leading-relaxed text-[var(--l-text-2)]">
+              <p style={{ '--i': 0 } as CSSProperties} className="hero-fade max-w-[32rem] text-lg leading-relaxed text-[var(--l-text-2)]">
                 Plans, subscriptions, invoices and payments for businesses that earn every month, in one system that bills each period exactly once.
               </p>
-              <div data-hero-fade className="flex flex-wrap gap-3.5">
+              <div style={{ '--i': 1 } as CSSProperties} className="hero-fade flex flex-wrap gap-3.5">
                 <Link href="/login" className={primaryCta}>Open the live demo</Link>
                 <Link href="/signup" className={secondaryCta}>Create an account</Link>
               </div>

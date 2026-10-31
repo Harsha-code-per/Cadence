@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LedgerMark } from "@/components/layout/LedgerMark";
 import type { LedgerState } from "@/components/landing/Ledger";
-import { canUseWebGL } from "@/components/landing/support";
+import { canUseWebGL, whenIdle } from "@/components/landing/support";
 
 const Ledger = dynamic(() => import("@/components/landing/Ledger"), { ssr: false });
 
@@ -16,14 +16,14 @@ const scene: LedgerState = { morph: 0, sub: 0, track: 0.5, form: 1 };
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode }) {
   const [three, setThree] = useState(false);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check only exists in the browser
-    setThree(canUseWebGL() && !window.matchMedia("(prefers-reduced-motion: reduce)").matches && window.innerWidth >= 1024);
+    if (window.innerWidth < 1024 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    return whenIdle(() => setThree(canUseWebGL()));
   }, []);
 
   return (
     <div className="landing min-h-svh">
       <div className="stage" aria-hidden="true">
-        {three && <Ledger world={scene} />}
+        {three && <Ledger world={scene} still />}
       </div>
       <div className="relative z-10 mx-auto flex min-h-svh max-w-[1500px] flex-col px-4 py-6 sm:px-10">
         <Link href="/" className="flex w-fit items-center gap-2.5" aria-label="Cadence home">

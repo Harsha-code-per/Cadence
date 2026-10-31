@@ -7,7 +7,7 @@
 
 - **Audience**: Brightloop's admin, staff and finance lead (dense, all-day ERP use) and their customers (occasional portal visits).
 - **Primary job**: make "where does every subscription and every rupee stand right now?" answerable at a glance.
-- **Nod to the judges**: the base hue is **Odoo-adjacent aubergine**, and the accent is the **marigold highlighter** used in the problem statement PDF.
+- **Nod to the judges**: the base hue is **emerald on warm ivory**, light theme only, with mint-lime as a small accent.
 
 ## 2. Color tokens
 **Light theme only. No dark mode.** Tokens live in `frontend/src/app/globals.css` and are exposed through Tailwind's `@theme`, with the shadcn variables mapped onto them.
@@ -82,7 +82,7 @@ Copy rules: **sentence case everywhere**, no all-caps eyebrows, no "→" glued t
 │ [user ▾]   │                                                      │
 └────────────┴──────────────────────────────────────────────────────┘
 ```
-- **Sidebar**: `--ink` background (aubergine) in light mode, 248px, collapsible to icons. The active item has a **3px marigold bar** on the left (the app's one signature accent). Groups: *Workspace* (Overview, Customers, Subscriptions, Invoices, Payments), *Catalog* (Products, Plans, Discounts, Taxes, Quotation templates), *Admin* (Staff, Settings). Items hidden by role.
+- **Sidebar**: light surface, 248px, collapsible to icons. The active item has a **3px marigold bar** on the left (the app's one signature accent). Groups: *Workspace* (Overview, Customers, Subscriptions, Invoices, Payments), *Catalog* (Products, Plans, Discounts, Taxes, Quotation templates), *Admin* (Staff, Settings). Items hidden by role.
 - **Detail pages**: two columns at ≥1280px: main (lines, invoices) + 320px side rail (customer, dates, **CycleRing**, timeline).
 - **Portal**: no sidebar; a top bar with the customer's company name; cards for each subscription with a CycleRing; invoice list below.
 - **Mobile (<768px)**: the sidebar becomes a sheet; tables become stacked rows showing number, customer, status and amount.
@@ -101,14 +101,14 @@ Top row: four KPI tiles (Active subscriptions · MRR · Collected this month · 
 ## 7. Landing page (M1), the one place we spend boldness
 Libraries (landing only, lazy-loaded): **React Three Fiber + three**, **GSAP + ScrollTrigger**, **Lenis**.
 
-1. **Hero: "the cycle dial."** Full-viewport aubergine. On the right, a WebGL dial of four concentric orbit rings (daily, weekly, monthly, yearly). Hundreds of small particles (subscriptions) orbit at speeds proportional to their real cycle, and a **marigold sweep hand** rotates. When it passes a particle, that particle flashes (an invoice is issued) and a tiny counter increments. On the left, left-aligned: headline in Bricolage hero size: **"Recurring revenue, kept in time."** Sub: "Plans, subscriptions, invoices and payments for businesses that earn every month, in one system." Buttons: "Open the live demo" (primary marigold on ink) and "Create an account". One orchestrated load: the rings draw in, then the hand starts. That's the only autoplay motion on the page.
+1. **Hero: a galaxy of invoices.** Full-viewport ivory. A spiral of particles, one per loose invoice, collapses into a glass ledger of twelve invoices as you scroll: scattered billing becoming one exact record. The ledger then fans out, lines up as a year, flips through billing day, rises as revenue bars and scatters back into a galaxy behind the closing CTA.
 2. **"A month at Brightloop"**: a pinned horizontal scroll through the brief's real sequence (numbering is honest here because it is a timeline): *Day 1 a customer signs up → Day 3 a new plan launches → Day 8 a quote becomes a subscription → Day 15 billing day → Day 18 a better price → Day 22 the money comes in → Day 30 the finance lead's view.* Each panel shows a real UI fragment (actual React components with demo data, not screenshots) and one sentence.
 3. **"Money that can't go wrong."** The database guarantees shown typographically: the actual partial unique index SQL and CHECK constraints set large on `--ink`, each with a one-line plain-English caption ("A billing period can never be invoiced twice."). This speaks directly to the judges.
 4. **Three roles**: admin, staff, customer, each with what they can do.
 5. **Live band**: real numbers from `GET /api/public/stats/` (active subscriptions, invoices issued, MRR). Real dynamic data, not static JSON.
 6. **Closing CTA** + a minimal footer (team names, GitHub).
 
-Quality floor: responsive down to 360px (the hero dial moves behind the text at 30% opacity on mobile), keyboard focus visible, `prefers-reduced-motion` → static SVG dial + no pinning, WebGL fallback to SVG, Lighthouse performance ≥ 85.
+Quality floor: responsive down to 360px (the object sits above the headline on phones and fades after the hero), keyboard focus visible, `prefers-reduced-motion` → static SVG dial + no pinning, WebGL fallback to SVG, Lighthouse performance ≥ 85.
 
 ## 8. Implementation notes (M2)
 - `next/font/google`: `Bricolage_Grotesque` (variable `--font-display`), `IBM_Plex_Sans` (400/500/600, `--font-sans`).
@@ -127,7 +127,7 @@ Quality floor: responsive down to 360px (the hero dial moves behind the text at 
 Claude Design canvas: https://claude.ai/artifact/FWF3YVnpekm2kSAtVxTcUt (private until M1 shares it; ask in chat). Four artboards:
 - **Design system**: palette, type, status badges, actions, CycleRing, shape and space
 - **Landing page**: hero cycle dial, the "month at Brightloop" strip, DB guarantees, roles, live band, CTA
-- **App · Subscriptions**: sidebar with the marigold active bar, filter pills, data table
+- **App · Subscriptions**: sidebar with the emerald active bar, filter pills, data table
 - **App · Finance dashboard**: KPI tiles, invoiced vs collected, overdue list with "Record payment"
 
 Where the canvas and this file disagree, **this file wins**.

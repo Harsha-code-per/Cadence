@@ -1,4 +1,5 @@
 "use client";
+import { ActiveBadge } from "@/components/data/StatusBadge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { CatalogPage } from "@/components/data/CatalogPage";
@@ -13,7 +14,7 @@ type Term = components["schemas"]["PaymentTerm"];
 const taxColumns: ColumnDef<Tax, unknown>[] = [
   { accessorKey: "name", header: "Name" },
   { accessorKey: "rate", header: "Rate", meta: { align: "right" }, cell: ({ row }) => formatPercent(row.original.rate) },
-  { accessorKey: "is_active", header: "Status", cell: ({ row }) => (row.original.is_active ? "Active" : "Inactive") },
+  { accessorKey: "is_active", header: "Status", cell: ({ row }) => <ActiveBadge active={!!row.original.is_active} /> },
 ];
 const taxFields: FieldDef[] = [
   { name: "name", label: "Name", kind: "text", required: true },

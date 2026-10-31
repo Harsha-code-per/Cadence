@@ -1,4 +1,5 @@
 "use client";
+import { ActiveBadge } from "@/components/data/StatusBadge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { CatalogPage } from "@/components/data/CatalogPage";
@@ -28,7 +29,7 @@ const columns: ColumnDef<Discount, unknown>[] = [
     meta: { align: "right" },
     cell: ({ row }) => `${row.original.times_used}${row.original.usage_limit ? ` / ${row.original.usage_limit}` : ""}`,
   },
-  { accessorKey: "is_active", header: "Status", cell: ({ row }) => (row.original.is_active ? "Active" : "Inactive") },
+  { accessorKey: "is_active", header: "Status", cell: ({ row }) => <ActiveBadge active={!!row.original.is_active} /> },
 ];
 
 export default function DiscountsPage() {

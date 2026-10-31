@@ -27,6 +27,20 @@ type Breakdown = { subscriptions?: Record<string, number>; invoices?: Record<str
 type OverdueInvoice = { id: number; number: string; customer?: { name: string; company?: string }; outstanding?: string };
 type Plan = components["schemas"]["Plan"];
 
+// Status → token, per docs/DESIGN.md "Status mapping" (never generic chart colours: green must mean active/paid).
+const STATUS_COLOR: Record<string, string> = {
+  draft: "var(--slate)",
+  quotation: "var(--plum)",
+  confirmed: "var(--plum)",
+  active: "var(--teal)",
+  paid: "var(--teal)",
+  paused: "var(--amber)",
+  closed: "var(--ink-3)",
+  cancelled: "var(--ink-3)",
+  overdue: "var(--rose)",
+};
+const colorOf = (status: string) => STATUS_COLOR[status] ?? "var(--slate)";
+
 const selectCls =
   "h-11 rounded-md border border-input bg-surface px-3 text-sm focus-visible:outline-2 focus-visible:outline-ring";
 
@@ -126,15 +140,15 @@ export default function DashboardPage() {
                   return (
                     <div key={k} className="flex flex-col gap-2">
                       <span className="text-ink-2">{k === "subscriptions" ? "Subscriptions" : "Invoices"}</span>
-                      <div className="flex h-2 overflow-hidden rounded-full bg-line" role="img" aria-label={`${k} by status`}>
-                        {rows.map(([status, n], i) => (
-                          <span key={status} style={{ width: `${(n / total) * 100}%`, background: `var(--chart-${(i % 5) + 1})` }} title={`${status}: ${n}`} />
+                      <div className="flex h-2 gap-px overflow-hidden rounded-full bg-line" role="img" aria-label={`${k} by status`}>
+                        {rows.map(([status, n]) => (
+                          <span key={status} style={{ width: `${(n / total) * 100}%`, background: colorOf(status) }} title={`${status}: ${n}`} />
                         ))}
                       </div>
                       <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
-                        {rows.map(([status, n], i) => (
+                        {rows.map(([status, n]) => (
                           <li key={status} className="inline-flex items-center gap-1.5">
-                            <span aria-hidden className="size-2 rounded-full" style={{ background: `var(--chart-${(i % 5) + 1})` }} />
+                            <span aria-hidden className="size-2 rounded-full" style={{ background: colorOf(status) }} />
                             <span className="capitalize">{status}</span> <span className="tabular-nums text-ink-2">{n.toLocaleString("en-IN")}</span>
                           </li>
                         ))}

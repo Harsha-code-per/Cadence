@@ -1,4 +1,5 @@
 "use client";
+import { ActiveBadge } from "@/components/data/StatusBadge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Layers, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -72,7 +73,7 @@ export default function ProductsPage() {
       { accessorKey: "sales_price", header: "Sales price", meta: { align: "right" }, cell: ({ row }) => <Money value={row.original.sales_price} /> },
       { accessorKey: "cost_price", header: "Cost", meta: { align: "right" }, cell: ({ row }) => <Money value={row.original.cost_price} /> },
       { id: "variants", header: "Variants", meta: { align: "right" }, cell: ({ row }) => row.original.variants.length },
-      { accessorKey: "is_active", header: "Status", cell: ({ row }) => (row.original.is_active ? "Active" : "Inactive") },
+      { accessorKey: "is_active", header: "Status", cell: ({ row }) => <ActiveBadge active={!!row.original.is_active} /> },
     ],
     [],
   );

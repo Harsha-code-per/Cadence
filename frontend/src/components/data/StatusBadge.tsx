@@ -43,3 +43,8 @@ export function StatusBadge({
     </span>
   );
 }
+
+/** Catalog on/off state: teal "Active" or slate "Inactive", dot plus label. */
+export function ActiveBadge({ active }: { active: boolean }) {
+  return <StatusBadge domain="subscription" status={active ? "active" : "closed"} label={active ? "Active" : "Inactive"} />;
+}

@@ -8,7 +8,12 @@ const nextConfig: NextConfig = {
   },
   // Same-origin API in every environment: the browser never sees the Django host.
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${process.env.API_URL ?? "http://localhost:8000"}/api/:path*` }];
+    const api = process.env.API_URL ?? "http://localhost:8000";
+    // :path* drops the trailing slash Django requires, so match the slashed form first.
+    return [
+      { source: "/api/:path*/", destination: `${api}/api/:path*/` },
+      { source: "/api/:path*", destination: `${api}/api/:path*` },
+    ];
   },
 };
 

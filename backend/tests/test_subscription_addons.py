@@ -97,6 +97,14 @@ def test_non_addon_refused(owner, subscription):
     )
 
 
+@pytest.mark.parametrize("role", ["admin", "staff"])
+def test_internal_users_can_manage_addons(api, make_user, subscription, addon, role):
+    api.force_authenticate(make_user(f"{role}@example.test", role=role))
+    url = f"/api/subscriptions/{subscription.pk}/addons/"
+    assert api.post(url, {"product": addon.pk}, format="json").status_code == 204
+    assert api.delete(f"{url}{addon.pk}/").status_code == 204
+
+
 def test_other_customer_cannot_access_addons(api, make_user, subscription, addon):
     api.force_authenticate(make_user("other@example.test"))
     url = f"/api/subscriptions/{subscription.pk}/addons/"

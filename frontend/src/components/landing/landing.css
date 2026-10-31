@@ -1,24 +1,29 @@
-/* Landing-only palette: always aubergine, independent of the app's light/dark theme. */
+/* Landing and auth: their own palette, independent of the app's light/dark theme.
+   Aubergine and marigold, treated as light: night violet, rose, ember, gold, cream. */
 .landing {
-  --l-bg: #2a1730;
-  --l-raised: #3a2540;
-  --l-line: #4a2f52;
-  --l-line-strong: #5a3f62;
-  --l-text: #f3eef5;
-  --l-text-2: #d9cedd;
-  --l-text-3: #b9aec0;
-  --l-marigold: #f2ae2e;
-  --l-marigold-text: #f2b84b;
+  --l-night: #0f0618;
+  --l-bg: #1b0c26;
+  --l-raised: rgb(255 255 255 / 0.06);
+  --l-line: rgb(255 255 255 / 0.14);
+  --l-line-strong: rgb(255 255 255 / 0.28);
+  --l-text: #fbf6ff;
+  --l-text-2: #e2d6ea;
+  --l-text-3: #bdafc8;
+  --l-rose: #ff5c93;
+  --l-ember: #ff7838;
+  --l-marigold: #ffc247;
+  --l-marigold-text: #ffcf70;
   --l-mist: #f3f1f6;
   --l-ink: #2a1730;
-  background: var(--l-bg);
+  position: relative;
+  background: var(--l-night);
   color: var(--l-text);
   font-family: var(--font-plex), system-ui, sans-serif;
 }
 
 .landing .display {
   font-family: var(--font-bricolage), var(--font-plex), sans-serif;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
 }
 
 .landing :focus-visible {
@@ -31,8 +36,52 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The world sits behind everything. The gradient is the first paint and the fallback
+   for reduced motion or no WebGL, so the page always has its sunrise. */
+.cosmos {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(90% 70% at 72% 108%, #fff1d6 0%, #ffc247 9%, #ff7838 22%, #d42a62 40%, #5a1a6e 62%, transparent 82%),
+    linear-gradient(180deg, #0f0618 0%, #1b0c26 100%);
+}
+.cosmos canvas {
+  animation: cosmos-in 1.8s ease-out both;
+}
+@keyframes cosmos-in {
+  from { opacity: 0; }
+}
+
+/* Frosted panels: the scene stays visible through them. */
+.glass {
+  background: rgb(24 10 34 / 0.58);
+  border: 1px solid var(--l-line);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
+}
+
+.landing .lift {
+  text-shadow: 0 2px 28px rgb(15 6 24 / 0.65);
+}
+
+.landing header {
+  transition: color 0.4s ease;
+}
+.landing.is-day header {
+  color: var(--l-ink);
+}
+
+/* The finale is gold. Without the scene, the section paints the gold itself. */
+.landing.no-cosmos .finale {
+  background: linear-gradient(180deg, #ffc247, #ffe6a8);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing * {
     scroll-behavior: auto !important;
+  }
+  .cosmos canvas {
+    animation: none;
   }
 }

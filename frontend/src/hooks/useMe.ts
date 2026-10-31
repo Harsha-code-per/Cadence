@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
 
 export type Role = "admin" | "staff" | "customer";
-export type Me = { id: number; email: string; full_name: string; role: Role; customer_id: number | null };
+export type Me = { id: number; email: string; full_name: string; role: Role; customer_id: number | null; is_demo: boolean };
 
 export function useMe() {
   return useQuery({

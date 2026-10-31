@@ -37,7 +37,7 @@ export function ForgotForm() {
       title="Reset your password"
       subtitle="Enter the email you signed up with and we'll send you a secure link. It works once and expires in an hour."
       footer={
-        <Link href="/login" className="font-medium text-plum underline-offset-4 hover:underline">
+        <Link href="/login" className="font-medium text-[var(--l-marigold-text)] underline-offset-4 hover:underline">
           Back to log in
         </Link>
       }
@@ -53,7 +53,7 @@ export function ForgotForm() {
             <Field label="Email" error={errors.email?.message}>
               <Input type="email" autoComplete="email" autoFocus className="h-11" aria-invalid={!!errors.email} {...register("email")} />
             </Field>
-            <Button type="submit" className="h-11 w-full text-[15px]" disabled={isSubmitting}>
+            <Button type="submit" className="h-11 w-full bg-[var(--l-marigold)] text-[15px] font-semibold text-[#2a1730] hover:bg-[#ffd47a]" disabled={isSubmitting}>
               {isSubmitting ? "Sending…" : "Send reset link"}
             </Button>
           </form>

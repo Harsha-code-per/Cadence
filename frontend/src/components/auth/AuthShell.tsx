@@ -1,42 +1,46 @@
-import Link from "next/link";
-import { CycleMark } from "@/components/layout/CycleMark";
+"use client";
+import "@/components/landing/landing.css";
 
-/** Split auth layout: brand panel (hidden on small screens) + a calm, single-column form. */
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { CycleMark } from "@/components/layout/CycleMark";
+import type { CosmosState } from "@/components/landing/Cosmos";
+import { canUseWebGL } from "@/components/landing/support";
+
+const Cosmos = dynamic(() => import("@/components/landing/Cosmos"), { ssr: false });
+
+/** The landing page's opening shot, held still: the eclipse behind a frosted card. */
+const scene: CosmosState = { morph: 0, sun: 0.17, glow: 0.9 };
+
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode }) {
+  const [cosmos, setCosmos] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check only exists in the browser
+    setCosmos(canUseWebGL() && !window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
   return (
-    <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
-      <aside className="relative hidden overflow-hidden bg-[#2a1730] p-12 text-[#f3eef5] lg:flex lg:flex-col lg:justify-between">
-        <Link href="/" className="flex items-center gap-2.5 text-[#f3eef5]" aria-label="Cadence home">
-          <CycleMark size={32} />
-          <span className="font-display text-2xl font-bold tracking-tight">Cadence</span>
+    <div className="landing dark min-h-svh">
+      <div className="cosmos" aria-hidden="true">
+        {cosmos && <Cosmos world={scene} density={0.6} />}
+      </div>
+      <div className="relative z-10 mx-auto flex min-h-svh max-w-[1500px] flex-col px-4 py-6 sm:px-10">
+        <Link href="/" className="flex w-fit items-center gap-2.5" aria-label="Cadence home">
+          <CycleMark size={30} />
+          <span className="display text-[22px] font-bold">Cadence</span>
         </Link>
-        <svg viewBox="0 0 400 400" className="pointer-events-none absolute -right-24 top-1/2 w-[520px] -translate-y-1/2 opacity-60" aria-hidden>
-          {[180, 135, 90, 48].map((r) => (
-            <circle key={r} cx="200" cy="200" r={r} fill="none" stroke="#5a3f62" strokeWidth="1.2" />
-          ))}
-          <path d="M200 200 L200 20 A180 180 0 0 1 327 73 Z" fill="#f2ae2e" opacity="0.08" />
-          <line x1="200" y1="200" x2="327" y2="73" stroke="#f2ae2e" strokeWidth="2.5" strokeLinecap="round" className="origin-center motion-safe:animate-[spin_24s_linear_infinite]" style={{ transformOrigin: "200px 200px" }} />
-          <circle cx="200" cy="200" r="6" fill="#f2ae2e" />
-        </svg>
-        <blockquote className="relative max-w-sm space-y-4">
-          <p className="font-display text-4xl font-bold leading-[1.05] tracking-tight">Every subscription, billed exactly once.</p>
-          <p className="text-[15px] leading-relaxed text-[#d9cedd]">Plans, quotes, invoices and payments for Brightloop, in one place, with the numbers always up to date.</p>
-        </blockquote>
-      </aside>
-      <main className="flex items-center justify-center bg-canvas px-4 py-12 sm:px-8">
-        <div className="w-full max-w-[420px] space-y-8">
-          <Link href="/" className="flex items-center gap-2 text-ink lg:hidden" aria-label="Cadence home">
-            <CycleMark size={28} />
-            <span className="font-display text-xl font-bold">Cadence</span>
-          </Link>
-          <header className="space-y-2">
-            <h1 className="font-display text-[32px] font-semibold leading-tight tracking-tight text-ink">{title}</h1>
-            {subtitle && <p className="text-[15px] leading-relaxed text-ink-2">{subtitle}</p>}
-          </header>
-          {children}
-          {footer && <div className="text-sm text-ink-2">{footer}</div>}
-        </div>
-      </main>
+        <main className="flex flex-1 items-center py-8">
+          <div className="glass w-full max-w-[460px] space-y-7 rounded-3xl p-7 shadow-[0_40px_120px_-30px_rgb(15_6_24/0.9)] sm:p-9">
+            <header className="space-y-2">
+              <h1 className="display text-[34px] font-bold leading-tight">{title}</h1>
+              {subtitle && <p className="text-[15px] leading-relaxed text-[var(--l-text-2)]">{subtitle}</p>}
+            </header>
+            {children}
+            {footer && <div className="text-sm text-[var(--l-text-2)]">{footer}</div>}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

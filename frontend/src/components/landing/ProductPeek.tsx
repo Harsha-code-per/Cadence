@@ -43,18 +43,18 @@ export default function ProductPeek() {
   );
 
   return (
-    <section ref={root} aria-labelledby="peek-title" className="overflow-hidden py-28">
-      <div className="mx-auto max-w-7xl px-4 sm:px-10">
-        <h2 id="peek-title" className="display max-w-3xl text-4xl font-bold leading-[1.02] sm:text-6xl">
+    <section ref={root} data-chapter="4" aria-labelledby="peek-title" className="overflow-hidden py-40">
+      <div className="mx-auto max-w-[1500px] px-4 sm:px-10">
+        <h2 id="peek-title" className="display lift max-w-4xl text-[clamp(2.75rem,6.4vw,6.5rem)] font-bold leading-[0.98]">
           The month-end report, already written
         </h2>
-        <p className="mt-4 max-w-xl text-lg leading-relaxed text-[var(--l-text-2)]">
+        <p className="lift mt-5 max-w-xl text-lg leading-relaxed text-[var(--l-text-2)]">
           Recurring revenue, cash collected and what&rsquo;s overdue, kept separate and always current. Every page answers in well under two seconds.
         </p>
-        <div data-panel className="mt-14 rounded-[20px] border border-[var(--l-line)] bg-[#17101a] p-5 shadow-[0_40px_120px_-40px_rgb(242_174_46/0.25)] sm:p-7" aria-hidden="true">
+        <div data-panel className="glass mt-16 rounded-3xl p-5 shadow-[0_50px_140px_-40px_rgb(255_120_56/0.45)] sm:p-7" aria-hidden="true">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {KPIS.map(([label, value, delta, color]) => (
-              <div key={label} className="rounded-[10px] border border-[var(--l-raised)] bg-[#211826] p-4">
+              <div key={label} className="rounded-[10px] bg-white/[0.06] p-4">
                 <p className="text-[13px] text-[var(--l-text-3)]">{label}</p>
                 <p className="display num mt-1.5 text-3xl font-semibold">{value}</p>
                 <p className="mt-1 text-[12px]" style={{ color }}>{delta}</p>
@@ -62,7 +62,7 @@ export default function ProductPeek() {
             ))}
           </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-[2fr_1fr]">
-            <div className="rounded-[10px] border border-[var(--l-raised)] bg-[#211826] p-4">
+            <div className="rounded-[10px] bg-white/[0.06] p-4">
               <p className="mb-4 text-sm font-medium">Invoiced and collected</p>
               <div className="flex h-40 items-end gap-2">
                 {BARS.map((h, i) => (
@@ -73,7 +73,7 @@ export default function ProductPeek() {
                 ))}
               </div>
             </div>
-            <div className="rounded-[10px] border border-[var(--l-raised)] bg-[#211826] p-4 text-[13px]">
+            <div className="rounded-[10px] bg-white/[0.06] p-4 text-[13px]">
               <p className="mb-3 text-sm font-medium">Overdue, by age</p>
               {[
                 ['1–7 days', 46, '₹1.2 L'],
@@ -86,7 +86,7 @@ export default function ProductPeek() {
                     <span className="text-[var(--l-text-2)]">{label}</span>
                     <span className="num">{amount}</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-[var(--l-raised)]">
+                  <div className="h-1.5 rounded-full bg-white/10">
                     <div className="h-full rounded-full bg-[#f07088]" style={{ width: `${pct}%` }} />
                   </div>
                 </div>

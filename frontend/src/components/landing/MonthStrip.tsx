@@ -136,19 +136,20 @@ export default function MonthStrip() {
     <section
       ref={section}
       id="month"
+      data-chapter="1"
       aria-labelledby="month-title"
-      className="overflow-hidden border-t border-[var(--l-raised)] py-24 md:flex md:min-h-screen md:flex-col md:justify-center"
+      className="overflow-hidden py-24 md:flex md:min-h-screen md:flex-col md:justify-center"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-10">
-        <h2 id="month-title" className="display max-w-3xl text-4xl font-bold leading-[1.02] sm:text-6xl">
+      <div className="mx-auto w-full max-w-[1500px] px-4 sm:px-10">
+        <h2 id="month-title" className="display lift max-w-4xl text-[clamp(2.5rem,5.4vw,5.5rem)] font-bold leading-[1]">
           A month at Brightloop, without the spreadsheet
         </h2>
-        <p className="mt-4 max-w-xl text-lg leading-relaxed text-[var(--l-text-2)]">
+        <p className="lift mt-4 max-w-xl text-lg leading-relaxed text-[var(--l-text-2)]">
           One billing month, scene by scene: each problem the team faced, and the screen that now handles it.
         </p>
         <div className="mt-8 hidden items-center gap-4 text-sm text-[var(--l-text-3)] md:flex" aria-hidden="true">
           <span>Day 1</span>
-          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-[var(--l-raised)]">
+          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/15">
             <div ref={progress} className="h-full origin-left scale-x-0 bg-[var(--l-marigold)]" />
           </div>
           <span>Day 30</span>
@@ -161,7 +162,7 @@ export default function MonthStrip() {
         {SCENES.map((scene) => (
           <li
             key={scene.day}
-            className="flex w-[300px] shrink-0 snap-start flex-col gap-4 rounded-[20px] bg-[var(--l-raised)] p-7 sm:w-[340px]"
+            className="glass flex w-[300px] shrink-0 snap-start flex-col gap-4 rounded-3xl p-7 sm:w-[350px]"
           >
             <span className="display text-4xl font-bold text-[var(--l-marigold)]">Day {scene.day}</span>
             <h3 className="text-xl font-semibold">{scene.title}</h3>

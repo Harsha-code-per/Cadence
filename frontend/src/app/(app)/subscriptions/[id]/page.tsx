@@ -10,6 +10,7 @@ import { CycleRing } from "@/components/data/CycleRing";
 import { DateText, Money } from "@/components/data/Money";
 import { StatusBadge } from "@/components/data/StatusBadge";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { InvoiceNow } from "@/components/subscriptions/InvoiceNow";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { api, type Paginated } from "@/lib/api";
@@ -240,6 +241,7 @@ export default function SubscriptionDetailPage() {
           </div>
         </section>
       )}
+      <InvoiceNow subscriptionId={id} status={sub.status} />
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex min-w-0 flex-col gap-5">
           <Panel id="overview-heading" title="Overview">

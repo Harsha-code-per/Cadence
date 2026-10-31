@@ -352,3 +352,24 @@ Indexes: `(invoice_id)`, `(payment_date)`.
 4. **No drifting counters**: discount usage = `COUNT(redemptions)`; overdue = derived from `due_date`.
 5. **Hot paths are indexed for the exact query**: partial indexes for "due today" and "open invoices"; composite `(customer_id, date DESC)` for portal lists.
 6. **Gapless numbering** with row-locked sequences, which matches accounting expectations.
+
+## Query plans
+
+Measured on PostgreSQL 17 in the GitHub Actions service on 31 October 2026,
+after `seed_demo --subscriptions 5000` and `ANALYZE`: 5,000 subscriptions and
+18,032 invoices. These are single `EXPLAIN (ANALYZE, BUFFERS)` execution times,
+not HTTP timings; results vary with data distribution and cache state.
+
+| Query | Observed plan | Execution time |
+|---|---|---:|
+| Billing runner: due, activate or expire, ordered by id, `LIMIT 500 FOR UPDATE OF` subscription `SKIP LOCKED` | Sequential scan on subscriptions and the five-row plan table | 0.978 ms |
+| Active due subscriptions, including the expiration guard | Bitmap index scan on `idx_sub_due` | 0.177 ms |
+| Confirmed invoices with `due_date < 2026-10-31` | Bitmap index scan on `idx_inv_status_date`, then a due-date filter | 2.515 ms |
+| Subscription search for `SUB/2026/00001` (number, customer name or company contains), limit 20 | Sequential scans on subscriptions and customers | 4.081 ms |
+
+The subscription search measurement models its search predicate and limit; it
+does not include every selected relation or the pagination count. Its `OR`
+spans two tables, so an index on subscription number alone does not establish
+that the combined search can use it. Search indexing and the runner's combined
+predicate need further measurement on a larger dataset before claiming they use
+an index. These figures do not establish the API's two-second target.

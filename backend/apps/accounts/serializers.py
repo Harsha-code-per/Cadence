@@ -33,6 +33,12 @@ class SignupSerializer(serializers.Serializer):
         clean = value.strip().lower()
         if User.objects.filter(email__iexact=clean).exists():
             raise serializers.ValidationError("An account with this email already exists.")
+        if Customer.objects.filter(email__iexact=clean, user__isnull=True).exists():
+            # Linking here would let anyone claim a company's records just by typing its email.
+            raise serializers.ValidationError(
+                "This email is already a Brightloop customer. Use “Forgot password” to set up "
+                "your login. We'll email you a secure link."
+            )
         return clean
 
     def validate_password(self, value: str) -> str:
@@ -41,6 +47,14 @@ class SignupSerializer(serializers.Serializer):
         except DjangoValidationError as exc:
             raise serializers.ValidationError(list(exc.messages)) from exc
         return value
+
+    def validate(self, attrs):
+        probe = User(email=attrs.get("email", ""), full_name=attrs.get("full_name", ""))
+        try:  # second pass with the user's details so "too similar to your name/email" applies
+            password_validation.validate_password(attrs["password"], probe)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": list(exc.messages)}) from exc
+        return attrs
 
     @transaction.atomic
     def create(self, validated_data) -> User:
@@ -152,6 +166,11 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
         fields = ["id", "email", "full_name", "role", "is_active"]
         read_only_fields = ["id", "email"]
 
+    def update(self, instance, validated_data):
+        if "role" in validated_data:  # Django admin-site access follows the admin role
+            instance.is_staff = validated_data["role"] == Role.ADMIN
+        return super().update(instance, validated_data)
+
 
 class CustomerSerializer(serializers.ModelSerializer):
     assigned_staff_name = serializers.CharField(source="assigned_staff.full_name", read_only=True)
@@ -171,7 +190,8 @@ class CustomerSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        # Portal logins are linked only by signup or a verified reset-link claim, never by hand.
+        read_only_fields = ["id", "user", "created_at", "updated_at"]
 
     def validate_email(self, value: str) -> str:
         clean = value.strip().lower()

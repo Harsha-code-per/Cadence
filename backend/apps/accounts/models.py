@@ -39,6 +39,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.CUSTOMER)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, help_text="Can open the Django admin site.")
+    is_demo = models.BooleanField(
+        default=False,
+        help_text="Public demo login: may read everything its role can, change nothing.",
+    )
     date_joined = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()

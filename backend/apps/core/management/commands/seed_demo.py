@@ -17,6 +17,7 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
 from dateutil.relativedelta import relativedelta
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -135,6 +136,7 @@ class Command(BaseCommand):
         catalog = self._catalog(today)
         customers = self._customers(max(20, subscriptions // 3), users, rng)
         self._subscriptions(subscriptions, customers, catalog, users, today, rng)
+        call_command("create_demo_accounts", verbosity=0)
         self.stdout.write(
             self.style.SUCCESS(
                 f"Seeded {Subscription.objects.count()} subscriptions, "

@@ -99,7 +99,10 @@ class LoginView(APIView):
 
         user = authenticate(request, username=email, password=password)
         if user is None:
-            cache.set(key, cache.get(key, 0) + 1, LOCKOUT_SECONDS)
+            # A public demo login has no secret to protect, and locking it would let
+            # anyone shut judges out of the demo.
+            if not User.objects.filter(email__iexact=email, is_demo=True).exists():
+                cache.set(key, cache.get(key, 0) + 1, LOCKOUT_SECONDS)
             candidate = User.objects.filter(email__iexact=email).first()
             if candidate and candidate.check_password(password) and not candidate.is_active:
                 raise DomainError(

@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import filters, status, viewsets
+from rest_framework import serializers as drf_serializers
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -27,6 +29,17 @@ from apps.core.permissions import InternalOrCustomerReadOnly, IsAdmin
 class CsrfView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                name="CsrfResponse",
+                fields={
+                    "status": drf_serializers.CharField(),
+                    "csrf_token": drf_serializers.CharField(),
+                },
+            )
+        }
+    )
     def get(self, request):
         token = get_token(request)
         return Response({"status": "ok", "csrf_token": token})
@@ -37,6 +50,7 @@ class SignupView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "auth"
 
+    @extend_schema(request=SignupSerializer, responses={201: UserSerializer})
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -51,6 +65,7 @@ class LoginView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "auth"
 
+    @extend_schema(request=LoginSerializer, responses={200: UserSerializer})
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -79,6 +94,9 @@ class LoginView(APIView):
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None, responses={204: OpenApiResponse(description="Logged out successfully")}
+    )
     def post(self, request):
         audit.record(request.user, "user.logout", request.user)
         logout(request)
@@ -88,6 +106,7 @@ class LogoutView(APIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: UserSerializer})
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
@@ -97,6 +116,10 @@ class PasswordResetView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "password_reset"
 
+    @extend_schema(
+        request=PasswordResetRequestSerializer,
+        responses={204: OpenApiResponse(description="Reset link sent if user exists")},
+    )
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -110,6 +133,10 @@ class PasswordResetConfirmView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "password_reset"
 
+    @extend_schema(
+        request=PasswordResetConfirmSerializer,
+        responses={204: OpenApiResponse(description="Password reset confirmed")},
+    )
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -120,6 +147,10 @@ class PasswordResetConfirmView(APIView):
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=ChangePasswordSerializer,
+        responses={204: OpenApiResponse(description="Password changed successfully")},
+    )
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

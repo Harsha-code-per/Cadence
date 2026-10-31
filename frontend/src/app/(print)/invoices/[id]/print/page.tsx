@@ -107,7 +107,21 @@ export default function InvoicePrintPage() {
               </p>
             </div>
           </section>
-          <div className="overflow-x-auto">
+          <div className="divide-y divide-slate-200 sm:hidden print:hidden">
+            {invoice.data.lines.map((line) => (
+              <div key={line.id} className="space-y-2 py-3 text-sm">
+                <p className="break-words font-medium">{line.description}</p>
+                {line.taxes.map((tax) => <p key={tax.id} className="text-xs text-slate-600">{tax.name.includes("%") ? tax.name : `${tax.name} (${tax.rate}%)`}: <Money value={tax.amount} /></p>)}
+                <dl className="grid grid-cols-2 gap-2">
+                  <div><dt className="text-xs text-slate-600">Qty</dt><dd>{line.quantity}</dd></div>
+                  <div><dt className="text-xs text-slate-600">Unit price</dt><dd><Money value={line.unit_price} /></dd></div>
+                  <div><dt className="text-xs text-slate-600">Discount</dt><dd><Money value={line.discount_amount} /></dd></div>
+                  <div><dt className="text-xs text-slate-600">Total</dt><dd><Money value={line.total} /></dd></div>
+                </dl>
+              </div>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto sm:block print:block">
             <table className="w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-y border-slate-300">

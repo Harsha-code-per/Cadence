@@ -112,7 +112,7 @@ export default function SubscriptionBoardPage() {
         }
       />
 
-      <div className="-mx-4 flex min-h-0 flex-1 gap-4 overflow-x-auto px-4 pb-4 md:-mx-6 md:px-6" role="list" aria-label="Subscription stages">
+      <div className="grid min-w-0 grid-cols-1 items-start gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6" role="list" aria-label="Subscription stages">
         {STAGES.map((stage) => {
           const canDrop = !!dragging && !!moveFor(dragging, stage.status);
           return (
@@ -133,7 +133,7 @@ export default function SubscriptionBoardPage() {
                 setOver(null);
               }}
               className={cn(
-                "flex w-[296px] shrink-0 flex-col rounded-[10px] border bg-surface/60 transition-colors",
+                "flex min-w-0 flex-col rounded-[10px] border bg-surface/60 transition-colors",
                 dragging && !canDrop && dragging.status !== stage.status && "opacity-55",
                 canDrop && "border-dashed border-brand/60",
                 over === stage.status && "border-solid border-brand bg-brand-soft/60",
@@ -148,7 +148,7 @@ export default function SubscriptionBoardPage() {
                     {totals[stage.status]?.count?.toLocaleString("en-IN") ?? "…"}
                   </span>
                 </div>
-                <p className="flex items-baseline justify-between gap-2 text-xs text-ink-2">
+                <p className="flex flex-wrap items-baseline justify-between gap-2 text-xs text-ink-2">
                   <span>{stage.hint}</span>
                   <span className="tabular-nums font-medium text-ink">{totals[stage.status] ? `${formatMoneyCompact(totals[stage.status]!.recurring_value)}/cycle` : ""}</span>
                 </p>
@@ -243,7 +243,7 @@ function Column({
   const cards = list.data.results;
 
   return (
-    <ul className="flex min-h-24 flex-1 flex-col gap-2 overflow-y-auto p-2.5" aria-label={`${stage} subscriptions`}>
+    <ul className="flex max-h-[26rem] min-h-24 flex-col gap-2 overflow-y-auto p-2.5" aria-label={`${stage} subscriptions`}>
       {cards.length === 0 && <li className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-ink-2">Nothing here right now.</li>}
       {cards.map((card) => (
         <SubscriptionCard key={card.id} card={card} onDragStart={onDragStart} onDragEnd={onDragEnd} onMove={onMove} pending={pending === card.id} />
@@ -292,9 +292,9 @@ function SubscriptionCard({
     >
       <div className="flex items-start justify-between gap-2">
         <Link href={`/subscriptions/${card.id}`} className="min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-brand">
-          <span className="block truncate text-[13px] font-medium text-brand">{card.number}</span>
-          <span className="block truncate text-sm font-medium text-ink">{card.customer.name}</span>
-          {card.customer.company && <span className="block truncate text-xs text-ink-2">{card.customer.company}</span>}
+          <span className="block break-words text-[13px] font-medium text-brand">{card.number}</span>
+          <span className="block break-words text-sm font-medium text-ink">{card.customer.name}</span>
+          {card.customer.company && <span className="block break-words text-xs text-ink-2">{card.customer.company}</span>}
         </Link>
         {targets.length > 0 && (
           <DropdownMenu>
@@ -323,8 +323,8 @@ function SubscriptionCard({
           </DropdownMenu>
         )}
       </div>
-      <div className="mt-2.5 flex items-end justify-between gap-2 text-xs">
-        <span className="truncate text-ink-2">{card.plan.name}</span>
+      <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2 text-xs">
+        <span className="min-w-0 break-words text-ink-2">{card.plan.name}</span>
         <span className="shrink-0 text-sm font-medium tabular-nums text-ink">
           <Money value={card.recurring_total} />
         </span>

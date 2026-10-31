@@ -1,0 +1,25 @@
+name: billing-scheduler
+
+# Runs the idempotent billing batch on the deployed API and keeps the free Render
+# instance warm. Safe to run any number of times (see docs/BILLING_RULES.md §4).
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-billing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger billing batch
+        env:
+          CADENCE_API_URL: ${{ secrets.CADENCE_API_URL }}
+          SCHEDULER_SECRET: ${{ secrets.SCHEDULER_SECRET }}
+        run: |
+          if [ -z "$CADENCE_API_URL" ] || [ -z "$SCHEDULER_SECRET" ]; then
+            echo "Scheduler secrets not set yet; skipping."; exit 0
+          fi
+          curl --fail-with-body --retry 3 --retry-delay 20 --max-time 120 \
+            -X POST "$CADENCE_API_URL/api/internal/billing/run/" \
+            -H "Authorization: Bearer $SCHEDULER_SECRET"

@@ -1,0 +1,55 @@
+# One owner per path; PRs touching a path auto-request review from its owner.
+# Ownership map: docs/TEAM_PLAN.md
+
+*                                         @Harsha-code-per
+
+# M1: foundation, core, deploy, landing
+/backend/config/                          @Harsha-code-per
+/backend/apps/core/                       @Harsha-code-per
+/backend/requirements*.txt                @Harsha-code-per
+/docker-compose.yml                       @Harsha-code-per
+/render.yaml                              @Harsha-code-per
+/.github/workflows/                       @Harsha-code-per
+/frontend/src/app/page.tsx                @Harsha-code-per
+/frontend/src/components/landing/         @Harsha-code-per
+
+# M2: frontend platform + catalog
+/frontend/                                @loktrishal-05
+/.github/workflows/frontend.yml           @loktrishal-05
+/backend/apps/catalog/                    @loktrishal-05
+/backend/tests/test_catalog*              @loktrishal-05
+
+# M3: subscriptions + billing + invoices
+/backend/apps/subscriptions/              @Sanjjith27
+/backend/apps/billing/                    @Sanjjith27
+/backend/tests/test_subscriptions*        @Sanjjith27
+/backend/tests/test_billing*              @Sanjjith27
+/frontend/src/app/(app)/subscriptions/    @Sanjjith27
+/frontend/src/app/(app)/invoices/         @Sanjjith27
+/frontend/src/components/subscriptions/   @Sanjjith27
+/frontend/src/components/invoices/        @Sanjjith27
+/docs/BILLING_RULES.md                    @Sanjjith27
+
+# M4: accounts, payments, analytics, portal
+/backend/apps/accounts/                   @Cholan-kinnera
+/backend/apps/payments/                   @Cholan-kinnera
+/backend/apps/analytics/                  @Cholan-kinnera
+/backend/tests/test_accounts*             @Cholan-kinnera
+/backend/tests/test_payments*             @Cholan-kinnera
+/backend/tests/test_analytics*            @Cholan-kinnera
+/frontend/src/app/(auth)/                 @Cholan-kinnera
+/frontend/src/app/(portal)/               @Cholan-kinnera
+/frontend/src/app/(app)/dashboard/        @Cholan-kinnera
+/frontend/src/app/(app)/customers/        @Cholan-kinnera
+/frontend/src/app/(app)/staff/            @Cholan-kinnera
+/frontend/src/app/(app)/payments/         @Cholan-kinnera
+/frontend/src/app/(app)/insights/         @Cholan-kinnera
+/frontend/src/components/auth/            @Cholan-kinnera
+/frontend/src/components/dashboard/       @Cholan-kinnera
+/frontend/src/components/portal/          @Cholan-kinnera
+/frontend/src/proxy.ts                    @Cholan-kinnera
+/docs/DEMO.md                             @Cholan-kinnera
+
+# Models + initial migrations reviewed by M1 (DB design owner)
+/backend/apps/*/models.py                 @Harsha-code-per
+/backend/apps/*/migrations/               @Harsha-code-per

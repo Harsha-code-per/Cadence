@@ -1,0 +1,34 @@
+name: query-plan-probe
+on:
+  pull_request:
+    paths: ["backend/query_plan_probe.py", ".github/workflows/query-plan-probe.yml"]
+jobs:
+  plans:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: cadence
+          POSTGRES_PASSWORD: cadence
+          POSTGRES_DB: cadence
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U cadence" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgres://cadence:cadence@localhost:5432/cadence
+      DJANGO_SECRET_KEY: ci-only-not-secret
+      DJANGO_DEBUG: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements-dev.txt
+      - run: python manage.py migrate --noinput
+      - run: python manage.py seed_demo --subscriptions 5000
+      - run: python query_plan_probe.py

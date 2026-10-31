@@ -178,3 +178,30 @@ def test_insights_and_portal_summary(api, make_user, subscription):
     assert portal_resp.data["active_subscriptions"] == 1
     assert Decimal(portal_resp.data["outstanding"]) >= Decimal("500.00")
     assert len(portal_resp.data["recent_invoices"]) >= 1
+
+
+def test_pipeline_counts_and_values_each_stage_without_double_counting(api, make_user):
+    staff = make_user("pipe-staff@example.test", role="staff")
+    customer = Customer.objects.create(name="Pipe Co", email="pipe@example.test")
+    plan = Plan.objects.create(name="Fee plan", price=100, start_date=date(2026, 1, 1))
+    term = PaymentTerm.objects.create(name="Net 7", due_days=7)
+    product = Product.objects.create(name="Seat", sales_price=10, cost_price=1)
+    sub = Subscription.objects.create(
+        number="SUB/2026/09001",
+        customer=customer,
+        plan=plan,
+        payment_term=term,
+        status="active",
+        start_date=date(2026, 1, 1),
+    )
+    for qty in (2, 3):  # two lines must not double the plan fee
+        SubscriptionLine.objects.create(
+            subscription=sub, product=product, quantity=qty, unit_price=10
+        )
+
+    api.force_authenticate(staff)
+    stages = {row["status"]: row for row in api.get("/api/analytics/pipeline/").json()}
+    assert list(stages) == ["draft", "quotation", "confirmed", "active", "paused", "closed"]
+    assert stages["active"]["count"] == 1
+    assert stages["active"]["recurring_value"] == "150.00"  # 100 fee + 2×10 + 3×10
+    assert stages["draft"] == {"status": "draft", "count": 0, "recurring_value": "0.00"}

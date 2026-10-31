@@ -1,4 +1,5 @@
 import {
+  Columns3,
   Banknote,
   Boxes,
   FileText,
@@ -25,6 +26,7 @@ export const NAV: NavGroup[] = [
       { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
       { href: "/customers", label: "Customers", icon: Users },
       { href: "/subscriptions", label: "Subscriptions", icon: RefreshCw },
+      { href: "/subscriptions/board", label: "Pipeline", icon: Columns3 },
       { href: "/invoices", label: "Invoices", icon: Receipt },
       { href: "/payments", label: "Payments", icon: Banknote },
       { href: "/insights", label: "Insights", icon: Sparkles },

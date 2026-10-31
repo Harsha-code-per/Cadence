@@ -1,6 +1,8 @@
 from datetime import datetime
+from decimal import Decimal
 
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +18,7 @@ from apps.analytics.serializers import (
 from apps.analytics.services import (
     get_analytics_summary,
     get_insights,
+    get_pipeline,
     get_portal_summary,
     get_revenue_series,
     get_status_breakdown,
@@ -113,4 +116,27 @@ class PortalSummaryView(APIView):
             )
 
         data = get_portal_summary(customer)
+        return Response(data)
+
+
+class PipelineView(APIView):
+    """Kanban column totals: count and recurring value per subscription stage."""
+
+    permission_classes = [IsAdminOrStaff]
+
+    @extend_schema(
+        responses=inline_serializer(
+            "PipelineStage",
+            {
+                "status": serializers.CharField(),
+                "count": serializers.IntegerField(),
+                "recurring_value": serializers.DecimalField(max_digits=14, decimal_places=2),
+            },
+            many=True,
+        )
+    )
+    def get(self, request):
+        data = get_pipeline()
+        for row in data:
+            row["recurring_value"] = str(row["recurring_value"].quantize(Decimal("0.01")))
         return Response(data)

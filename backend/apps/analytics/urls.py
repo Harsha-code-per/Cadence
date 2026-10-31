@@ -2,6 +2,7 @@ from django.urls import path
 
 from apps.analytics.views import (
     InsightsView,
+    PipelineView,
     PortalSummaryView,
     RevenueSeriesView,
     StatusBreakdownView,
@@ -17,5 +18,6 @@ urlpatterns = [
         name="analytics-status-breakdown",
     ),
     path("analytics/insights/", InsightsView.as_view(), name="analytics-insights"),
+    path("analytics/pipeline/", PipelineView.as_view(), name="analytics-pipeline"),
     path("portal/summary/", PortalSummaryView.as_view(), name="portal-summary"),
 ]

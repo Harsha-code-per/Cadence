@@ -1,7 +1,12 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { Suspense } from "react";
+import { LoginForm } from "./LoginForm";
 
 export const metadata = { title: "Log in" };
 
 export default function LoginPage() {
-  return <PageHeader title="Log in" description="This page is being built." />;
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
 }

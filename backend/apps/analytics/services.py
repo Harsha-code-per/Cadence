@@ -276,3 +276,32 @@ def get_portal_summary(customer: Customer) -> dict:
         "recent_invoices": recent_invoices,
         "recent_payments": recent_payments,
     }
+
+
+def get_pipeline() -> list[dict]:
+    """Subscriptions per lifecycle stage with their recurring value (plan fee + lines).
+
+    Two grouped aggregates (lines and plan fees) instead of one join, so a plan fee is
+    never multiplied by the number of lines.
+    """
+    lines = {
+        row["subscription__status"]: row["value"]
+        for row in SubscriptionLine.objects.values("subscription__status").annotate(
+            value=Sum(F("quantity") * F("unit_price"), output_field=DecimalField())
+        )
+    }
+    stages = {
+        row["status"]: row
+        for row in Subscription.objects.values("status").annotate(
+            count=Count("id"), plan_fees=Coalesce(Sum("plan__price"), Decimal("0"))
+        )
+    }
+    return [
+        {
+            "status": status,
+            "count": stages.get(status, {}).get("count", 0),
+            "recurring_value": (lines.get(status) or Decimal("0"))
+            + stages.get(status, {}).get("plan_fees", Decimal("0")),
+        }
+        for status in SubscriptionStatus.values
+    ]

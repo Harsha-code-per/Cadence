@@ -167,7 +167,11 @@ def test_customer_list_is_scoped_and_foreign_detail_is_404(api, people, plan, te
         "name": "Asha Rao",
         "company": "Rao Traders",
     }
-    assert body["results"][0]["outstanding"] == "118.00"
+    assert body["results"][0]["outstanding"] == "0.00"  # draft: not payable yet
+
+    own_detail = api.get(f"/api/invoices/{own.pk}/")
+    assert own_detail.status_code == 200
+    assert own_detail.json()["id"] == own.pk
 
     response = api.get(f"/api/invoices/{foreign.pk}/")
     assert response.status_code == 404
@@ -199,6 +203,10 @@ def test_staff_lists_everything_with_filters_and_pagination(api, people, plan, t
     body = api.get("/api/invoices/").json()
     assert body["count"] == 3
     assert set(body) == {"count", "next", "previous", "results"}
+    by_status_rows = {row["status"]: row for row in body["results"]}
+    assert by_status_rows["confirmed"]["outstanding"] == "118.00"
+    assert by_status_rows["paid"]["outstanding"] == "0.00"
+    assert by_status_rows["draft"]["outstanding"] == "0.00"
 
     by_status = api.get("/api/invoices/?status=confirmed").json()
     assert [row["id"] for row in by_status["results"]] == [overdue.pk]
@@ -437,6 +445,18 @@ def test_cancel_frees_the_discount_and_the_billing_period(api, people, plan, ter
     assert AuditLog.objects.filter(
         action="invoice.cancel", entity_id=invoice.pk, changes__released_discount_redemptions=1
     ).exists()
+
+
+def test_cancel_confirmed_unpaid_invoice(api, people, plan, term, make_invoice):
+    invoice = make_invoice(
+        make_subscription(people.asha_customer, plan, term), status=InvoiceStatus.CONFIRMED
+    )
+    api.force_authenticate(people.staff)
+    response = api.post(f"/api/invoices/{invoice.pk}/cancel/")
+    assert response.status_code == 200
+    assert response.json()["status"] == "cancelled"
+    invoice.refresh_from_db()
+    assert invoice.status == InvoiceStatus.CANCELLED
 
 
 def test_cancel_rejects_paid_or_partially_paid_invoices(api, people, plan, term, make_invoice):

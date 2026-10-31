@@ -98,6 +98,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
         ]
 
     def get_outstanding(self, obj) -> str:
+        # BILLING_RULES §5: outstanding is what a confirmed invoice still owes.
+        # Drafts and cancelled invoices are not payable, so they owe nothing.
+        if obj.status not in (InvoiceStatus.CONFIRMED, InvoiceStatus.PAID):
+            return "0.00"
         # Money is a string everywhere (docs/API.md); never let JSON render a float.
         return str(obj.outstanding.quantize(Decimal("0.01")))
 

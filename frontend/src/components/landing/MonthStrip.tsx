@@ -10,6 +10,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef, type ReactNode } from 'react';
 
+import { world } from './world';
+
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 type Scene = { day: number; title: string; body: string; fragment?: ReactNode };
@@ -23,8 +25,8 @@ const SCENES: Scene[] = [
     body: 'One account per email. Password rules check as they type, and a reset link arrives if they forget.',
     fragment: (
       <ul className="space-y-1 text-[13px]">
-        <li className="text-[#17806F]">✓ More than 8 characters</li>
-        <li className="text-[#17806F]">✓ Uppercase and lowercase</li>
+        <li className="text-[var(--l-emerald)]">✓ More than 8 characters</li>
+        <li className="text-[var(--l-emerald)]">✓ Uppercase and lowercase</li>
         <li className="text-[#A12A40]">Add a special character</li>
       </ul>
     ),
@@ -47,9 +49,9 @@ const SCENES: Scene[] = [
     fragment: (
       <div className="flex flex-wrap gap-1.5">
         <span className={`${pill} bg-[#EEEFF2]`}>Draft</span>
-        <span className={`${pill} bg-[#F1E8F0]`}>Quotation</span>
-        <span className={`${pill} bg-[#6B3F69] text-white`}>Confirmed</span>
-        <span className={`${pill} bg-[#E2F3EF]`}>Active</span>
+        <span className={`${pill} bg-[#dcebf3]`}>Quotation</span>
+        <span className={`${pill} bg-[var(--l-deep)] text-white`}>Confirmed</span>
+        <span className={`${pill} bg-[#e3f1ea]`}>Active</span>
       </div>
     ),
   },
@@ -71,7 +73,7 @@ const SCENES: Scene[] = [
     fragment: (
       <div className="num flex justify-between text-[13px]">
         <span>Bulk seats 10% · 2 of 3 uses left</span>
-        <strong className="font-semibold text-[#17806F]">−₹880</strong>
+        <strong className="font-semibold text-[var(--l-emerald)]">−₹880</strong>
       </div>
     ),
   },
@@ -82,7 +84,7 @@ const SCENES: Scene[] = [
     fragment: (
       <div className="num flex justify-between text-[13px]">
         <span>INV/2026/04182 · UPI</span>
-        <span className={`${pill} bg-[#E2F3EF]`}>Paid</span>
+        <span className={`${pill} bg-[#e3f1ea]`}>Paid</span>
       </div>
     ),
   },
@@ -118,6 +120,9 @@ export default function MonthStrip() {
             pin: true,
             scrub: 0.6,
             invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              world.track = self.progress;
+            },
           },
         });
         tl.to(el, { x: () => -distance(), ease: 'none' }, 0).fromTo(
@@ -136,21 +141,21 @@ export default function MonthStrip() {
     <section
       ref={section}
       id="month"
-      data-chapter="1"
+      data-chapter="2"
       aria-labelledby="month-title"
       className="overflow-hidden py-24 md:flex md:min-h-screen md:flex-col md:justify-center"
     >
       <div className="mx-auto w-full max-w-[1500px] px-4 sm:px-10">
-        <h2 id="month-title" className="display lift max-w-4xl text-[clamp(2.5rem,5.4vw,5.5rem)] font-bold leading-[1]">
+        <h2 id="month-title" className="display max-w-4xl text-[clamp(2.5rem,5.4vw,5.5rem)] font-bold leading-[1]">
           A month at Brightloop, without the spreadsheet
         </h2>
-        <p className="lift mt-4 max-w-xl text-lg leading-relaxed text-[var(--l-text-2)]">
+        <p className="mt-4 max-w-xl text-lg leading-relaxed text-[var(--l-text-2)]">
           One billing month, scene by scene: each problem the team faced, and the screen that now handles it.
         </p>
         <div className="mt-8 hidden items-center gap-4 text-sm text-[var(--l-text-3)] md:flex" aria-hidden="true">
           <span>Day 1</span>
-          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/15">
-            <div ref={progress} className="h-full origin-left scale-x-0 bg-[var(--l-marigold)]" />
+          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-[var(--l-line)]">
+            <div ref={progress} className="h-full origin-left scale-x-0 bg-[var(--l-emerald)]" />
           </div>
           <span>Day 30</span>
         </div>
@@ -162,13 +167,13 @@ export default function MonthStrip() {
         {SCENES.map((scene) => (
           <li
             key={scene.day}
-            className="glass flex w-[300px] shrink-0 snap-start flex-col gap-4 rounded-3xl p-7 sm:w-[350px]"
+            className="glass flex w-[300px] !bg-white/85 shrink-0 snap-start flex-col gap-4 rounded-3xl p-7 sm:w-[350px]"
           >
-            <span className="display text-4xl font-bold text-[var(--l-marigold)]">Day {scene.day}</span>
+            <span className="display text-4xl font-bold text-[var(--l-emerald)]">Day {scene.day}</span>
             <h3 className="text-xl font-semibold">{scene.title}</h3>
             <p className="text-[15px] leading-relaxed text-[var(--l-text-2)]">{scene.body}</p>
             {scene.fragment && (
-              <div className="mt-auto rounded-[10px] bg-white p-4 text-[var(--l-ink)]">{scene.fragment}</div>
+              <div className="mt-auto rounded-xl border border-[var(--l-line)] bg-white p-4">{scene.fragment}</div>
             )}
           </li>
         ))}

@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, type Paginated } from "@/lib/api";
 import { useOptions } from "@/lib/crud";
-import { formatMoney, formatMoneyCompact } from "@/lib/format";
+import { formatMoneyCompact } from "@/lib/format";
 import type { components } from "@/lib/api-types";
 
 type Summary = {

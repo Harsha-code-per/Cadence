@@ -141,7 +141,7 @@ export default function PortalPage() {
                     <CycleRing
                       progress={0.65}
                       size={54}
-                      label={
+                      caption={
                         sub.next_invoice_date
                           ? `Next bill: ${sub.next_invoice_date}`
                           : "Current cycle"

@@ -27,8 +27,9 @@ def draft(subscription):
 def test_lifecycle_and_activation_rollback(draft):
     transition_subscription(draft.pk, "send", today=TODAY)
     transition_subscription(draft.pk, "confirm", today=TODAY)
-    with patch("apps.billing.services.generate_invoice", return_value=None), pytest.raises(
-        BillingUnavailable
+    with (
+        patch("apps.billing.services.generate_invoice", return_value=None),
+        pytest.raises(BillingUnavailable),
     ):
         transition_subscription(draft.pk, "activate", today=TODAY)
     draft.refresh_from_db()

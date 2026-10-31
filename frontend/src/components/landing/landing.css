@@ -9,7 +9,7 @@
   --l-emerald: #0e7a63;
   --l-deep: #0b3328;
   --l-mint: #b7f36b;
-  --l-panel: rgb(255 255 255 / 0.66);
+  --l-panel: rgb(255 255 255 / 0.9);
   position: relative;
   background: var(--l-bg);
   color: var(--l-text);
@@ -56,20 +56,37 @@
   from { opacity: 0; }
 }
 
-/* Frosted panels: the object stays visible through them. */
+/* Panels over the 3D stage. No backdrop blur: re-blurring a moving canvas every frame stalls the GPU. */
 .glass {
   background: var(--l-panel);
   border: 1px solid var(--l-line);
   box-shadow: 0 24px 60px -32px rgb(11 51 40 / 0.28);
-  -webkit-backdrop-filter: blur(18px) saturate(1.3);
-  backdrop-filter: blur(18px) saturate(1.3);
+}
+
+/* The opening runs in CSS, so it starts with the first paint instead of after JavaScript loads. */
+.hero-word {
+  display: inline-block;
+  animation: word-rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(60ms + var(--i) * 80ms);
+}
+.hero-fade {
+  animation: fade-rise 0.9s ease-out both;
+  animation-delay: calc(500ms + var(--i) * 100ms);
+}
+@keyframes word-rise {
+  from { transform: translateY(118%) rotate(3deg); }
+}
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(22px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .landing * {
     scroll-behavior: auto !important;
   }
-  .stage canvas {
+  .stage canvas,
+  .hero-word,
+  .hero-fade {
     animation: none;
   }
   /* Hide-on-scroll is motion, so without it the header scrolls away with the page. */

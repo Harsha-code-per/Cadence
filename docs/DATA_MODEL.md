@@ -373,3 +373,32 @@ spans two tables, so an index on subscription number alone does not establish
 that the combined search can use it. Search indexing and the runner's combined
 predicate need further measurement on a larger dataset before claiming they use
 an index. These figures do not establish the API's two-second target.
+
+To reproduce the individual filter measurements on a disposable seeded PostgreSQL
+database, run `ANALYZE` first and use the same date and search term:
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM subscriptions_subscription
+WHERE status = 'active' AND next_invoice_date <= DATE '2026-10-31'
+  AND (expiration_date IS NULL OR next_invoice_date <= expiration_date);
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM billing_invoice
+WHERE status = 'confirmed' AND due_date < DATE '2026-10-31';
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT s.* FROM subscriptions_subscription s
+JOIN accounts_customer c ON c.id = s.customer_id
+WHERE UPPER(s.number::text) LIKE '%SUB/2026/00001%'
+   OR UPPER(c.name::text) LIKE '%SUB/2026/00001%'
+   OR UPPER(c.company::text) LIKE '%SUB/2026/00001%'
+ORDER BY s.created_at DESC, s.id DESC LIMIT 20;
+```
+
+The search uses a leading wildcard and an `OR` across subscription and customer
+columns. The existing B-tree number index cannot serve the substring predicate,
+and adding another ordinary index to subscriptions alone does not establish an
+indexed plan for the whole search. A useful fix must preserve substring search
+and be measured across both branches of that `OR`; it may also need a query
+change and PostgreSQL-specific text indexing. That work is still pending.

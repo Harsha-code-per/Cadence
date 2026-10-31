@@ -12,10 +12,16 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied
 
+from apps.catalog.models import Product, ProductType
 from apps.core.audit import record
 from apps.core.exceptions import DomainError
 from apps.core.sequences import next_number
-from apps.subscriptions.models import Subscription, SubscriptionLine, SubscriptionStatus
+from apps.subscriptions.models import (
+    Subscription,
+    SubscriptionEvent,
+    SubscriptionLine,
+    SubscriptionStatus,
+)
 
 # Portal actions (docs/API.md): everything else is admin/staff only.
 CUSTOMER_ACTIONS = frozenset({"confirm", "pause", "resume", "close", "renew"})
@@ -217,6 +223,37 @@ def remove_line(subscription_id: int, line_id: int, *, actor) -> None:
     line_pk = line.pk
     line.delete()
     record(actor, "subscription.line.remove", subscription, {"line": line_pk})
+
+
+@transaction.atomic
+def set_addon(subscription_id: int, product_id: int, *, enabled: bool, actor) -> None:
+    """Change future billing lines while serializing changes with invoice generation."""
+    subscription = get_object_or_404(Subscription.objects.select_for_update(), pk=subscription_id)
+    if subscription.status != SubscriptionStatus.ACTIVE:
+        _invalid("Add-ons can only be changed on an active subscription.")
+    product = Product.objects.filter(pk=product_id, is_active=True).first()
+    if product is None or product.product_type != ProductType.ADDON:
+        _invalid(
+            "Choose an active add-on.",
+            code="validation_error",
+            field_errors={"product": ["Choose an active add-on."]},
+        )
+    lines = subscription.lines.filter(product=product)
+    if enabled and not lines.exists():
+        _create_line(subscription, product=product, quantity=1)
+    elif not enabled and lines.exists():
+        lines.delete()
+    else:
+        return
+    action = "enabled" if enabled else "disabled"
+    SubscriptionEvent.objects.create(
+        subscription=subscription,
+        from_status=subscription.status,
+        to_status=subscription.status,
+        actor=actor,
+        note=f"Add-on {product.name} {action}.",
+    )
+    record(actor, f"subscription.addon.{action}", subscription, {"product": product.pk})
 
 
 def available_actions(subscription: Subscription, user, today: date | None = None) -> list[str]:

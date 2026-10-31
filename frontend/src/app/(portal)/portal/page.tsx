@@ -11,6 +11,7 @@ import { Money } from "@/components/data/Money";
 import { StatusBadge } from "@/components/data/StatusBadge";
 import { sentence } from "@/components/invoices/format";
 import type { InvoiceDetail } from "@/components/invoices/types";
+import { SubscriptionAddons } from "@/components/portal/SubscriptionAddons";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -366,6 +367,7 @@ export default function PortalPage() {
                   </div>
                 </div>
                 <PortalActions subscription={sub} />
+                {sub.status === "active" && <SubscriptionAddons subscriptionId={sub.id} />}
               </div>
             ))}
           </div>

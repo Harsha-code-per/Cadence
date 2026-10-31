@@ -33,6 +33,17 @@ READ_ONLY_FIELDS = (
 )
 
 
+class AddonSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    sales_price = serializers.DecimalField(max_digits=12, decimal_places=2)
+    on = serializers.BooleanField()
+
+
+class AddonWriteSerializer(serializers.Serializer):
+    product = serializers.IntegerField(min_value=1)
+
+
 def _reject_read_only(initial_data, serializer, extra=()):
     errors = {
         field: ["This field is read-only; use a lifecycle action instead."]

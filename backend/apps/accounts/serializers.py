@@ -135,12 +135,17 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class StaffCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    role = serializers.ChoiceField(choices=[Role.ADMIN, Role.STAFF], default=Role.STAFF)
 
     class Meta:
         model = User
         fields = ["id", "email", "full_name", "role", "password", "is_active", "date_joined"]
         read_only_fields = ["id", "date_joined"]
+        extra_kwargs = {"role": {"default": Role.STAFF}}
+
+    def validate_role(self, value: str) -> str:
+        if value not in (Role.ADMIN, Role.STAFF):
+            raise serializers.ValidationError("Staff role must be either admin or staff.")
+        return value
 
     def validate_email(self, value: str) -> str:
         clean = value.strip().lower()
@@ -156,7 +161,7 @@ class StaffCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        role = validated_data["role"]
+        role = validated_data.get("role", Role.STAFF)
         is_staff = role == Role.ADMIN
         return User.objects.create_user(
             email=validated_data["email"],
@@ -168,12 +173,15 @@ class StaffCreateSerializer(serializers.ModelSerializer):
 
 
 class StaffUpdateSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=[Role.ADMIN, Role.STAFF], required=False)
-
     class Meta:
         model = User
         fields = ["id", "email", "full_name", "role", "is_active"]
         read_only_fields = ["id", "email"]
+
+    def validate_role(self, value: str) -> str:
+        if value not in (Role.ADMIN, Role.STAFF):
+            raise serializers.ValidationError("Staff role must be either admin or staff.")
+        return value
 
     def update(self, instance, validated_data):
         if "role" in validated_data:  # Django admin-site access follows the admin role

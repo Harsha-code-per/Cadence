@@ -1,6 +1,6 @@
 "use client";
 import { Menu } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Sidebar, SidebarNav } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -23,7 +23,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <SidebarNav onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
-        <main className="mx-auto w-full max-w-[1400px] flex-1 p-4 md:p-6">{children}</main>
+        <main className="mx-auto w-full max-w-[1400px] flex-1 p-4 md:p-6">
+          <Suspense>{children}</Suspense>
+        </main>
       </div>
     </div>
   );

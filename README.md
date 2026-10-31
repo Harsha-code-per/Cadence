@@ -74,7 +74,20 @@ cd frontend && npm install && cp .env.example .env.local && npm run dev
 Full instructions: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Performance
-_Measured on 5,000 subscriptions / 20,000 invoices; results added after seeding._
+Measured in production on 31 Oct 2026 with 5,000 subscriptions and 18,032 invoices. Total is the time seen in the browser through Vercel to Render; the free tier's cold start is not included. Every app page also shows the last request's server time and query count in its footer.
+
+| Request | Total | Server | Queries |
+|---|---|---|---|
+| Dashboard summary | 205 ms | 48 ms | 8 |
+| Revenue, 12 months | 277 ms | 31 ms | 4 |
+| Overdue aging | 164 ms | 19 ms | 3 |
+| Pipeline | 309 ms | 28 ms | 4 |
+| Subscriptions list | 204 ms | 75 ms | 11 |
+| Subscription search | 379 ms | 92 ms | 11 |
+| Invoices list | 207 ms | 48 ms | 4 |
+| Overdue invoices | 182 ms | 21 ms | 4 |
+| Payments list | 126 ms | 22 ms | 4 |
+| Customer search | 205 ms | 21 ms | 4 |
 
 ## Team
 | Member | Role |

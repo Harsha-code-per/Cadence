@@ -208,7 +208,7 @@ def get_aging(today: date | None = None) -> list[dict]:
         {
             "bucket": label,
             "count": row[f"count_{index}"],
-            "amount": str(row[f"amount_{index}"] or Decimal("0.00")),
+            "amount": f"{row[f'amount_{index}'] or Decimal('0.00'):.2f}",
         }
         for index, (label, _, _) in enumerate(AGING_BUCKETS)
     ]

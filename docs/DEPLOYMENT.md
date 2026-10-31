@@ -33,7 +33,7 @@ python manage.py runserver                    # http://localhost:8000/api/docs/
 # Frontend (new terminal)
 cd frontend
 npm install
-cp .env.example .env.local                    # BACKEND_URL=http://localhost:8000
+cp .env.example .env.local                    # API_URL=http://localhost:8000
 npm run gen:api                               # regenerate TS types from the running backend's OpenAPI
 npm run dev                                   # http://localhost:3000
 ```
@@ -55,7 +55,7 @@ Reset the DB: `docker compose down -v && docker compose up -d db && python manag
 1. **Neon**: create project `cadence` (region: Singapore), copy the *pooled* connection string.
 2. **Render**: New → Blueprint → this repo → `render.yaml`. Paste `DATABASE_URL`, `FRONTEND_URL`, SMTP vars. Build: `pip install -r requirements.txt && python manage.py collectstatic --noinput`. Start: `python manage.py migrate --noinput && gunicorn config.wsgi --workers 2 --bind 0.0.0.0:$PORT`. Health check `/api/health/`.
 3. **Seed prod** once from a local shell: `DATABASE_URL=<neon> python manage.py seed_demo --subscriptions 5000`.
-4. **Vercel**: `cd frontend && vercel link && vercel env add BACKEND_URL production` (Render URL) → `vercel --prod`. Root directory: `frontend`.
+4. **Vercel**: `cd frontend && vercel link && vercel env add API_URL production` (Render URL) → `vercel --prod`. Root directory: `frontend`.
 5. **Brevo**: verify the sender email, create an SMTP key, put it in Render env.
 6. **GitHub** → Settings → Secrets → Actions: `CADENCE_API_URL` (Render URL), `SCHEDULER_SECRET` (same as Render).
 7. Smoke test: `/api/health/`, signup, login, DEMO story on the live URLs.

@@ -45,6 +45,7 @@ if env("RENDER_EXTERNAL_HOSTNAME"):  # set by Render for every web service
 FRONTEND_URL = env("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 CSRF_TRUSTED_ORIGINS = [FRONTEND_URL]
 SCHEDULER_SECRET = env("SCHEDULER_SECRET")
+ENABLE_DJANGO_ADMIN = env_bool("ENABLE_DJANGO_ADMIN", DEBUG)
 
 INSTALLED_APPS = [
     "django.contrib.admin",

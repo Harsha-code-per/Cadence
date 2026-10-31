@@ -1,5 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
+from django.core.cache import cache
 from django.middleware.csrf import get_token
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
 from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import filters, status, viewsets
 from rest_framework import serializers as drf_serializers
@@ -25,6 +28,19 @@ from apps.core import audit
 from apps.core.exceptions import DomainError
 from apps.core.permissions import InternalOrCustomerReadOnly, IsAdmin
 
+# Per-account lockout: the IP throttle alone can be dodged with spoofed proxy headers.
+# ponytail: per-process cache (2 workers ⇒ up to 2× attempts); move to a shared cache if scaled.
+MAX_FAILED_LOGINS = 5
+LOCKOUT_SECONDS = 15 * 60
+
+
+def _lockout_key(email: str) -> str:
+    return f"login-failures:{email}"
+
+
+# DRF exempts views from CSRF; anonymous auth endpoints opt back in (stops login CSRF).
+csrf_protected = method_decorator(csrf_protect, name="dispatch")
+
 
 class CsrfView(APIView):
     permission_classes = [AllowAny]
@@ -45,6 +61,7 @@ class CsrfView(APIView):
         return Response({"status": "ok", "csrf_token": token})
 
 
+@csrf_protected
 class SignupView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
@@ -60,6 +77,7 @@ class SignupView(APIView):
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 
+@csrf_protected
 class LoginView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
@@ -71,9 +89,17 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"].strip().lower()
         password = serializer.validated_data["password"]
+        key = _lockout_key(email)
+        if cache.get(key, 0) >= MAX_FAILED_LOGINS:
+            raise DomainError(
+                "too_many_attempts",
+                "Too many failed attempts. Try again in 15 minutes, or reset your password.",
+                http_status=429,
+            )
 
         user = authenticate(request, username=email, password=password)
         if user is None:
+            cache.set(key, cache.get(key, 0) + 1, LOCKOUT_SECONDS)
             candidate = User.objects.filter(email__iexact=email).first()
             if candidate and candidate.check_password(password) and not candidate.is_active:
                 raise DomainError(
@@ -86,6 +112,7 @@ class LoginView(APIView):
                 "account_inactive", "This account has been deactivated.", http_status=403
             )
 
+        cache.delete(key)
         login(request, user)
         audit.record(user, "user.login", user)
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
@@ -111,6 +138,7 @@ class MeView(APIView):
         return Response(UserSerializer(request.user).data)
 
 
+@csrf_protected
 class PasswordResetView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
@@ -128,6 +156,7 @@ class PasswordResetView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@csrf_protected
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
@@ -184,6 +213,13 @@ class StaffViewSet(viewsets.ModelViewSet):
         )
 
     def perform_update(self, serializer):
+        demoting = serializer.validated_data.get("role", Role.ADMIN) != Role.ADMIN
+        deactivating = serializer.validated_data.get("is_active") is False
+        if serializer.instance == self.request.user and (demoting or deactivating):
+            raise DomainError(
+                "cannot_modify_self",
+                "You can't remove your own admin access or deactivate yourself.",
+            )
         user = serializer.save()
         audit.record(
             self.request.user,
@@ -193,6 +229,8 @@ class StaffViewSet(viewsets.ModelViewSet):
         )
 
     def perform_destroy(self, instance):
+        if instance == self.request.user:
+            raise DomainError("cannot_modify_self", "You can't deactivate your own account.")
         # Soft deactivate instead of hard delete
         instance.is_active = False
         instance.save(update_fields=["is_active"])

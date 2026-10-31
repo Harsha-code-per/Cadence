@@ -10,6 +10,7 @@ from django.db.models import F, Q
 from apps.billing.models import BillingRun, DiscountRedemption, Invoice, InvoiceLine, InvoiceLineTax
 from apps.catalog.models import Discount
 from apps.core.audit import record
+from apps.core.exceptions import DomainError
 from apps.core.sequences import next_number
 from apps.subscriptions.models import Subscription, SubscriptionStatus
 
@@ -187,6 +188,65 @@ def generate_invoice(subscription_id, today):
         invoice,
         {"subscription": sub.pk, "period_start": start.isoformat()},
     )
+    return invoice
+
+
+@transaction.atomic
+def generate_invoice_now(subscription_id, today):
+    """Bill exactly one due period for one subscription, or explain why nothing was billed.
+
+    A thin, lock-aware wrapper around generate_invoice for the manual
+    POST /api/subscriptions/{id}/invoice-now/ action: the billing engine still
+    decides eligibility and writes the invoice; this only turns "not billed"
+    into a domain error the API can explain. Never catches up missed periods.
+    """
+    sub = (
+        Subscription.objects.select_for_update(of=("self",))
+        .select_related("plan", "payment_term")
+        .get(pk=subscription_id)
+    )
+    start = sub.next_invoice_date
+    if sub.status != SubscriptionStatus.ACTIVE:
+        raise DomainError(
+            "subscription_not_active",
+            f"{sub.number} is {sub.get_status_display().lower()}; only active "
+            "subscriptions can be invoiced.",
+        )
+    if start is None:
+        raise DomainError(
+            "invoice_not_due",
+            f"{sub.number} has no billing period to invoice.",
+        )
+    if start > today:
+        raise DomainError(
+            "invoice_not_due",
+            f"The next billing period for {sub.number} starts on "
+            f"{start:%d %b %Y}; it is not due yet.",
+        )
+    if sub.expiration_date and start > sub.expiration_date:
+        raise DomainError(
+            "subscription_expired",
+            f"{sub.number} expired on {sub.expiration_date:%d %b %Y}; a period starting "
+            "after the expiration date is never invoiced.",
+        )
+    if (
+        Invoice.objects.filter(subscription=sub, period_start=start)
+        .exclude(status="cancelled")
+        .exists()
+    ):
+        raise DomainError(
+            "invoice_already_billed",
+            f"The period starting {start:%d %b %Y} is already invoiced for {sub.number}.",
+        )
+
+    invoice = generate_invoice(subscription_id, today)
+    if invoice is None:
+        # The row changed between the checks above and the engine's own locked
+        # re-check (e.g. a concurrent billing run). Nothing was written.
+        raise DomainError(
+            "invoice_not_due",
+            f"No invoice was generated for {sub.number}; it is no longer due.",
+        )
     return invoice
 
 

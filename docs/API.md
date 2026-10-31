@@ -106,7 +106,7 @@ Subscription response:
 | GET | `/api/invoices/{id}/` | A,S,C(own) | lines with tax snapshots, payments, `outstanding`, `is_overdue`, `changes` (vs previous invoice, BILLING_RULES §9) |
 | POST | `/api/invoices/{id}/confirm/` · `/cancel/` · `/send/` | A,S | see BILLING_RULES §5 |
 | POST | `/api/invoices/confirm-bulk/` | A,S | `{ids: [..]}` → `{confirmed: n}` |
-| POST | `/api/subscriptions/{id}/invoice-now/` | A,S | bill the due period now (same engine) |
+| POST | `/api/subscriptions/{id}/invoice-now/` | A,S | bill the single due period now through the normal engine, no catch-up; `201` invoice, `400` `subscription_not_active` / `invoice_not_due` / `subscription_expired` / `invoice_already_billed` |
 | POST | `/api/billing/run/` | A | `{date?, dry_run?: bool}` → `{activated, closed, invoiced, skipped, total_billed, discounts_applied, dry_run, ran_at}`; a dry run changes nothing |
 | POST | `/api/internal/billing/run/` | Bearer `SCHEDULER_SECRET` | same, for the cron; constant-time secret compare |
 | GET | `/api/billing/last-run/` | A,S | last run time + counts (shown on the Invoices page) |

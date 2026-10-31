@@ -5,6 +5,7 @@ apps.subscriptions.services and apps.subscriptions.state.
 """
 
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
@@ -13,6 +14,8 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.billing.serializers import InvoiceSerializer
+from apps.billing.services import generate_invoice_now
 from apps.core.pagination import StandardPagination
 from apps.core.permissions import CustomerScopedMixin, IsAdminOrStaff
 from apps.subscriptions import services
@@ -52,7 +55,13 @@ class SubscriptionViewSet(
 
     # Writes are admin/staff only; the customer portal only ever POSTs lifecycle actions,
     # and services.perform_action allow-lists confirm/pause/close/renew for customers.
-    INTERNAL_ONLY_ACTIONS = {"create", "from_template", "partial_update", "line_detail"}
+    INTERNAL_ONLY_ACTIONS = {
+        "create",
+        "from_template",
+        "partial_update",
+        "line_detail",
+        "invoice_now",
+    }
 
     def get_permissions(self):
         if self.action in self.INTERNAL_ONLY_ACTIONS or (
@@ -204,6 +213,14 @@ class SubscriptionViewSet(
     @action(detail=True, methods=["post"])
     def renew(self, request, pk=None):
         return self._run_action(request, "renew")
+
+    @extend_schema(request=None, responses={201: InvoiceSerializer})
+    @action(detail=True, methods=["post"], url_path="invoice-now")
+    def invoice_now(self, request, pk=None):
+        """Bill the period that is due today, through the normal billing engine."""
+        subscription = self.get_object()
+        invoice = generate_invoice_now(subscription.pk, timezone.localdate())
+        return Response(InvoiceSerializer(invoice).data, status=status.HTTP_201_CREATED)
 
     def _run_action(self, request, action_name: str):
         subscription = self.get_object()

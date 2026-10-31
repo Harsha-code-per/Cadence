@@ -207,8 +207,10 @@ def test_provider_uses_chat_completions_shape_and_timeout():
     request = opener.return_value.open.call_args.args[0]
     assert opener.return_value.open.call_args.kwargs["timeout"] == 10
     assert request.full_url.endswith("/v1/chat/completions")
+    assert request.get_header("User-agent") == "Cadence/1.0"
     body = json.loads(request.data)
     assert body["model"] == "test-model"
+    assert body["max_tokens"] == 2048
     assert body["messages"][0] == {"role": "system", "content": "Rules"}
 
 

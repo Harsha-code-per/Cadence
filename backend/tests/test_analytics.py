@@ -245,3 +245,42 @@ def test_aging_buckets_use_outstanding_and_exclude_paid_and_future(api, make_use
 
     api.force_authenticate(make_user("c@example.test"))
     assert api.get("/api/analytics/aging/").status_code == 403
+
+
+def test_insights_score_every_rule_and_rank_the_riskiest_first(
+    api, make_user, subscription, django_assert_max_num_queries
+):
+    today = date.today()
+    subscription.expiration_date = today + timedelta(days=10)
+    subscription.save()
+    SubscriptionEvent.objects.create(subscription=subscription, to_status="paused")
+    for index, days_late in enumerate((5, 40, 90)):
+        Invoice.objects.create(
+            number=f"R{index}",
+            subscription=subscription,
+            customer=subscription.customer,
+            status=InvoiceStatus.CONFIRMED,
+            invoice_date=today - timedelta(days=days_late + 15),
+            due_date=today - timedelta(days=days_late),
+            period_start=today - timedelta(days=500 + index * 31),
+            period_end=today - timedelta(days=470 + index * 31),
+            subtotal=Decimal("10.00"),
+            total=Decimal("10.00"),
+        )
+    Subscription.objects.create(
+        number="SUB/SAFE",
+        customer=subscription.customer,
+        plan=subscription.plan,
+        payment_term=subscription.payment_term,
+        status="active",
+        start_date=today,
+    )
+
+    api.force_authenticate(make_user("staff@example.test", role=Role.STAFF))
+    with django_assert_max_num_queries(6):
+        data = api.get("/api/analytics/insights/").json()
+
+    assert len(data) == 1  # the healthy subscription isn't listed
+    assert data[0]["risk_score"] == 85  # overdue capped at 40, pause 20, expiring 25
+    assert data[0]["reasons"][0] == "3 overdue invoice(s), oldest 90 days past due"
+    assert len(data[0]["reasons"]) == 3

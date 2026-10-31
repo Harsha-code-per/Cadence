@@ -3,10 +3,14 @@ from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import (
+    BooleanField,
     Case,
     Count,
     DecimalField,
+    Exists,
     F,
+    IntegerField,
+    Min,
     OuterRef,
     Q,
     Subquery,
@@ -14,12 +18,17 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, TruncMonth
+from django.db.models.functions import Coalesce, Least, TruncMonth
 
 from apps.accounts.models import Customer
 from apps.billing.models import Invoice, InvoiceStatus
 from apps.payments.models import Payment
-from apps.subscriptions.models import Subscription, SubscriptionLine, SubscriptionStatus
+from apps.subscriptions.models import (
+    Subscription,
+    SubscriptionEvent,
+    SubscriptionLine,
+    SubscriptionStatus,
+)
 
 
 def calculate_mrr(plan_id: int | None = None) -> Decimal:
@@ -206,60 +215,63 @@ def get_aging(today: date | None = None) -> list[dict]:
 
 
 def get_insights() -> list[dict]:
-    """Rule-based churn risk score (0-100) and explanations for active subscriptions (BILLING_RULES §7)."""
+    """The ten active subscriptions most at risk of churn, each with its reasons (BILLING_RULES §7).
+
+    Scored in the database: with thousands of active subscriptions, loading them to score in
+    Python took six seconds.
+    """
     today = date.today()
-    active_subs = (
+    overdue = Q(invoices__status=InvoiceStatus.CONFIRMED, invoices__due_date__lt=today)
+    at_risk = (
         Subscription.objects.filter(status=SubscriptionStatus.ACTIVE)
+        .annotate(
+            overdue_count=Count("invoices", filter=overdue, distinct=True),
+            oldest_due=Min("invoices__due_date", filter=overdue),
+            was_paused=Exists(
+                SubscriptionEvent.objects.filter(
+                    subscription=OuterRef("pk"), to_status=SubscriptionStatus.PAUSED
+                )
+            ),
+            renewed=Exists(Subscription.objects.filter(renewed_from=OuterRef("pk"))),
+        )
+        .annotate(
+            expiring=Case(
+                When(expiration_date__lte=today + timedelta(days=30), renewed=False, then=True),
+                default=False,
+                output_field=BooleanField(),
+            )
+        )
+        .annotate(
+            risk=Least(F("overdue_count") * 20, Value(40))
+            + Case(When(was_paused=True, then=20), default=0, output_field=IntegerField())
+            + Case(When(expiring=True, then=25), default=0, output_field=IntegerField())
+        )
+        .filter(risk__gt=0)
         .select_related("customer", "plan")
-        .prefetch_related("invoices", "events")
+        .order_by("-risk", "oldest_due", "id")[:10]
     )
 
     results = []
-    for sub in active_subs:
-        score = 0
+    for sub in at_risk:
         reasons = []
-
-        # 1. Overdue invoices check
-        overdue_invoices = [
-            inv
-            for inv in sub.invoices.all()
-            if inv.status == InvoiceStatus.CONFIRMED and inv.due_date < today
-        ]
-        if overdue_invoices:
-            count = len(overdue_invoices)
-            score += min(count * 20, 40)
-            max_days = max((today - inv.due_date).days for inv in overdue_invoices)
-            reasons.append(f"{count} overdue invoice(s), oldest {max_days} days past due")
-
-        # 2. Recent pause history
-        pause_events = [e for e in sub.events.all() if e.to_status == SubscriptionStatus.PAUSED]
-        if pause_events:
-            score += 20
+        if sub.overdue_count:
+            days = (today - sub.oldest_due).days
+            reasons.append(f"{sub.overdue_count} overdue invoice(s), oldest {days} days past due")
+        if sub.was_paused:
             reasons.append("Subscription was paused recently")
-
-        # 3. Expiration within 30 days without renewal
-        if (
-            sub.expiration_date
-            and (sub.expiration_date - today).days <= 30
-            and not Subscription.objects.filter(renewed_from=sub).exists()
-        ):
-            score += 25
+        if sub.expiring:
             reasons.append(f"Expiring on {sub.expiration_date} with no renewal")
-
-        if score > 0:
-            results.append(
-                {
-                    "subscription_id": sub.id,
-                    "number": sub.number,
-                    "customer_name": sub.customer.name,
-                    "plan_name": sub.plan.name,
-                    "risk_score": min(score, 100),
-                    "reasons": reasons,
-                }
-            )
-
-    results.sort(key=lambda x: x["risk_score"], reverse=True)
-    return results[:10]
+        results.append(
+            {
+                "subscription_id": sub.id,
+                "number": sub.number,
+                "customer_name": sub.customer.name,
+                "plan_name": sub.plan.name,
+                "risk_score": min(sub.risk, 100),
+                "reasons": reasons,
+            }
+        )
+    return results
 
 
 def get_portal_summary(customer: Customer) -> dict:

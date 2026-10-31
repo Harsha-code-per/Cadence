@@ -94,7 +94,17 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
   );
 }
 
-function Panel({ id, title, children, flush }: { id: string; title: string; children: React.ReactNode; flush?: boolean }) {
+function Panel({
+  id,
+  title,
+  children,
+  flush,
+}: {
+  id: string;
+  title: string;
+  children: React.ReactNode;
+  flush?: boolean;
+}) {
   return (
     <section aria-labelledby={id} className="overflow-hidden rounded-lg border bg-surface">
       <h2 id={id} className="px-5 pt-5 font-sans text-[17px] font-semibold leading-tight">
@@ -167,6 +177,14 @@ export default function SubscriptionDetailPage() {
         actions={
           <>
             <StatusBadge domain="subscription" status={sub.status} />
+            {sub.status === "draft" && available.includes("send") && (
+              <Link
+                href={`/subscriptions/${id}/edit`}
+                className="inline-flex h-8 items-center rounded-lg border px-3 text-sm font-medium hover:bg-muted"
+              >
+                Edit draft
+              </Link>
+            )}
             {available.map((name) => (
               <Button
                 key={name}
@@ -196,7 +214,12 @@ export default function SubscriptionDetailPage() {
           <p className="mt-1 text-sm text-ink-2">{ACTIONS[selectedAction].description}</p>
           <label className="mt-4 grid max-w-xl gap-1.5 text-sm font-medium">
             Note (optional)
-            <Textarea maxLength={255} className="bg-surface" value={note} onChange={(event) => setNote(event.target.value)} />
+            <Textarea
+              maxLength={255}
+              className="bg-surface"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+            />
           </label>
           {action.error && (
             <p role="alert" className="mt-3 text-sm text-rose">
@@ -322,7 +345,10 @@ export default function SubscriptionDetailPage() {
                   <li key={event.id} className="relative">
                     <span
                       aria-hidden
-                      className={cn("absolute -left-[26px] top-1.5 size-2.5 rounded-full ring-4 ring-surface", DOT[event.to_status] ?? "bg-slate")}
+                      className={cn(
+                        "absolute -left-[26px] top-1.5 size-2.5 rounded-full ring-4 ring-surface",
+                        DOT[event.to_status] ?? "bg-slate",
+                      )}
                     />
                     <p className="flex flex-wrap items-center gap-1.5 text-sm">
                       {event.from_status && (

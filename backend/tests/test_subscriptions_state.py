@@ -27,18 +27,17 @@ def draft(subscription):
 def test_lifecycle_and_activation_rollback(draft):
     transition_subscription(draft.pk, "send", today=TODAY)
     transition_subscription(draft.pk, "confirm", today=TODAY)
-    with pytest.raises(BillingUnavailable):
+    with (
+        patch("apps.billing.services.generate_invoice", return_value=None),
+        pytest.raises(BillingUnavailable),
+    ):
         transition_subscription(draft.pk, "activate", today=TODAY)
     draft.refresh_from_db()
     assert draft.status == "confirmed"
     assert SubscriptionEvent.objects.filter(subscription=draft).count() == 2
-    with patch(
-        "apps.billing.services.generate_invoice", create=True, return_value=object()
-    ) as billing:
-        transition_subscription(draft.pk, "activate", today=TODAY)
-    billing.assert_called_once_with(draft.pk, TODAY)
+    transition_subscription(draft.pk, "activate", today=TODAY)
     draft.refresh_from_db()
-    assert draft.status == "active" and draft.next_invoice_date == TODAY
+    assert draft.status == "active" and draft.invoices.count() == 1
 
 
 @pytest.mark.django_db

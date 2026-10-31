@@ -34,7 +34,7 @@
 | Method | Path | Roles | Notes |
 |---|---|---|---|
 | GET | `/api/health/` | public | `{"status":"ok","db":"ok"}` |
-| GET | `/api/public/stats/` | public | landing live band: `{"active_subscriptions", "invoices_issued", "mrr"}` (aggregates only, cached 60 s) |
+| GET | `/api/public/stats/` | public | landing live band: `{"active_subscriptions", "invoices_issued", "revenue_collected"}` (aggregates only, cached 60 s) |
 
 ## Auth & users (M4)
 | Method | Path | Roles | Body → Response |

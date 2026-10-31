@@ -316,6 +316,14 @@ Snapshot so historic invoices never change when a tax rate is edited.
 
 `UNIQUE (discount_id, invoice_id)`. Cancelling an invoice deletes its redemptions, which frees the usage.
 
+### `billing_billingrun`
+One row per billing batch (powers "last run" on the Invoices page).
+| run_date | date | |
+|---|---|---|
+| triggered_by | varchar(20) | `manual` · `scheduler` · `command` |
+| activated, closed, invoiced, skipped | integer | counts |
+| created_at | timestamptz | |
+
 ---
 
 ## payments (models M1, logic M4)

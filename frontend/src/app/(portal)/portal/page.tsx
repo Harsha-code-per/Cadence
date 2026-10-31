@@ -1,13 +1,24 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Receipt } from "lucide-react";
+import { AlertTriangle, FileText, HelpCircle, Receipt } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/data/EmptyState";
+import { Money } from "@/components/data/Money";
 import { StatusBadge } from "@/components/data/StatusBadge";
+import { sentence } from "@/components/invoices/format";
+import type { InvoiceDetail } from "@/components/invoices/types";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, ApiError, type Paginated } from "@/lib/api";
 import { formatDate, formatMoney } from "@/lib/format";
@@ -118,14 +129,103 @@ function PortalActions({ subscription }: { subscription: SubscriptionItem }) {
   );
 }
 
+function InvoiceChangesDialog({
+  invoiceId,
+  onClose,
+}: {
+  invoiceId: number | null;
+  onClose: () => void;
+}) {
+  const { data: invoice, isLoading, isError, refetch } = useQuery({
+    queryKey: ["portal-invoice-detail", invoiceId],
+    queryFn: () => api.get<InvoiceDetail>(`/invoices/${invoiceId}/`),
+    enabled: invoiceId !== null,
+  });
+
+  return (
+    <Dialog open={invoiceId !== null} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Why this bill changed</DialogTitle>
+          <DialogDescription>
+            {invoice ? `Invoice ${invoice.number} · Compared with the previous invoice` : "Comparing with the previous invoice"}
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="space-y-3 py-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        ) : isError ? (
+          <EmptyState
+            message="Could not load bill changes."
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
+          />
+        ) : invoice ? (
+          <div className="space-y-4 py-2">
+            {invoice.changes.length === 0 ? (
+              <div className="rounded-lg border border-line bg-canvas p-4 text-center text-sm text-ink-2">
+                No differences from the previous invoice for this subscription.
+              </div>
+            ) : (
+              <ul className="divide-y divide-line rounded-lg border border-line bg-surface p-3">
+                {invoice.changes.map((change, index) => (
+                  <li key={`${change.kind}-${index}`} className="flex items-start justify-between gap-3 py-2.5 text-sm">
+                    <div>
+                      <div className="mb-1">
+                        <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand">
+                          {sentence(change.kind)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-ink-2">{change.description}</p>
+                    </div>
+                    <Money value={change.amount_delta} className="shrink-0 text-sm font-semibold" />
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className="flex items-center justify-between border-t border-line pt-3 text-xs text-ink-2">
+              <span>Period: {formatDate(invoice.period_start)} – {formatDate(invoice.period_end)}</span>
+              <Link
+                href={`/invoices/${invoice.id}/print`}
+                className="font-medium text-brand hover:underline"
+              >
+                View printable invoice →
+              </Link>
+            </div>
+          </div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function PortalPage() {
-  const { data: summary, isLoading: loadingSummary } = useQuery({
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<number | null>(null);
+
+  const {
+    data: summary,
+    isLoading: loadingSummary,
+    isError: errorSummary,
+    refetch: refetchSummary,
+  } = useQuery({
     queryKey: ["portal-summary"],
     queryFn: () => api.get<PortalSummary>("/portal/summary/"),
     staleTime: 30_000,
   });
 
-  const { data: subsData, isLoading: loadingSubs } = useQuery({
+  const {
+    data: subsData,
+    isLoading: loadingSubs,
+    isError: errorSubs,
+    refetch: refetchSubs,
+  } = useQuery({
     queryKey: ["portal-subscriptions"],
     queryFn: () => api.get<Paginated<SubscriptionItem>>("/subscriptions/"),
     staleTime: 30_000,
@@ -133,12 +233,49 @@ export default function PortalPage() {
 
   const subscriptions = subsData?.results ?? [];
 
+  const isOverdue = (inv: { status: string; due_date: string; outstanding: string }) =>
+    inv.status === "overdue" ||
+    (inv.status === "confirmed" &&
+      parseFloat(inv.outstanding) > 0 &&
+      new Date(inv.due_date) < new Date(new Date().toDateString()));
+
+  const overdueInvoices = (summary?.recent_invoices ?? []).filter(isOverdue);
+  const totalOverdue = overdueInvoices.reduce((sum, inv) => sum + parseFloat(inv.outstanding), 0);
+
   return (
     <div className="space-y-8">
+      {/* Overdue Alert Banner */}
+      {!loadingSummary && overdueInvoices.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-rose/30 bg-rose/10 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose/20 text-rose">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-ink">
+                You have {overdueInvoices.length} overdue {overdueInvoices.length === 1 ? "invoice" : "invoices"}
+              </h2>
+              <p className="mt-0.5 text-xs text-ink-2">
+                Total overdue balance: <span className="font-semibold text-rose">{formatMoney(totalOverdue.toFixed(2))}</span>. Please settle promptly to avoid service disruption.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
-        {loadingSummary || !summary ? (
+        {loadingSummary ? (
           <Skeleton className="h-16 w-full" />
+        ) : errorSummary || !summary ? (
+          <EmptyState
+            message="Your portal summary couldn't be loaded."
+            action={
+              <Button variant="outline" size="sm" onClick={() => refetchSummary()}>
+                Try again
+              </Button>
+            }
+          />
         ) : (
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
@@ -175,6 +312,17 @@ export default function PortalPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Skeleton className="h-44 w-full rounded-xl" />
             <Skeleton className="h-44 w-full rounded-xl" />
+          </div>
+        ) : errorSubs ? (
+          <div className="rounded-xl border border-line bg-surface p-8">
+            <EmptyState
+              message="Your subscriptions couldn't be loaded."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetchSubs()}>
+                  Try again
+                </Button>
+              }
+            />
           </div>
         ) : subscriptions.length === 0 ? (
           <div className="rounded-xl border border-line bg-surface p-8 text-center text-sm text-ink-2">
@@ -231,8 +379,19 @@ export default function PortalPage() {
           <p className="text-xs text-ink-2">Payment history and open invoices</p>
         </div>
 
-        {loadingSummary || !summary ? (
+        {loadingSummary ? (
           <Skeleton className="h-48 w-full rounded-xl" />
+        ) : errorSummary || !summary ? (
+          <div className="rounded-xl border border-line bg-surface p-8">
+            <EmptyState
+              message="Invoices couldn't be loaded."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetchSummary()}>
+                  Try again
+                </Button>
+              }
+            />
+          </div>
         ) : summary.recent_invoices.length === 0 ? (
           <div className="rounded-xl border border-line bg-surface p-8 text-center text-sm text-ink-2">
             No invoices issued yet.
@@ -240,41 +399,61 @@ export default function PortalPage() {
         ) : (
           <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
             <div className="divide-y divide-line text-sm">
-              {summary.recent_invoices.map((inv) => (
-                <div
-                  key={inv.id}
-                  className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas text-brand">
-                      <FileText className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <Link href={`/invoices/${inv.id}/print`} className="tabular-nums font-semibold text-brand hover:underline">
-                        {inv.number}
-                      </Link>
-                      <p className="text-xs text-ink-2">
-                        Issued {formatDate(inv.invoice_date)} · Due {formatDate(inv.due_date)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4 sm:justify-end">
-                    <StatusBadge domain="invoice" status={inv.status} />
-
-                    <div className="text-right">
-                      <p className="tabular-nums font-semibold text-ink">
-                        {formatMoney(inv.total)}
-                      </p>
-                      {parseFloat(inv.outstanding) > 0 && inv.status !== "paid" && (
-                        <p className="text-xs font-medium text-rose">
-                          Due: {formatMoney(inv.outstanding)}
+              {summary.recent_invoices.map((inv) => {
+                const overdue = isOverdue(inv);
+                return (
+                  <div
+                    key={inv.id}
+                    className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas text-brand">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Link href={`/invoices/${inv.id}/print`} className="tabular-nums font-semibold text-brand hover:underline">
+                            {inv.number}
+                          </Link>
+                          {overdue && (
+                            <span className="rounded bg-rose/10 px-1.5 py-0.5 text-[10px] font-semibold text-rose">
+                              Overdue
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-ink-2">
+                          Issued {formatDate(inv.invoice_date)} · Due {formatDate(inv.due_date)}
                         </p>
-                      )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedInvoiceId(inv.id)}
+                        className="h-8 gap-1.5 text-xs text-ink-2 hover:text-brand hover:border-brand"
+                      >
+                        <HelpCircle className="h-3.5 w-3.5" />
+                        Why this bill changed
+                      </Button>
+
+                      <StatusBadge domain="invoice" status={overdue ? "overdue" : inv.status} />
+
+                      <div className="text-right">
+                        <p className="tabular-nums font-semibold text-ink">
+                          {formatMoney(inv.total)}
+                        </p>
+                        {parseFloat(inv.outstanding) > 0 && inv.status !== "paid" && (
+                          <p className={`text-xs font-medium ${overdue ? "text-rose font-bold" : "text-rose"}`}>
+                            Due: {formatMoney(inv.outstanding)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -287,8 +466,19 @@ export default function PortalPage() {
           <p className="text-xs text-ink-2">Settled transactions and receipts</p>
         </div>
 
-        {loadingSummary || !summary ? (
+        {loadingSummary ? (
           <Skeleton className="h-32 w-full rounded-xl" />
+        ) : errorSummary || !summary ? (
+          <div className="rounded-xl border border-line bg-surface p-8">
+            <EmptyState
+              message="Payment receipts couldn't be loaded."
+              action={
+                <Button variant="outline" size="sm" onClick={() => refetchSummary()}>
+                  Try again
+                </Button>
+              }
+            />
+          </div>
         ) : summary.recent_payments.length === 0 ? (
           <div className="rounded-xl border border-line bg-surface p-6 text-center text-sm text-ink-2">
             No payments recorded yet.
@@ -328,6 +518,11 @@ export default function PortalPage() {
           </div>
         )}
       </div>
+
+      <InvoiceChangesDialog
+        invoiceId={selectedInvoiceId}
+        onClose={() => setSelectedInvoiceId(null)}
+      />
     </div>
   );
 }

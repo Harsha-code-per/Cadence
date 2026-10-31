@@ -1,10 +1,10 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
-import { LedgerMark } from "@/components/layout/LedgerMark";
+import { SidebarHeader, WORKSPACE_NAV_ID } from "@/components/layout/SidebarHeader";
 import { NAV } from "@/components/layout/nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,11 +15,16 @@ import { cn } from "@/lib/utils";
 const KEY = "cadence.sidebar.collapsed";
 
 const listeners = new Set<() => void>();
+let memoryCollapsed = false;
+let storageAvailable = true;
 const read = () => {
+  if (!storageAvailable) return memoryCollapsed;
   try {
-    return localStorage.getItem(KEY) === "1";
+    memoryCollapsed = localStorage.getItem(KEY) === "1";
+    return memoryCollapsed;
   } catch {
-    return false;
+    storageAvailable = false;
+    return memoryCollapsed;
   }
 };
 
@@ -34,16 +39,19 @@ export function useSidebarCollapsed() {
     () => false,
   );
   const toggle = () => {
+    memoryCollapsed = !read();
     try {
-      localStorage.setItem(KEY, read() ? "0" : "1");
-    } catch {}
+      localStorage.setItem(KEY, memoryCollapsed ? "1" : "0");
+    } catch {
+      storageAvailable = false;
+    }
     listeners.forEach((l) => l());
   };
   return { collapsed, toggle };
 }
 
 const row =
-  "relative flex items-center rounded-md text-[15px] transition-colors hover:bg-sidebar-accent/60 focus-visible:outline-2 focus-visible:outline-sidebar-ring";
+  "relative flex items-center rounded-md text-[15px] transition-colors hover:bg-sidebar-accent/60 focus-visible:outline-2 focus-visible:outline-sidebar-ring [@media(pointer:coarse)]:min-h-11";
 
 function Labelled({ label, show, children }: { label: string; show: boolean; children: React.ReactElement }) {
   if (!show) return children;
@@ -89,21 +97,11 @@ export function SidebarNav({
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <Link
-        href="/dashboard"
-        onClick={onNavigate}
-        aria-label="Cadence home"
-        className={cn(
-          "flex h-12 shrink-0 items-center gap-2.5 font-display text-xl font-bold text-sidebar-accent-foreground",
-          collapsed ? "justify-center" : "px-6",
-        )}
-      >
-        <LedgerMark />
-        {!collapsed && "Cadence"}
-      </Link>
+      <SidebarHeader collapsed={collapsed} onToggle={onToggle} onNavigate={onNavigate} />
 
       {/* The scrollbar is hidden and a soft fade marks overflow, so the rail never shows browser chrome. */}
       <nav
+        id={onToggle ? WORKSPACE_NAV_ID : undefined}
         aria-label="Main"
         className={cn(
           "min-h-0 flex-1 overflow-y-auto pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
@@ -120,7 +118,7 @@ export function SidebarNav({
               {collapsed ? (
                 gi > 0 && <div aria-hidden className="mx-3 mb-3 border-t border-sidebar-border" />
               ) : (
-                <p className="px-3 pb-1.5 text-xs font-medium text-sidebar-muted">{group.label}</p>
+                <p className="px-3 pb-1.5 text-xs font-medium text-sidebar-foreground">{group.label}</p>
               )}
               <ul className="space-y-0.5">
                 {items.map(({ href, label, icon: Icon }) => {
@@ -156,7 +154,7 @@ export function SidebarNav({
         })}
       </nav>
 
-      <div className={cn("flex gap-1 border-t border-sidebar-border py-2", collapsed ? "flex-col-reverse px-2" : "items-center px-3")}>
+      <div className={cn("flex border-t border-sidebar-border py-2", collapsed ? "px-2" : "px-3")}>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -172,7 +170,7 @@ export function SidebarNav({
             {!collapsed && (
               <span className="min-w-0">
                 <span className="block truncate text-sm leading-tight text-sidebar-accent-foreground">{me?.full_name ?? "Account"}</span>
-                <span className="block text-xs capitalize leading-tight text-sidebar-muted">{me?.role ?? ""}</span>
+                <span className="block text-xs capitalize leading-tight text-sidebar-foreground">{me?.role ?? ""}</span>
               </span>
             )}
           </DropdownMenuTrigger>
@@ -182,19 +180,6 @@ export function SidebarNav({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        {onToggle && (
-          <Labelled label="Expand sidebar" show={collapsed}>
-            <button
-              type="button"
-              onClick={onToggle}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-expanded={!collapsed}
-              className={cn(row, "size-9 shrink-0 justify-center text-sidebar-muted hover:text-sidebar-accent-foreground", collapsed && "w-full")}
-            >
-              {collapsed ? <PanelLeftOpen size={18} strokeWidth={1.75} /> : <PanelLeftClose size={18} strokeWidth={1.75} />}
-            </button>
-          </Labelled>
-        )}
       </div>
     </div>
   );

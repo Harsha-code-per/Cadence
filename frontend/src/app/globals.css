@@ -138,7 +138,7 @@
   --radius-lg: var(--radius-panel);
   --radius-xl: var(--radius-panel);
   --radius-2xl: 1.25rem;
-  --shadow-float: var(--shadow-float);
+  --shadow-float: 0 12px 32px -12px rgb(42 23 48 / 0.28);
 
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
@@ -169,6 +169,10 @@
     line-height: 1.02;
   }
   table { line-height: 1.35; }
+  :focus-visible {
+    outline: 2px solid var(--plum);
+    outline-offset: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

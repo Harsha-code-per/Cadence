@@ -73,3 +73,19 @@ def internal_billing_run(request):
     if not expected or not hmac.compare_digest(supplied.encode(), expected.encode()):
         raise DomainError("permission_denied", "Invalid scheduler credentials.", http_status=403)
     return Response(run_due_billing(date.today(), triggered_by="scheduler"))
+
+
+def csrf_failure(request, reason=""):
+    """CSRF rejections in the API's error shape, so the UI can show a useful message."""
+    from django.http import JsonResponse
+
+    return JsonResponse(
+        {
+            "error": {
+                "code": "csrf_failed",
+                "message": "Your security token expired. Refresh the page and try again.",
+                "field_errors": {},
+            }
+        },
+        status=403,
+    )

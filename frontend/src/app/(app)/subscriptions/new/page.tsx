@@ -121,7 +121,7 @@ export default function CreateSubscriptionPage() {
   }
   return (
     <>
-      <Link href="/subscriptions" className="mb-3 inline-flex items-center gap-1 text-sm text-plum hover:underline">
+      <Link href="/subscriptions" className="mb-3 inline-flex items-center gap-1 text-sm text-brand hover:underline">
         <ChevronLeft size={16} /> Subscriptions
       </Link>
       <PageHeader title="New subscription" description="Create a draft without a quotation template." />
@@ -162,7 +162,7 @@ export default function CreateSubscriptionPage() {
           <Button type="submit" disabled={create.isPending || !customer || !plan || !paymentTerm || !startDate}>
             {create.isPending ? "Creating…" : "Create draft"}
           </Button>
-          <Link href="/subscriptions" className="text-sm text-plum hover:underline">
+          <Link href="/subscriptions" className="text-sm text-brand hover:underline">
             Cancel
           </Link>
         </div>

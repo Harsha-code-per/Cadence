@@ -364,7 +364,7 @@ export default function EditSubscriptionPage() {
     <>
       <Link
         href={`/subscriptions/${id}`}
-        className="mb-3 inline-flex items-center gap-1 text-sm text-plum hover:underline"
+        className="mb-3 inline-flex items-center gap-1 text-sm text-brand hover:underline"
       >
         <ChevronLeft size={16} /> Back to subscription
       </Link>

@@ -197,7 +197,7 @@ export function RecordPaymentDialog({ open, onOpenChange, defaultInvoiceId }: Pr
             <Button
               type="submit"
               disabled={loading}
-              className="bg-plum text-white hover:bg-plum/90"
+              className="bg-brand text-white hover:bg-brand/90"
             >
               {loading ? "Recording…" : "Record Payment"}
             </Button>

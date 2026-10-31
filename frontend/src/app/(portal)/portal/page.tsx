@@ -74,7 +74,7 @@ export default function PortalPage() {
         ) : (
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-plum">
+              <span className="text-xs font-semibold uppercase tracking-wider text-brand">
                 Customer Portal
               </span>
               <h1 className="font-display text-2xl font-bold text-ink">
@@ -186,7 +186,7 @@ export default function PortalPage() {
                   className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas text-plum">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-canvas text-brand">
                       <FileText className="h-5 w-5" />
                     </div>
                     <div>

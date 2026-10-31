@@ -26,7 +26,7 @@ export function RoleGate({ allow, children }: { allow: Role[]; children: React.R
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas" aria-busy="true" aria-live="polite">
         <span className="sr-only">Checking your session…</span>
-        <span className="size-8 animate-spin rounded-full border-2 border-line border-t-plum" aria-hidden />
+        <span className="size-8 animate-spin rounded-full border-2 border-line border-t-brand" aria-hidden />
       </div>
     );
   }

@@ -135,8 +135,8 @@ export default function SubscriptionBoardPage() {
               className={cn(
                 "flex w-[296px] shrink-0 flex-col rounded-[10px] border bg-surface/60 transition-colors",
                 dragging && !canDrop && dragging.status !== stage.status && "opacity-55",
-                canDrop && "border-dashed border-plum/60",
-                over === stage.status && "border-solid border-plum bg-plum-soft/60",
+                canDrop && "border-dashed border-brand/60",
+                over === stage.status && "border-solid border-brand bg-brand-soft/60",
               )}
             >
               <header className="space-y-1 border-b px-3.5 py-3">
@@ -282,8 +282,8 @@ function SubscriptionCard({
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <Link href={`/subscriptions/${card.id}`} className="min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-plum">
-          <span className="block truncate text-[13px] font-medium text-plum">{card.number}</span>
+        <Link href={`/subscriptions/${card.id}`} className="min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-brand">
+          <span className="block truncate text-[13px] font-medium text-brand">{card.number}</span>
           <span className="block truncate text-sm font-medium text-ink">{card.customer.name}</span>
           {card.customer.company && <span className="block truncate text-xs text-ink-2">{card.customer.company}</span>}
         </Link>
@@ -292,7 +292,7 @@ function SubscriptionCard({
             <DropdownMenuTrigger
               render={
                 <button
-                  className="-mr-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-2 hover:bg-plum-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-plum"
+                  className="-mr-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-2 hover:bg-brand-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
                   aria-label={`Move ${card.number}`}
                 />
               }

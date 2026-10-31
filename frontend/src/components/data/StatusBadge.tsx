@@ -1,17 +1,18 @@
 import { cn } from "@/lib/utils";
 
-type Tone = "slate" | "plum" | "plum-solid" | "teal" | "amber" | "rose" | "muted";
+type Tone = "slate" | "brand" | "brand-solid" | "sky" | "teal" | "amber" | "rose" | "muted";
 
 // Domain → status → tone: docs/DESIGN.md §2 "Status mapping".
 const TONES = {
-  subscription: { draft: "slate", quotation: "plum", confirmed: "plum-solid", active: "teal", paused: "amber", closed: "muted" },
-  invoice: { draft: "slate", confirmed: "plum", paid: "teal", cancelled: "muted", overdue: "rose" },
+  subscription: { draft: "slate", quotation: "sky", confirmed: "brand-solid", active: "teal", paused: "amber", closed: "muted" },
+  invoice: { draft: "slate", confirmed: "brand", paid: "teal", cancelled: "muted", overdue: "rose" },
 } as const satisfies Record<string, Record<string, Tone>>;
 
 const STYLE: Record<Tone, string> = {
   slate: "bg-[color-mix(in_oklab,var(--slate)_13%,var(--surface))] text-[color-mix(in_oklab,var(--slate)_72%,var(--ink))]",
-  plum: "bg-plum-soft text-plum",
-  "plum-solid": "bg-plum text-primary-foreground",
+  brand: "bg-brand-soft text-brand",
+  "brand-solid": "bg-brand-deep text-primary-foreground",
+  sky: "bg-[color-mix(in_oklab,var(--sky)_13%,var(--surface))] text-[color-mix(in_oklab,var(--sky)_78%,var(--ink))]",
   teal: "bg-[color-mix(in_oklab,var(--teal)_13%,var(--surface))] text-[color-mix(in_oklab,var(--teal)_72%,var(--ink))]",
   amber: "bg-[color-mix(in_oklab,var(--amber)_13%,var(--surface))] text-[color-mix(in_oklab,var(--amber)_72%,var(--ink))]",
   rose: "bg-[color-mix(in_oklab,var(--rose)_13%,var(--surface))] text-[color-mix(in_oklab,var(--rose)_72%,var(--ink))]",

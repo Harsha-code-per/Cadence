@@ -9,9 +9,9 @@ export function CycleRing({ progress, size = 96, title, caption }: { progress: n
         <circle cx="48" cy="48" r={r} fill="none" strokeWidth="8" className="stroke-line" />
         <circle
           cx="48" cy="48" r={r} fill="none" strokeWidth="8" strokeLinecap="round"
-          strokeDasharray={`${c * p} ${c}`} transform="rotate(-90 48 48)" className="stroke-plum"
+          strokeDasharray={`${c * p} ${c}`} transform="rotate(-90 48 48)" className="stroke-brand"
         />
-        <line x1="48" y1="2" x2="48" y2="18" strokeWidth="4" strokeLinecap="round" className="stroke-marigold" transform={`rotate(${p * 360} 48 48)`} />
+        <line x1="48" y1="2" x2="48" y2="18" strokeWidth="4" strokeLinecap="round" className="stroke-brand" transform={`rotate(${p * 360} 48 48)`} />
       </svg>
       {(title || caption) && (
         <figcaption className="flex flex-col gap-1">

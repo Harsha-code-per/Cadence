@@ -32,7 +32,7 @@ const columns: ColumnDef<Subscription, unknown>[] = [
     header: "Subscription",
     cell: ({ row }) => (
       <Link
-        className="font-medium text-plum underline-offset-4 hover:underline"
+        className="font-medium text-brand underline-offset-4 hover:underline"
         href={`/subscriptions/${row.original.id}`}
       >
         {row.original.number}
@@ -208,7 +208,7 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Link href="/subscriptions/new" className="self-center text-sm text-plum underline-offset-4 hover:underline">
+          <Link href="/subscriptions/new" className="self-center text-sm text-brand underline-offset-4 hover:underline">
             Create without a template
           </Link>
         </div>
@@ -263,7 +263,7 @@ export default function SubscriptionsPage() {
                 }}
                 className={cn(
                   "min-h-9 rounded-full border px-3.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-ring",
-                  on ? "border-plum bg-plum-soft font-medium text-ink" : "border-line bg-surface text-ink hover:bg-plum-soft/60",
+                  on ? "border-brand bg-brand-soft font-medium text-ink" : "border-line bg-surface text-ink hover:bg-brand-soft/60",
                 )}
               >
                 {value ? value[0].toUpperCase() + value.slice(1) : "All"}

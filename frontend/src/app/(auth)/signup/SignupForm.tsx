@@ -57,7 +57,7 @@ export function SignupForm() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-[var(--l-marigold-text)] underline-offset-4 hover:underline">
+          <Link href="/login" className="font-medium text-[var(--l-mint-text)] underline-offset-4 hover:underline">
             Log in
           </Link>
         </>
@@ -85,7 +85,7 @@ export function SignupForm() {
         <Field label="Confirm password" error={errors.confirm?.message}>
           <PasswordInput autoComplete="new-password" aria-invalid={!!errors.confirm} {...register("confirm")} />
         </Field>
-        <Button type="submit" className="h-11 w-full bg-[var(--l-marigold)] text-[15px] font-semibold text-[#2a1730] hover:bg-[#ffd47a]" disabled={isSubmitting}>
+        <Button type="submit" className="h-11 w-full bg-[var(--l-mint)] text-[15px] font-semibold text-[#2a1730] hover:bg-[#ffd47a]" disabled={isSubmitting}>
           {isSubmitting ? "Creating your account…" : "Create account"}
         </Button>
       </form>

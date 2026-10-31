@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api, type Paginated } from "@/lib/api";
 import { useOptions } from "@/lib/crud";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatMoneyCompact } from "@/lib/format";
 import type { components } from "@/lib/api-types";
 
 type Summary = {
@@ -30,8 +30,8 @@ type Plan = components["schemas"]["Plan"];
 // Status → token, per docs/DESIGN.md "Status mapping" (never generic chart colours: green must mean active/paid).
 const STATUS_COLOR: Record<string, string> = {
   draft: "var(--slate)",
-  quotation: "var(--plum)",
-  confirmed: "var(--plum)",
+  quotation: "var(--sky)",
+  confirmed: "var(--brand-deep)",
   active: "var(--teal)",
   paid: "var(--teal)",
   paused: "var(--amber)",
@@ -76,9 +76,9 @@ export default function DashboardPage() {
   const s = summary.data;
   const kpis = [
     { label: "Active subscriptions", value: s ? s.active_subscriptions.toLocaleString("en-IN") : "—" },
-    { label: "Monthly recurring revenue", value: s ? formatMoney(s.mrr) : "—", delta: s ? `ARR ${formatMoney(s.arr)}` : undefined },
-    { label: "Collected", value: s ? formatMoney(s.collected) : "—", delta: s ? `of ${formatMoney(s.invoiced)} invoiced` : undefined },
-    { label: "Outstanding", value: s ? formatMoney(s.outstanding) : "—", delta: s && s.overdue_count ? `${s.overdue_count} overdue · ${formatMoney(s.overdue_amount)}` : undefined, deltaTone: "rose" as const },
+    { label: "Monthly recurring revenue", value: s ? formatMoneyCompact(s.mrr) : "—", delta: s ? `ARR ${formatMoneyCompact(s.arr)}` : undefined },
+    { label: "Collected", value: s ? formatMoneyCompact(s.collected) : "—", delta: s ? `of ${formatMoneyCompact(s.invoiced)} invoiced` : undefined },
+    { label: "Outstanding", value: s ? formatMoneyCompact(s.outstanding) : "—", delta: s && s.overdue_count ? `${s.overdue_count} overdue · ${formatMoneyCompact(s.overdue_amount)}` : undefined, deltaTone: "rose" as const },
   ];
 
   return (
@@ -119,8 +119,8 @@ export default function DashboardPage() {
             title="Invoiced and collected"
             legend={
               <span className="flex gap-4 text-[13px] text-ink-2">
-                <Swatch color="var(--plum)" label="Invoiced" />
-                <Swatch color="var(--teal)" label="Collected" />
+                <Swatch color="var(--chart-1)" label="Invoiced" />
+                <Swatch color="var(--chart-2)" label="Collected" />
               </span>
             }
           >
@@ -165,14 +165,14 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-4">
-        <Panel title="Overdue invoices" legend={<Link href="/invoices?overdue=true" className="text-sm text-plum hover:underline">View all</Link>}>
+        <Panel title="Overdue invoices" legend={<Link href="/invoices?overdue=true" className="text-sm text-brand hover:underline">View all</Link>}>
           {overdue.isLoading ? (
             <Skeleton className="h-24" />
           ) : overdue.data && overdue.data.results.length ? (
             <ul className="divide-y">
               {overdue.data.results.map((inv) => (
                 <li key={inv.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-                  <Link href={`/invoices/${inv.id}`} className="font-medium text-plum hover:underline">{inv.number}</Link>
+                  <Link href={`/invoices/${inv.id}`} className="font-medium text-brand hover:underline">{inv.number}</Link>
                   <span className="min-w-0 flex-1 truncate text-ink-2">{inv.customer?.company || inv.customer?.name}</span>
                   <span className="font-medium text-rose"><Money value={inv.outstanding} /></span>
                 </li>

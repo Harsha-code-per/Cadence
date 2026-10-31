@@ -1,9 +1,8 @@
 "use client";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Moon, PanelLeftClose, PanelLeftOpen, Sun } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { CycleMark } from "@/components/layout/CycleMark";
 import { NAV } from "@/components/layout/nav";
@@ -67,7 +66,6 @@ export function SidebarNav({
 }) {
   const pathname = usePathname();
   const { data: me } = useMe();
-  const { resolvedTheme, setTheme } = useTheme();
   const qc = useQueryClient();
 
   async function logout() {
@@ -141,8 +139,8 @@ export function SidebarNav({
                             collapsed ? "justify-center" : "px-3",
                             active &&
                               (collapsed
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground before:absolute before:inset-y-2 before:-left-2 before:w-[3px] before:rounded-r before:bg-marigold"
-                                : "rounded-l-none border-l-[3px] border-marigold bg-sidebar-accent pl-[9px] font-medium text-sidebar-accent-foreground"),
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground before:absolute before:inset-y-2 before:-left-2 before:w-[3px] before:rounded-r before:bg-brand"
+                                : "rounded-l-none border-l-[3px] border-brand bg-sidebar-accent pl-[9px] font-medium text-sidebar-accent-foreground"),
                           )}
                         >
                           <Icon size={18} strokeWidth={1.75} aria-hidden className="shrink-0" />
@@ -168,7 +166,7 @@ export function SidebarNav({
               />
             }
           >
-            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-plum text-[13px] font-semibold text-primary-foreground">
+            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-[13px] font-semibold text-primary-foreground">
               {initials}
             </span>
             {!collapsed && (
@@ -179,9 +177,6 @@ export function SidebarNav({
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" side="top">
-            <DropdownMenuItem onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
-              {resolvedTheme === "dark" ? <Sun size={16} /> : <Moon size={16} />} Switch theme
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={logout}>
               <LogOut size={16} /> Log out
             </DropdownMenuItem>

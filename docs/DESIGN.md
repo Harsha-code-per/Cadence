@@ -10,32 +10,32 @@
 - **Nod to the judges**: the base hue is **Odoo-adjacent aubergine**, and the accent is the **marigold highlighter** used in the problem statement PDF.
 
 ## 2. Color tokens
-Define these as CSS variables in `globals.css` and expose them through the Tailwind v4 `@theme`. Map the shadcn variables (`--background`, `--primary` …) onto them.
+**Light theme only. No dark mode.** Tokens live in `frontend/src/app/globals.css` and are exposed through Tailwind's `@theme`, with the shadcn variables mapped onto them.
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `--ink` | `#2A1730` | `#F3EEF5` | primary text, sidebar background (light mode) |
-| `--ink-2` | `#5E4B66` | `#B9AEC0` | secondary text |
-| `--ink-3` | `#8E8095` | `#7F7387` | placeholders, disabled |
-| `--canvas` | `#F3F1F6` | `#17101A` | app background (cool mist, **not** cream) |
-| `--surface` | `#FFFFFF` | `#211826` | panels, tables, dialogs |
-| `--line` | `#E3DDE8` | `#35293B` | borders, dividers |
-| `--plum` | `#6B3F69` | `#C38DC0` | primary actions, links, focus ring |
-| `--plum-soft` | `#F1E8F0` | `#3A2540` | selected rows, primary-tinted backgrounds |
-| `--marigold` | `#F2AE2E` | `#F2B84B` | **the single accent**: active nav marker, "now" tick, highlights. Max one per view. |
-| `--marigold-soft` | `#FDF1D8` | `#3D2E12` | highlight wash (like the PDF's highlighter strokes) |
-| `--teal` | `#17806F` | `#4CC3AE` | success · paid · active |
-| `--rose` | `#C2364F` | `#F07088` | danger · overdue · destructive |
-| `--amber` | `#B7791F` | `#E3AD55` | warning · paused · quotation expiring |
-| `--slate` | `#6B7280` | `#9CA3AF` | neutral · closed · cancelled |
-
-Contrast: all text tokens meet WCAG AA on `--surface` and `--canvas`. Never put marigold text on white (use `--ink` on `--marigold-soft`).
+| Token | Value | Use |
+|---|---|---|
+| `--ink` | `#0A1F1A` | primary text |
+| `--ink-2` | `#47605A` | secondary text |
+| `--ink-3` | `#7C918B` | placeholders, disabled |
+| `--canvas` | `#F6F3EA` | warm ivory page background |
+| `--surface` | `#FFFFFF` | panels, tables, dialogs |
+| `--line` | `#E4E0D3` | borders, dividers |
+| `--brand` | `#0E7A63` | emerald: primary actions, links, focus ring |
+| `--brand-deep` | `#0B3328` | deep emerald: the strongest buttons, confirmed state, chart series 1 |
+| `--brand-soft` | `#E3F1EA` | selected rows, active nav |
+| `--mint` | `#B7F36B` | mint-lime accent, **fills only**. Never text or thin strokes on a light background |
+| `--mint-soft` | `#EEFBD8` | highlight wash, demo banner |
+| `--teal` | `#2F9E44` | success: paid, active |
+| `--sky` | `#2C6E91` | in progress: quotations |
+| `--rose` | `#C2364F` | danger, overdue |
+| `--amber` | `#B7791F` | warning, paused |
+| `--slate` | `#66736F` | neutral, closed, cancelled |
 
 ### Status mapping (one `StatusBadge` component, pill shape)
 | Domain | Status → token |
 |---|---|
-| Subscription | draft → slate · quotation → plum · confirmed → plum (solid) · **active → teal** · paused → amber · closed → slate (muted) |
-| Invoice | draft → slate · confirmed → plum · **paid → teal** · cancelled → slate + strikethrough · **overdue (derived) → rose** |
+| Subscription | draft → slate · quotation → sky · confirmed → brand-deep (solid) · **active → teal** · paused → amber · closed → slate (muted) |
+| Invoice | draft → slate · confirmed → brand · **paid → teal** · cancelled → slate + strikethrough · **overdue (derived) → rose** |
 | Payment method | neutral outline badge |
 
 Badge = dot + label in sentence case ("Active", "Overdue 12 days"). Never color alone: the label always carries the meaning.

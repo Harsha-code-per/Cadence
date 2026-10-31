@@ -1,0 +1,38 @@
+/* Landing-only palette: always aubergine, independent of the app's light/dark theme. */
+.landing {
+  --l-bg: #2a1730;
+  --l-raised: #3a2540;
+  --l-line: #4a2f52;
+  --l-line-strong: #5a3f62;
+  --l-text: #f3eef5;
+  --l-text-2: #d9cedd;
+  --l-text-3: #b9aec0;
+  --l-marigold: #f2ae2e;
+  --l-marigold-text: #f2b84b;
+  --l-mist: #f3f1f6;
+  --l-ink: #2a1730;
+  background: var(--l-bg);
+  color: var(--l-text);
+  font-family: var(--font-plex), system-ui, sans-serif;
+}
+
+.landing .display {
+  font-family: var(--font-bricolage), var(--font-plex), sans-serif;
+  letter-spacing: -0.035em;
+}
+
+.landing :focus-visible {
+  outline: 2px solid var(--l-marigold);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.landing .num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing * {
+    scroll-behavior: auto !important;
+  }
+}

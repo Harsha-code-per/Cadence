@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
@@ -14,15 +15,13 @@ import { api } from "@/lib/api";
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: me } = useMe();
+  const client = useQueryClient();
 
   const handleLogout = async () => {
-    try {
-      await api.post("/auth/logout/");
-      toast.success("Signed out");
-      router.push("/login");
-    } catch {
-      router.push("/login");
-    }
+    await api.post("/auth/logout/").catch(() => undefined);
+    client.clear(); // the next person on this browser must never see this customer's data
+    toast.success("Signed out");
+    router.push("/login");
   };
 
   return (

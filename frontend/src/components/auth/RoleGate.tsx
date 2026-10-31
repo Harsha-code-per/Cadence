@@ -11,7 +11,7 @@ import { homeFor } from "@/lib/auth";
  * An expired session (401) goes back to login. The API enforces all of this as well;
  * this just avoids showing screens the user can't use.
  */
-export function RoleGate({ allow, children }: { allow: Role[]; children: React.ReactNode }) {
+export function RoleGate({ allow, children, nested = false }: { allow: Role[]; children: React.ReactNode; nested?: boolean }) {
   const router = useRouter();
   const { data: me, error, isPending } = useMe();
   const expired = error instanceof ApiError && error.status === 401;
@@ -32,7 +32,7 @@ export function RoleGate({ allow, children }: { allow: Role[]; children: React.R
   }
   return (
     <>
-      {me?.is_demo && <DemoBanner />}
+      {me?.is_demo && !nested && <DemoBanner />}
       {children}
     </>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { FileText } from "lucide-react";
+import { FileText, Receipt } from "lucide-react";
 
 import { CycleRing } from "@/components/data/CycleRing";
 import { StatusBadge } from "@/components/data/StatusBadge";
@@ -210,6 +210,55 @@ export default function PortalPage() {
                         </p>
                       )}
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Payment Receipts Section */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="font-display text-lg font-semibold text-ink">Payment Receipts</h2>
+          <p className="text-xs text-ink-2">Settled transactions and receipts</p>
+        </div>
+
+        {loadingSummary || !summary ? (
+          <Skeleton className="h-32 w-full rounded-xl" />
+        ) : summary.recent_payments.length === 0 ? (
+          <div className="rounded-xl border border-line bg-surface p-6 text-center text-sm text-ink-2">
+            No payments recorded yet.
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
+            <div className="divide-y divide-line text-sm">
+              {summary.recent_payments.map((pmt) => (
+                <div
+                  key={pmt.id}
+                  className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal/10 text-teal">
+                      <Receipt className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="font-mono font-semibold text-ink">{pmt.number}</p>
+                      <p className="text-xs text-ink-2">
+                        {pmt.payment_date} • {pmt.method.toUpperCase().replace("_", " ")}
+                        {pmt.reference ? ` • Ref: ${pmt.reference}` : ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="font-mono font-semibold text-teal">
+                      {formatMoney(pmt.amount)}
+                    </p>
+                    <span className="inline-block rounded-full bg-teal/10 px-2 py-0.5 text-[10px] font-medium text-teal">
+                      Success
+                    </span>
                   </div>
                 </div>
               ))}

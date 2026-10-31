@@ -242,6 +242,7 @@ def test_aging_buckets_use_outstanding_and_exclude_paid_and_future(api, make_use
         ("31-60", 1, Decimal("100.00")),
         ("60+", 1, Decimal("100.00")),
     ]
+    assert [row["amount"] for row in data] == ["160.00", "100.00", "100.00", "100.00"]
 
     api.force_authenticate(make_user("c@example.test"))
     assert api.get("/api/analytics/aging/").status_code == 403

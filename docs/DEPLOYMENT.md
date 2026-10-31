@@ -45,7 +45,7 @@ Reset the DB: `docker compose down -v && docker compose up -d db && python manag
 | `DJANGO_SECRET_KEY` | any | Render `generateValue` |
 | `DJANGO_DEBUG` | `true` | `false` |
 | `DATABASE_URL` | `postgres://cadence:cadence@localhost:5432/cadence` | Neon pooled URL with `?sslmode=require` |
-| `ALLOWED_HOSTS` | `localhost,127.0.0.1` | `<service>.onrender.com` |
+| `ALLOWED_HOSTS` | `localhost,127.0.0.1` | not needed: Render's `RENDER_EXTERNAL_HOSTNAME` is added automatically |
 | `FRONTEND_URL` | `http://localhost:3000` | Vercel URL (used in reset links, CSRF trusted origins) |
 | `EMAIL_URL` / `EMAIL_HOST`… | console | Brevo SMTP host/port/user/key |
 | `DEFAULT_FROM_EMAIL` | `Cadence <no-reply@cadence.local>` | verified Brevo sender |

@@ -1,5 +1,5 @@
 "use client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRightLeft, List, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -72,7 +72,6 @@ export default function SubscriptionBoardPage() {
   const [over, setOver] = useState<Stage | null>(null);
   const [closing, setClosing] = useState<Card | null>(null);
   const [reason, setReason] = useState("");
-  const [limits, setLimits] = useState<Record<Stage, number>>({ draft: 12, quotation: 12, confirmed: 12, active: 12, paused: 12, closed: 6 });
 
   const pipeline = useQuery({ queryKey: ["analytics", "pipeline"], queryFn: () => api.get<PipelineStage[]>("/analytics/pipeline/") });
   const totals = Object.fromEntries((pipeline.data ?? []).map((s) => [s.status, s])) as Partial<Record<Stage, PipelineStage>>;
@@ -101,7 +100,7 @@ export default function SubscriptionBoardPage() {
   }
 
   return (
-    <div className="flex h-full min-w-0 flex-col gap-5">
+    <div data-pipeline-board className="flex min-w-0 flex-col gap-6">
       <PageHeader
         title="Subscription pipeline"
         description="Every subscription by stage. Drag a card to move it, or use its menu. Only moves the plan allows are offered."
@@ -112,7 +111,7 @@ export default function SubscriptionBoardPage() {
         }
       />
 
-      <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6" role="list" aria-label="Subscription stages">
+      <div className="grid min-w-0 grid-cols-1 items-stretch gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:gap-3" role="list" aria-label="Subscription stages">
         {STAGES.map((stage) => {
           const canDrop = !!dragging && !!moveFor(dragging, stage.status);
           return (
@@ -133,13 +132,13 @@ export default function SubscriptionBoardPage() {
                 setOver(null);
               }}
               className={cn(
-                "flex min-w-0 flex-col rounded-[10px] border bg-surface/60 transition-colors",
+                "flex min-h-[calc(100svh-14rem)] min-w-0 flex-col rounded-lg border border-line bg-surface/60 transition-colors",
                 dragging && !canDrop && dragging.status !== stage.status && "opacity-55",
                 canDrop && "border-dashed border-brand/60",
                 over === stage.status && "border-solid border-brand bg-brand-soft/60",
               )}
             >
-              <header className="space-y-1 border-b px-3.5 py-3">
+              <header className="space-y-2 border-b border-line p-3">
                 <div className="flex items-center justify-between gap-2">
                   <h2 id={`col-${stage.status}`} className="flex items-center gap-2">
                     <StatusBadge domain="subscription" status={stage.status} label={stage.label} />
@@ -148,15 +147,13 @@ export default function SubscriptionBoardPage() {
                     {totals[stage.status]?.count?.toLocaleString("en-IN") ?? "…"}
                   </span>
                 </div>
-                <p className="truncate text-xs text-ink-2">{stage.hint}</p>
+                <p className="min-h-8 text-xs leading-relaxed text-ink-2">{stage.hint}</p>
                 <p className="h-5 text-sm font-semibold tabular-nums text-ink">
                   {totals[stage.status] ? `${formatMoneyCompact(totals[stage.status]!.recurring_value)}/cycle` : ""}
                 </p>
               </header>
               <Column
                 stage={stage.status}
-                limit={limits[stage.status]}
-                onMore={() => setLimits((l) => ({ ...l, [stage.status]: Math.min(l[stage.status] + 24, 100) }))}
                 onDragStart={setDragging}
                 onDragEnd={() => {
                   setDragging(null);
@@ -200,37 +197,36 @@ export default function SubscriptionBoardPage() {
 
 function Column({
   stage,
-  limit,
-  onMore,
   onDragStart,
   onDragEnd,
   onMove,
   pending,
 }: {
   stage: Stage;
-  limit: number;
-  onMore: () => void;
   onDragStart: (card: Card) => void;
   onDragEnd: () => void;
   onMove: (card: Card, to: Stage) => void;
   pending?: number;
 }) {
-  const list = useQuery({
-    queryKey: ["board", stage, limit],
-    queryFn: () => api.get<Paginated<Card>>("/subscriptions/", { status: stage, page_size: limit, ordering: "-updated_at" }),
-    placeholderData: (prev) => prev,
+  const list = useInfiniteQuery({
+    queryKey: ["board", stage],
+    initialPageParam: 1,
+    queryFn: ({ pageParam }) => api.get<Paginated<Card>>("/subscriptions/", {
+      status: stage, page: pageParam, page_size: stage === "closed" ? 6 : 12, ordering: "-updated_at",
+    }),
+    getNextPageParam: (lastPage, _pages, lastPageParam) => lastPage.next ? lastPageParam + 1 : undefined,
   });
 
   if (list.isPending) {
     return (
-      <div className="space-y-2 p-2.5" aria-busy="true">
+      <div className="space-y-3 p-3" aria-busy="true">
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-[92px] animate-pulse rounded-md bg-line/50" />
         ))}
       </div>
     );
   }
-  if (list.isError) {
+  if (list.isError && !list.data) {
     return (
       <div className="flex flex-col items-center gap-2 p-4 text-center">
         <p className="text-sm text-rose">Couldn&apos;t load this stage.</p>
@@ -240,18 +236,20 @@ function Column({
       </div>
     );
   }
-  const cards = list.data.results;
+  const cards = list.data?.pages.flatMap((page) => page.results) ?? [];
+  const count = list.data?.pages[0]?.count ?? 0;
 
   return (
-    <ul className="flex h-[26rem] flex-col gap-2 overflow-y-auto p-2.5 [scrollbar-width:thin] 2xl:h-[calc(100dvh-19rem)] 2xl:min-h-[26rem]" aria-label={`${stage} subscriptions`}>
+    <ul className="flex flex-1 flex-col gap-3 p-3" aria-label={`${stage} subscriptions`} aria-busy={list.isFetchingNextPage}>
       {cards.length === 0 && <li className="rounded-md border border-dashed px-3 py-6 text-center text-sm text-ink-2">Nothing here right now.</li>}
       {cards.map((card) => (
         <SubscriptionCard key={card.id} card={card} onDragStart={onDragStart} onDragEnd={onDragEnd} onMove={onMove} pending={pending === card.id} />
       ))}
-      {list.data.count > cards.length && limit < 100 && (
+      {list.isFetchNextPageError && <li><p role="alert" className="text-xs text-rose">Couldn&apos;t load more. Try again below.</p></li>}
+      {list.hasNextPage && (
         <li>
-          <Button variant="ghost" size="sm" className="w-full" onClick={onMore}>
-            Show more ({(list.data.count - cards.length).toLocaleString("en-IN")} more)
+          <Button variant="outline" size="sm" className="min-h-11 w-full whitespace-normal" disabled={list.isFetchingNextPage} onClick={() => list.fetchNextPage()}>
+            {list.isFetchingNextPage ? "Loading…" : `Show more (${(count - cards.length).toLocaleString("en-IN")} more)`}
           </Button>
         </li>
       )}
@@ -285,14 +283,14 @@ function SubscriptionCard({
       }}
       onDragEnd={onDragEnd}
       className={cn(
-        "group rounded-md border bg-surface p-3 shadow-[0_1px_0_rgb(42_23_48/0.04)] transition-[transform,box-shadow] duration-150",
+        "group min-w-0 rounded-md border border-line bg-surface p-3 transition-[transform,box-shadow] duration-150",
         targets.length > 0 && "cursor-grab active:cursor-grabbing hover:-translate-y-px hover:shadow-float",
         pending && "pointer-events-none opacity-60",
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <Link href={`/subscriptions/${card.id}`} className="min-w-0 rounded-sm focus-visible:outline-2 focus-visible:outline-brand">
-          <span className="block break-words text-[13px] font-medium text-brand">{card.number}</span>
+          <span className="block break-all text-xs font-medium text-brand">{card.number}</span>
           <span className="block break-words text-sm font-medium text-ink">{card.customer.name}</span>
           {card.customer.company && <span className="block break-words text-xs text-ink-2">{card.customer.company}</span>}
         </Link>
@@ -301,7 +299,7 @@ function SubscriptionCard({
             <DropdownMenuTrigger
               render={
                 <button
-                  className="-mr-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-2 hover:bg-brand-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-brand"
+                  className="-mr-1 -mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-2 hover:bg-brand-soft hover:text-ink focus-visible:outline-2 focus-visible:outline-brand [@media(pointer:coarse)]:size-11"
                   aria-label={`Move ${card.number}`}
                 />
               }
@@ -323,7 +321,7 @@ function SubscriptionCard({
           </DropdownMenu>
         )}
       </div>
-      <div className="mt-2.5 flex flex-wrap items-end justify-between gap-2 text-xs">
+      <div className="mt-3 flex flex-col items-start gap-1 text-xs">
         <span className="min-w-0 break-words text-ink-2">{card.plan.name}</span>
         <span className="shrink-0 text-sm font-medium tabular-nums text-ink">
           <Money value={card.recurring_total} />

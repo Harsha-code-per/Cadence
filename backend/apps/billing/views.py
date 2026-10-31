@@ -56,7 +56,7 @@ class InvoiceViewSet(
         "subscription": ["exact"],
         "invoice_date": ["exact", "gte", "lte"],
     }
-    search_fields = ["number", "customer__name", "customer__company"]
+    search_fields = ["number", "customer__name", "customer__company", "subscription__number"]
     ordering_fields = ["invoice_date", "due_date", "total", "number", "status", "created_at"]
     customer_lookup = "customer"
 

@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Printer } from "lucide-react";
 import { DateText, Money } from "@/components/data/Money";
 import { Button } from "@/components/ui/button";
+import { useMe } from "@/hooks/useMe";
 import { api } from "@/lib/api";
 
 type Invoice = {
@@ -48,15 +49,16 @@ function AmountRow({ label, value, strong = false }: { label: string; value: str
 export default function InvoicePrintPage() {
   const { id } = useParams<{ id: string }>();
   const invoice = useQuery({ queryKey: ["invoice", id], queryFn: () => api.get<Invoice>(`/invoices/${id}/`) });
+  const customer = useMe().data?.role === "customer";
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-6 text-slate-950 print:min-h-0 print:bg-white print:p-0">
+    <main className="min-h-screen bg-canvas px-4 py-6 text-ink print:min-h-0 print:bg-white print:p-0">
       <style>{`@media print { @page { size: auto; margin: 16mm; } body { background: white !important; color: black !important; } .print-document { box-shadow: none !important; border: 0 !important; padding: 0 !important; } thead { display: table-header-group; } tr { break-inside: avoid; } }`}</style>
       <div className="mx-auto mb-4 flex max-w-4xl justify-between gap-3 print:hidden">
         <Link
-          href={`/invoices/${id}`}
+          href={customer ? "/portal" : `/invoices/${id}`}
           className="inline-flex items-center gap-2 text-sm font-medium underline-offset-4 hover:underline"
         >
-          <ArrowLeft size={16} /> Back to invoice
+          <ArrowLeft size={16} /> {customer ? "Back to portal" : "Back to invoice"}
         </Link>
         <Button disabled={!invoice.data} onClick={() => window.print()}>
           <Printer /> Print invoice
@@ -123,7 +125,7 @@ export default function InvoicePrintPage() {
                       <p>{line.description}</p>
                       {line.taxes.map((tax) => (
                         <p key={tax.id} className="mt-1 text-xs text-slate-600">
-                          {tax.name} ({tax.rate}%): <Money value={tax.amount} />
+                          {tax.name.includes("%") ? tax.name : `${tax.name} (${tax.rate}%)`}: <Money value={tax.amount} />
                         </p>
                       ))}
                     </td>

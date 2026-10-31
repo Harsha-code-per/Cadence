@@ -18,7 +18,7 @@ from apps.core.sequences import next_number
 from apps.subscriptions.models import Subscription, SubscriptionLine, SubscriptionStatus
 
 # Portal actions (docs/API.md): everything else is admin/staff only.
-CUSTOMER_ACTIONS = frozenset({"confirm", "pause", "close", "renew"})
+CUSTOMER_ACTIONS = frozenset({"confirm", "pause", "resume", "close", "renew"})
 EDITABLE_STATUSES = frozenset({SubscriptionStatus.DRAFT})
 
 
@@ -265,6 +265,10 @@ def available_actions(subscription: Subscription, user, today: date | None = Non
             actions.append("close")
         if plan.renewable:
             actions.append("renew")
+    elif status == SubscriptionStatus.PAUSED:
+        actions.append("resume")
+        if plan.closable:
+            actions.append("close")
     elif status == SubscriptionStatus.CLOSED and plan.renewable:
         actions.append("renew")
     return actions

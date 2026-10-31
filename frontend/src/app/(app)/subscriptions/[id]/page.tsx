@@ -116,6 +116,8 @@ function Panel({
   );
 }
 
+type InvoiceRow = { id: number; number: string; status: string };
+
 export default function SubscriptionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -130,6 +132,12 @@ export default function SubscriptionDetailPage() {
   const events = useQuery({
     queryKey: ["subscription-events", id, page],
     queryFn: () => api.get<Paginated<Event>>(`/subscriptions/${id}/events/`, { page }),
+    enabled: !!subscription.data,
+  });
+  const invoices = useQuery({
+    queryKey: ["invoices", "of-subscription", id],
+    queryFn: () =>
+      api.get<Paginated<InvoiceRow>>("/invoices/", { subscription: id, ordering: "-invoice_date", page_size: 5 }),
     enabled: !!subscription.data,
   });
   const action = useMutation({
@@ -326,6 +334,28 @@ export default function SubscriptionDetailPage() {
               />
             ) : (
               <p className="text-sm text-ink-2">No upcoming invoice. Billing starts once the subscription is active.</p>
+            )}
+          </Panel>
+
+          <Panel id="invoices-heading" title="Invoices">
+            {invoices.data?.results.length ? (
+              <ul className="divide-y text-sm">
+                {invoices.data.results.map((invoice) => (
+                  <li key={invoice.id} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
+                    <Link href={`/invoices/${invoice.id}`} className="font-medium text-brand hover:underline">
+                      {invoice.number}
+                    </Link>
+                    <StatusBadge domain="invoice" status={invoice.status} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-ink-2">{invoices.isLoading ? "Loading invoices…" : "No invoices yet."}</p>
+            )}
+            {(invoices.data?.count ?? 0) > 5 && (
+              <Link href={`/invoices?search=${encodeURIComponent(sub.number)}`} className="mt-3 inline-block text-sm text-brand hover:underline">
+                All {invoices.data?.count} invoices
+              </Link>
             )}
           </Panel>
 

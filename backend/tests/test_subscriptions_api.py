@@ -595,8 +595,12 @@ def test_customer_portal_actions_are_plan_gated_and_scoped(api, people, plan, te
     paused_plan.pausable = True
     paused_plan.save(update_fields=["pausable"])
     assert api.post(f"/api/subscriptions/{active.pk}/pause/").json()["status"] == "paused"
-    # Resume is not a customer action.
-    assert api.post(f"/api/subscriptions/{active.pk}/resume/").status_code == 403
+    # Whoever can pause can come back without emailing anyone.
+    assert api.get(f"/api/subscriptions/{active.pk}/").json()["allowed_actions"] == [
+        "resume",
+        "close",
+    ]
+    assert api.post(f"/api/subscriptions/{active.pk}/resume/").json()["status"] == "active"
 
     closed_plan = Plan.objects.create(
         name="Non-closable", price=0, start_date=TODAY - timedelta(days=5), closable=False

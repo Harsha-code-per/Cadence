@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
+import { CustomerPicker } from "@/components/data/CustomerPicker";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,7 +133,7 @@ export default function CreateSubscriptionPage() {
             After creating the draft, add product lines before sending the quotation.
           </p>
         </div>
-        <Picker label="Customer" path="/customers/" value={customer} onChange={setCustomer} />
+        <CustomerPicker value={customer} onChange={setCustomer} />
         <Picker label="Plan" path="/plans/" value={plan} onChange={setPlan} available />
         <Picker label="Payment term" path="/payment-terms/" value={paymentTerm} onChange={setPaymentTerm} />
         <label className="grid content-start gap-1.5 text-sm font-medium">

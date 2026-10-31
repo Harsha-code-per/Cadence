@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,11 +24,11 @@ import { formatMoney } from "@/lib/format";
 interface InvoiceOption {
   id: number;
   number: string;
-  customer_name: string;
-  total: string;
+  customer: { name: string; company?: string };
   outstanding: string;
-  status: string;
 }
+
+const customerOf = (invoice: InvoiceOption) => invoice.customer.company || invoice.customer.name;
 
 const schema = z.object({
   invoice: z.number().min(1, "Please select an invoice."),
@@ -44,27 +44,31 @@ type FormValues = z.infer<typeof schema>;
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultInvoiceId?: number;
+  /** Opened from an invoice: skip the search and pay this one. */
+  invoice?: InvoiceOption;
 }
 
-export function RecordPaymentDialog({ open, onOpenChange, defaultInvoiceId }: Props) {
+export function RecordPaymentDialog({ open, onOpenChange, invoice }: Props) {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const term = useDeferredValue(search.trim());
 
   const { data: invoicesData } = useQuery({
-    queryKey: ["invoices", "confirmed-for-payment"],
-    queryFn: () => api.get<Paginated<InvoiceOption>>("/invoices/?status=confirmed&page_size=50"),
-    enabled: open,
+    queryKey: ["invoices", "confirmed-for-payment", term],
+    queryFn: () => api.get<Paginated<InvoiceOption>>("/invoices/", { status: "confirmed", search: term, page_size: 25 }),
+    enabled: open && !invoice,
+    placeholderData: (previous) => previous,
   });
 
-  const invoices = invoicesData?.results ?? [];
+  const invoices = invoice ? [invoice] : (invoicesData?.results ?? []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      invoice: defaultInvoiceId || (invoices[0]?.id ?? 0),
+      invoice: invoice?.id ?? 0,
       method: "upi",
-      amount: 0,
+      amount: invoice ? parseFloat(invoice.outstanding) : 0,
       payment_date: new Date().toISOString().split("T")[0],
       reference: "",
       note: "",
@@ -79,7 +83,7 @@ export function RecordPaymentDialog({ open, onOpenChange, defaultInvoiceId }: Pr
     form.setValue("invoice", invId);
     const target = invoices.find((inv) => inv.id === invId);
     if (target) {
-      form.setValue("amount", parseFloat(target.outstanding || target.total));
+      form.setValue("amount", parseFloat(target.outstanding));
     }
   };
 
@@ -93,8 +97,8 @@ export function RecordPaymentDialog({ open, onOpenChange, defaultInvoiceId }: Pr
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["payments"] }),
         queryClient.invalidateQueries({ queryKey: ["invoices"] }),
-        queryClient.invalidateQueries({ queryKey: ["analytics-summary"] }),
-        queryClient.invalidateQueries({ queryKey: ["analytics-revenue-series"] }),
+        queryClient.invalidateQueries({ queryKey: ["invoice"] }),
+        queryClient.invalidateQueries({ queryKey: ["analytics"] }),
       ]);
       toast.success("Payment recorded successfully!");
       onOpenChange(false);
@@ -120,22 +124,39 @@ export function RecordPaymentDialog({ open, onOpenChange, defaultInvoiceId }: Pr
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <Field label="Invoice" error={errorOf(form.formState.errors, "invoice")}>
-            <select
-              value={selectedInvoiceId || ""}
-              onChange={(e) => handleInvoiceChange(Number(e.target.value))}
-              className="h-9 w-full rounded-lg border border-input bg-surface px-3 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <option value="" disabled>
-                Select confirmed invoice...
-              </option>
-              {invoices.map((inv) => (
-                <option key={inv.id} value={inv.id}>
-                  {inv.number} — {inv.customer_name} (Due: {formatMoney(inv.outstanding)})
+          {invoice ? (
+            <p className="text-sm">
+              <span className="font-medium">{invoice.number}</span> · {customerOf(invoice)}
+            </p>
+          ) : (
+            <Field label="Invoice" error={errorOf(form.formState.errors, "invoice")}>
+              <Input
+                type="search"
+                aria-label="Search confirmed invoices"
+                placeholder="Search by invoice number or customer"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  form.setValue("invoice", 0);
+                }}
+              />
+              <select
+                aria-label="Matching invoices"
+                value={selectedInvoiceId || ""}
+                onChange={(e) => handleInvoiceChange(Number(e.target.value))}
+                className="mt-2 h-9 w-full rounded-lg border border-input bg-surface px-3 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <option value="" disabled>
+                  {invoices.length ? "Select a confirmed invoice" : "No matching invoices"}
                 </option>
-              ))}
-            </select>
-          </Field>
+                {invoices.map((inv) => (
+                  <option key={inv.id} value={inv.id}>
+                    {inv.number} — {customerOf(inv)} ({formatMoney(inv.outstanding)} due)
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
 
           {selectedInvoice && (
             <div className="flex justify-between rounded-lg border border-line bg-canvas p-2.5 text-xs">

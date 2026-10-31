@@ -9,7 +9,7 @@
     "lint": "eslint",
     "gen:api": "openapi-typescript http://localhost:8000/api/schema/ -o src/lib/api-types.ts",
     "format": "prettier --write src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -31,7 +31,6 @@
     "react-dom": "19.3.0",
     "react-hook-form": "^7.91.0",
     "recharts": "^3.10.1",
-    "shadcn": "^4.23.0",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
     "three": "^0.187.0",
@@ -48,6 +47,7 @@
     "eslint-config-next": "16.4.3",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.10",
+    "shadcn": "^4.23.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

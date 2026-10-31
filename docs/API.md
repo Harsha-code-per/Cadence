@@ -56,6 +56,12 @@ invalid tool selections 400 `assistant_invalid_tool`, and rate limits 429 `throt
 all in the standard error shape. The counter uses Django's configured cache;
 the current LocMemCache is process-local (a shared cache is needed across workers).
 
+Groq is supported with `ASSISTANT_API_URL=https://api.groq.com/openai/v1/chat/completions`.
+Choose a chat model available to the key's account; local live checks used
+`ASSISTANT_MODEL=openai/gpt-oss-20b`. Put the key only in the gitignored `backend/.env`
+or the backend host's environment settings. The stdlib client sends a `Cadence/1.0`
+User-Agent and a 2048-token budget to accommodate reasoning models.
+
 ---
 
 ## Health / public (M1)

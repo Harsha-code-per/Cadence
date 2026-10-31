@@ -17,9 +17,9 @@ Configure all three server-only environment variables in the gitignored environm
 
 ## Checks actually run
 
-- `py -3.14 -m pytest -q` against local PostgreSQL: **234 passed**.
+- `py -3.14 -m pytest -q` against local PostgreSQL: **238 passed** on the latest main rebase (initial run: 234).
 - `py -3.14 -m ruff check .`: passed.
-- `py -3.14 -m ruff format --check .`: passed (99 files).
+- `py -3.14 -m ruff format --check .`: passed (100 files after rebase).
 - OpenAPI TypeScript regenerated from the local Django schema with `openapi-typescript`.
 - `npx eslint src`: passed.
 - `npx next typegen`, then `npx tsc --noEmit`: passed.
@@ -92,3 +92,9 @@ INR 3,448,988.50. These are local seeded-data observations, not production or
 5,000-subscription benchmarks. An unsupported weather question also returned the
 capability explanation during the live checks. This remains a text feature;
 speech recognition and voice output are not implemented.
+
+The real browser flow also passed after restarting Django and signing in again:
+Insights rendered the enabled box, the overdue question received the live answer,
+and displayed source JSON exactly matched the aging API response. Screenshot:
+[live Groq answer](ask-cadence-groq-live.png). The first browser attempt was blocked
+by an expired local session after environment setup; signing in resolved it.

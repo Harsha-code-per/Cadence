@@ -79,8 +79,8 @@ function cycleProgress(sub: Subscription) {
 // Timeline dot colour by the status the subscription moved to (docs/DESIGN.md status mapping).
 const DOT: Record<string, string> = {
   active: "bg-teal",
-  confirmed: "bg-plum",
-  quotation: "bg-plum",
+  confirmed: "bg-brand",
+  quotation: "bg-brand",
   paused: "bg-amber",
   draft: "bg-slate",
   closed: "bg-slate",
@@ -158,7 +158,7 @@ export default function SubscriptionDetailPage() {
         <Button variant="link" onClick={() => subscription.refetch()}>
           Try again
         </Button>
-        <Link href="/subscriptions" className="ml-2 text-plum underline">
+        <Link href="/subscriptions" className="ml-2 text-brand underline">
           Back to subscriptions
         </Link>
       </div>
@@ -169,7 +169,7 @@ export default function SubscriptionDetailPage() {
   const primary = available.find((n) => n !== "close");
   return (
     <>
-      <Link href="/subscriptions" className="mb-3 inline-flex items-center gap-1 text-sm text-plum hover:underline">
+      <Link href="/subscriptions" className="mb-3 inline-flex items-center gap-1 text-sm text-brand hover:underline">
         <ChevronLeft size={16} /> Subscriptions
       </Link>
       <PageHeader
@@ -208,7 +208,7 @@ export default function SubscriptionDetailPage() {
         }
       />
       {selectedAction && (
-        <section aria-labelledby="action-heading" className="mb-5 rounded-lg border border-plum bg-plum-soft p-5">
+        <section aria-labelledby="action-heading" className="mb-5 rounded-lg border border-brand bg-brand-soft p-5">
           <h2 id="action-heading" className="font-sans text-[17px] font-semibold">
             {ACTIONS[selectedAction].label}
           </h2>

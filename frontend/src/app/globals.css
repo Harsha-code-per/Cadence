@@ -2,28 +2,28 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
-/* Design tokens: docs/DESIGN.md §2. Only use these; no ad-hoc hex values. */
+/* Design tokens: docs/DESIGN.md §2. Light theme only. Use these; no ad-hoc hex values. */
 :root {
-  --ink: #2a1730;
-  --ink-2: #5e4b66;
-  --ink-3: #8e8095;
-  --canvas: #f3f1f6;
+  --ink: #0a1f1a;
+  --ink-2: #47605a;
+  --ink-3: #7c918b;
+  --canvas: #f6f3ea;
   --surface: #ffffff;
-  --line: #e3dde8;
-  --plum: #6b3f69;
-  --plum-soft: #f1e8f0;
-  --marigold: #f2ae2e;
-  --marigold-soft: #fdf1d8;
-  --teal: #17806f;
+  --line: #e4e0d3;
+  --brand: #0e7a63;
+  --brand-deep: #0b3328;
+  --brand-soft: #e3f1ea;
+  --mint: #b7f36b;
+  --mint-soft: #eefbd8;
+  --teal: #2f9e44; /* success: greener and lighter than the brand so the two never blur */
+  --sky: #2c6e91; /* in-progress states such as quotations */
   --rose: #c2364f;
   --amber: #b7791f;
-  --slate: #6b7280;
+  --slate: #66736f;
 
   --radius: 0.375rem; /* 6px: inputs and buttons; panels use --radius-panel */
   --radius-panel: 0.625rem;
-  --shadow-float: 0 12px 32px -12px rgb(42 23 48 / 0.28);
+  --shadow-float: 0 14px 36px -14px rgb(11 51 40 / 0.26);
 
   /* shadcn variables mapped onto the tokens */
   --background: var(--canvas);
@@ -32,54 +32,32 @@
   --card-foreground: var(--ink);
   --popover: var(--surface);
   --popover-foreground: var(--ink);
-  --primary: var(--plum);
+  --primary: var(--brand);
   --primary-foreground: #ffffff;
-  --secondary: var(--plum-soft);
+  --secondary: var(--brand-soft);
   --secondary-foreground: var(--ink);
-  --muted: var(--plum-soft);
+  --muted: var(--brand-soft);
   --muted-foreground: var(--ink-2);
-  --accent: var(--plum-soft);
+  --accent: var(--brand-soft);
   --accent-foreground: var(--ink);
   --destructive: var(--rose);
   --border: var(--line);
   --input: var(--line);
-  --ring: var(--plum);
-  --chart-1: var(--plum);
-  --chart-2: var(--teal);
-  --chart-3: var(--marigold);
+  --ring: var(--brand);
+  --chart-1: var(--brand-deep);
+  --chart-2: #8fd44f;
+  --chart-3: var(--amber);
   --chart-4: var(--rose);
   --chart-5: var(--slate);
-  --sidebar: var(--ink);
-  --sidebar-foreground: #d9cedd;
-  --sidebar-muted: #9c8ca4;
-  --sidebar-primary: var(--marigold);
-  --sidebar-primary-foreground: var(--ink);
-  --sidebar-accent: #3a2540;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #3a2540;
-  --sidebar-ring: var(--marigold);
-}
-
-.dark {
-  --ink: #f3eef5;
-  --ink-2: #b9aec0;
-  --ink-3: #7f7387;
-  --canvas: #17101a;
-  --surface: #211826;
-  --line: #35293b;
-  --plum: #c38dc0;
-  --plum-soft: #3a2540;
-  --marigold: #f2b84b;
-  --marigold-soft: #3d2e12;
-  --teal: #4cc3ae;
-  --rose: #f07088;
-  --amber: #e3ad55;
-  --slate: #9ca3af;
-  --shadow-float: 0 12px 32px -12px rgb(0 0 0 / 0.6);
-
-  --primary-foreground: #17101a;
-  --sidebar: #120b15; /* dark mode keeps the sidebar a step below the canvas */
-  --sidebar-accent: #2a1d30;
+  --sidebar: #fffdf8;
+  --sidebar-foreground: var(--ink-2);
+  --sidebar-muted: var(--ink-3);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--brand-soft);
+  --sidebar-accent-foreground: var(--brand-deep);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand);
 }
 
 @theme inline {
@@ -89,11 +67,12 @@
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-line: var(--line);
-  --color-plum: var(--plum);
-  --color-plum-soft: var(--plum-soft);
-  --color-marigold: var(--marigold);
-  --color-marigold-soft: var(--marigold-soft);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-mint: var(--mint);
+  --color-mint-soft: var(--mint-soft);
   --color-teal: var(--teal);
+  --color-sky: var(--sky);
   --color-rose: var(--rose);
   --color-amber: var(--amber);
   --color-slate: var(--slate);
@@ -172,7 +151,7 @@
   }
   table { line-height: 1.35; }
   :focus-visible {
-    outline: 2px solid var(--plum);
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
   }
 }

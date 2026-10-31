@@ -30,12 +30,12 @@ export function RevenueChart({ data }: { data: SeriesPoint[] }) {
           <XAxis dataKey="month" tickLine={false} axisLine={{ stroke: "var(--line)" }} tick={{ fill: "var(--ink-2)", fontSize: 12 }} />
           <YAxis width={44} tickLine={false} axisLine={false} tick={{ fill: "var(--ink-2)", fontSize: 12 }} tickFormatter={(v: number) => compact.format(v)} />
           <Tooltip
-            cursor={{ fill: "var(--plum-soft)" }}
+            cursor={{ fill: "var(--brand-soft)" }}
             formatter={(v) => formatMoney(Number(v))}
             contentStyle={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 10, boxShadow: "var(--shadow-float)" }}
           />
-          <Bar dataKey="invoiced" name="Invoiced" fill="var(--plum)" radius={[3, 3, 0, 0]} />
-          <Bar dataKey="collected" name="Collected" fill="var(--teal)" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="invoiced" name="Invoiced" fill="var(--chart-1)" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="collected" name="Collected" fill="var(--chart-2)" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
       </div>

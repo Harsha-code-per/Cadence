@@ -278,7 +278,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
                   <li key={`${change.kind}-${index}`} className="flex items-start justify-between gap-3 py-2 text-sm">
                     <div>
                       <div className="mb-0.5">
-                        <span className="rounded-full bg-plum-soft px-2 py-0.5 text-xs font-medium text-plum">
+                        <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand">
                           {sentence(change.kind)}
                         </span>
                       </div>

@@ -74,7 +74,7 @@ function PaymentsContent() {
       cell: ({ row }) => (
         <Link
           href={`/invoices/${row.original.invoice}`}
-          className="font-mono text-xs font-medium text-plum hover:underline"
+          className="font-mono text-xs font-medium text-brand hover:underline"
         >
           {row.original.invoice_number}
         </Link>
@@ -133,7 +133,7 @@ function PaymentsContent() {
         actions={
           <Button
             onClick={() => setRecordOpen(true)}
-            className="gap-1.5 bg-plum text-white hover:bg-plum/90"
+            className="gap-1.5 bg-brand text-white hover:bg-brand/90"
           >
             <Plus className="h-4 w-4" />
             Record payment
@@ -145,7 +145,7 @@ function PaymentsContent() {
         <select
           value={method}
           onChange={(e) => set({ method: e.target.value || undefined, page: 1 })}
-          className="h-9 rounded-md border border-line bg-canvas px-3 text-sm text-ink focus:border-plum focus:outline-none"
+          className="h-9 rounded-md border border-line bg-canvas px-3 text-sm text-ink focus:border-brand focus:outline-none"
         >
           <option value="">All methods</option>
           <option value="upi">UPI</option>
@@ -170,7 +170,7 @@ function PaymentsContent() {
             action={
               <Button
                 onClick={() => setRecordOpen(true)}
-                className="gap-1.5 bg-plum text-white hover:bg-plum/90"
+                className="gap-1.5 bg-brand text-white hover:bg-brand/90"
               >
                 <Plus className="h-4 w-4" />
                 Record payment

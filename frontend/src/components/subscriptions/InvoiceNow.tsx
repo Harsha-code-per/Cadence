@@ -36,7 +36,7 @@ export function InvoiceNow({ subscriptionId, status }: { subscriptionId: string;
       {invoice.data && (
         <p role="status" className="mt-3 text-sm">
           Invoice {invoice.data.number} was created.{" "}
-          <Link href={`/invoices/${invoice.data.id}`} className="text-plum underline">
+          <Link href={`/invoices/${invoice.data.id}`} className="text-brand underline">
             View invoice
           </Link>
         </p>

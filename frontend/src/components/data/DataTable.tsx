@@ -66,7 +66,7 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
                 tabIndex={onRowClick ? 0 : undefined}
                 onClick={() => onRowClick?.(row.original)}
                 onKeyDown={(e) => e.key === "Enter" && onRowClick?.(row.original)}
-                className={cn(compact ? "h-9" : "h-11", "max-md:grid max-md:h-auto max-md:grid-cols-2 max-md:gap-x-3 max-md:border-b max-md:p-3", onRowClick && "cursor-pointer focus-visible:bg-plum-soft")}
+                className={cn(compact ? "h-9" : "h-11", "max-md:grid max-md:h-auto max-md:grid-cols-2 max-md:gap-x-3 max-md:border-b max-md:p-3", onRowClick && "cursor-pointer focus-visible:bg-brand-soft")}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell

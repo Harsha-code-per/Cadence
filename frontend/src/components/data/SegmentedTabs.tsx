@@ -26,7 +26,7 @@ export function SegmentedTabs<T extends string>({
             onClick={() => onChange(o.value)}
             className={cn(
               "min-h-9 rounded-full border px-3.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-ring",
-              on ? "border-plum bg-plum-soft font-medium text-ink" : "border-line bg-surface text-ink hover:bg-plum-soft/60",
+              on ? "border-brand bg-brand-soft font-medium text-ink" : "border-line bg-surface text-ink hover:bg-brand-soft/60",
             )}
           >
             {o.label}

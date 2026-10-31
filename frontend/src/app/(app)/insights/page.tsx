@@ -63,7 +63,7 @@ export default function InsightsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/subscriptions/${item.subscription_id}`}
-                      className="font-mono text-base font-bold text-ink hover:text-plum hover:underline"
+                      className="font-mono text-base font-bold text-ink hover:text-brand hover:underline"
                     >
                       {item.number}
                     </Link>
@@ -103,7 +103,7 @@ export default function InsightsPage() {
                 <div className="shrink-0">
                   <Link
                     href={`/subscriptions/${item.subscription_id}`}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas px-3 py-1.5 text-xs font-medium text-ink hover:bg-plum hover:text-white transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-canvas px-3 py-1.5 text-xs font-medium text-ink hover:bg-brand hover:text-white transition-colors"
                   >
                     View subscription
                     <ArrowRight className="h-3.5 w-3.5" />

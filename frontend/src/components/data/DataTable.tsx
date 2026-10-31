@@ -72,7 +72,7 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
                   <TableCell
                     key={cell.id}
                     data-label={typeof cell.column.columnDef.header === "string" ? cell.column.columnDef.header : undefined}
-                    className={cn("px-4", align(cell.column.columnDef.meta), compact && "py-1", cell.column.id === "actions" && "max-md:col-span-2 max-md:pt-2", "max-md:block max-md:p-0 max-md:py-0.5 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]")}
+                    className={cn("px-4", align(cell.column.columnDef.meta), compact && "py-1", cell.column.id === "actions" && "max-md:col-span-2 max-md:pt-2", "max-md:block max-md:p-0 max-md:py-0.5 max-md:text-left max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

@@ -47,7 +47,7 @@ export function LoginForm() {
       footer={
         <>
           New to Cadence?{" "}
-          <Link href="/signup" className="font-medium text-[var(--l-mint-text)] underline-offset-4 hover:underline">
+          <Link href="/signup" className="font-medium text-[var(--l-emerald)] underline-offset-4 hover:underline">
             Create an account
           </Link>
         </>
@@ -65,12 +65,12 @@ export function LoginForm() {
             <PasswordInput autoComplete="current-password" aria-invalid={!!errors.password} {...register("password")} />
           </Field>
           <div className="flex justify-end">
-            <Link href="/forgot-password" className="text-sm font-medium text-[var(--l-mint-text)] underline-offset-4 hover:underline">
+            <Link href="/forgot-password" className="text-sm font-medium text-[var(--l-emerald)] underline-offset-4 hover:underline">
               Forgot password?
             </Link>
           </div>
         </div>
-        <Button type="submit" className="h-11 w-full bg-[var(--l-mint)] text-[15px] font-semibold text-[#2a1730] hover:bg-[#ffd47a]" disabled={isSubmitting}>
+        <Button type="submit" className="h-11 w-full bg-[var(--l-deep)] text-[15px] font-semibold text-white hover:bg-[var(--l-emerald)]" disabled={isSubmitting}>
           {isSubmitting ? "Logging in…" : "Log in"}
         </Button>
       </form>

@@ -42,7 +42,7 @@ export function ResetForm({ uid, token }: { uid: string; token: string }) {
       title="Choose a new password"
       subtitle="You'll be signed out of other devices once it's changed."
       footer={
-        <Link href="/forgot-password" className="font-medium text-[var(--l-mint-text)] underline-offset-4 hover:underline">
+        <Link href="/forgot-password" className="font-medium text-[var(--l-emerald)] underline-offset-4 hover:underline">
           Need a new link?
         </Link>
       }
@@ -58,7 +58,7 @@ export function ResetForm({ uid, token }: { uid: string; token: string }) {
         <Field label="Confirm new password" error={errors.confirm?.message}>
           <PasswordInput autoComplete="new-password" aria-invalid={!!errors.confirm} {...register("confirm")} />
         </Field>
-        <Button type="submit" className="h-11 w-full bg-[var(--l-mint)] text-[15px] font-semibold text-[#2a1730] hover:bg-[#ffd47a]" disabled={isSubmitting}>
+        <Button type="submit" className="h-11 w-full bg-[var(--l-deep)] text-[15px] font-semibold text-white hover:bg-[var(--l-emerald)]" disabled={isSubmitting}>
           {isSubmitting ? "Saving…" : "Save new password"}
         </Button>
       </form>

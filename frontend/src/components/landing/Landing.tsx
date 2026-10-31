@@ -11,8 +11,8 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
 import BillingDay from './BillingDay';
-import type { CosmosState } from './Cosmos';
 import { canUseWebGL } from './support';
+import { world } from './world';
 import LiveStats from './LiveStats';
 import MonthStrip from './MonthStrip';
 import ProductPeek from './ProductPeek';
@@ -21,18 +21,7 @@ import Statement from './Statement';
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 // three.js only ever loads on this page, after first paint.
-const Cosmos = dynamic(() => import('./Cosmos'), { ssr: false });
-
-/** Shared with the WebGL loop; mutated directly so scrolling never re-renders React. */
-const world: CosmosState = { morph: 0, sun: 0.17, glow: 1 };
-
-// Per chapter: how high the sun is, and how bright the particles are behind the text.
-const SUN = [0.17, 0.3, 0.42, 0.52, 0.66, 1];
-const GLOW = [1, 0.8, 0.4, 1, 0.75, 1];
-const between = (values: number[], m: number) => {
-  const i = Math.min(values.length - 2, Math.floor(m));
-  return gsap.utils.interpolate(values[i], values[i + 1], m - i);
-};
+const Ledger = dynamic(() => import('./Ledger'), { ssr: false });
 
 const LINE_ONE = ['Recurring', 'revenue,'];
 const LINE_TWO = ['kept', 'in', 'time.'];
@@ -44,21 +33,21 @@ const GUARANTEES = [
 ];
 
 const ROLES = [
-  { name: 'Admin', color: '#FFC247', body: 'Sets up products, plans, taxes and discount rules, adds staff, and runs billing on demand.' },
-  { name: 'Staff', color: '#FF5C93', body: 'Prepares quotes, moves subscriptions through the pipeline, confirms and sends invoices, records payments.' },
-  { name: 'Customer', color: '#5CE1C6', body: 'Sees their own plans and invoices, accepts quotes, and pauses or renews where the plan allows.' },
+  { name: 'Admin', color: '#0E7A63', body: 'Sets up products, plans, taxes and discount rules, adds staff, and runs billing on demand.' },
+  { name: 'Staff', color: '#2C6E91', body: 'Prepares quotes, moves subscriptions through the pipeline, confirms and sends invoices, records payments.' },
+  { name: 'Customer', color: '#8FD44F', body: 'Sees their own plans and invoices, accepts quotes, and pauses or renews where the plan allows.' },
 ];
 
 const primaryCta =
-  'magnetic inline-flex min-h-13 items-center rounded-full bg-[var(--l-marigold)] px-7 text-base font-semibold text-[#2a1730] shadow-[0_0_44px_-6px_rgb(255_194_71/0.75)] transition-[background-color,box-shadow] hover:bg-[#ffd47a] hover:shadow-[0_0_64px_-4px_rgb(255_194_71/0.95)]';
+  'magnetic inline-flex min-h-13 items-center rounded-full bg-[var(--l-deep)] px-7 text-base font-semibold text-[#f6f3ea] shadow-[0_18px_40px_-16px_rgb(11_51_40/0.6)] transition-colors hover:bg-[var(--l-emerald)]';
 const secondaryCta =
-  'magnetic glass inline-flex min-h-13 items-center rounded-full px-7 text-base font-medium transition-colors hover:border-[var(--l-text-3)]';
+  'magnetic glass inline-flex min-h-13 items-center rounded-full px-7 text-base font-medium transition-colors hover:border-[var(--l-line-strong)]';
 
 function Logo() {
   return (
     <svg width="32" height="32" viewBox="0 0 40 40" aria-hidden="true">
       <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="3" />
-      <circle cx="20" cy="20" r="16" fill="none" stroke="#FFC247" strokeWidth="3" strokeDasharray="25 100" strokeLinecap="round" transform="rotate(-90 20 20)" />
+      <circle cx="20" cy="20" r="16" fill="none" stroke="#0E7A63" strokeWidth="3" strokeDasharray="25 100" strokeLinecap="round" transform="rotate(-90 20 20)" />
       <circle cx="20" cy="20" r="3" fill="currentColor" />
     </svg>
   );
@@ -74,12 +63,12 @@ function Words({ words }: { words: string[] }) {
 
 export function Landing() {
   const root = useRef<HTMLDivElement>(null);
-  const [cosmos, setCosmos] = useState<boolean | null>(null);
+  const [three, setThree] = useState(false);
 
   useEffect(() => {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check only exists in the browser
-    setCosmos(!reduced && canUseWebGL());
+    setThree(!reduced && canUseWebGL());
     if (reduced) return;
 
     // Smooth scroll, driven by GSAP's ticker so ScrollTrigger stays in sync.
@@ -117,7 +106,7 @@ export function Landing() {
     () => {
       const mm = gsap.matchMedia();
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        // The opening: the headline rises out of the dark, word by word.
+        // The opening: the headline rises into place, word by word.
         gsap
           .timeline({ defaults: { ease: 'expo.out' }, delay: 0.35 })
           .from('[data-word]', { yPercent: 118, rotate: 3, duration: 1.5, stagger: 0.09 })
@@ -132,16 +121,21 @@ export function Landing() {
         });
 
         // Each chapter transforms the world as it scrolls in.
+        ScrollTrigger.create({
+          trigger: '[data-hero]',
+          start: 'bottom 40%',
+          end: 'max',
+          toggleClass: { targets: root.current, className: 'past-hero' },
+        });
+
         gsap.utils.toArray<HTMLElement>('[data-chapter]').forEach((el) => {
           const n = Number(el.dataset.chapter);
           ScrollTrigger.create({
             trigger: el,
-            start: n === 5 ? 'top 55%' : 'top 95%', // let the skyline hold before the finale
-            end: n === 5 ? 'top top' : 'top 15%',
+            start: n === 6 ? 'top 70%' : 'top 95%', // let the revenue bars hold before the finale
+            end: n === 6 ? 'top 5%' : 'top 15%',
             onUpdate: (self) => {
               world.morph = n - 1 + self.progress;
-              world.sun = between(SUN, world.morph);
-              world.glow = between(GLOW, world.morph);
             },
           });
         });
@@ -157,11 +151,6 @@ export function Landing() {
           },
         });
 
-        ScrollTrigger.create({
-          trigger: '[data-chapter="5"]',
-          start: 'top 45%',
-          onToggle: (self) => root.current?.classList.toggle('is-day', self.isActive),
-        });
         ScrollTrigger.sort();
         ScrollTrigger.refresh();
       });
@@ -171,13 +160,13 @@ export function Landing() {
   );
 
   return (
-    <div ref={root} className={`landing min-h-screen ${cosmos === false ? 'no-cosmos' : ''}`}>
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[var(--l-marigold)] focus:px-4 focus:py-2 focus:text-[#2a1730]">
+    <div ref={root} className="landing min-h-screen">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[var(--l-deep)] focus:px-4 focus:py-2 focus:text-white">
         Skip to content
       </a>
 
-      <div className="cosmos" aria-hidden="true">
-        {cosmos && <Cosmos world={world} />}
+      <div className="stage" aria-hidden="true">
+        {three && <Ledger world={world} />}
       </div>
 
       <header className="fixed inset-x-0 top-0 z-40">
@@ -198,14 +187,14 @@ export function Landing() {
       </header>
 
       <main id="main" className="relative z-10">
-        <section data-hero aria-labelledby="hero-title" className="relative flex min-h-svh flex-col justify-end">
-          <div data-hero-copy className="mx-auto w-full max-w-[1500px] px-4 pb-10 sm:px-10">
-            <h1 id="hero-title" aria-label="Recurring revenue, kept in time." className="display lift text-[clamp(3.25rem,8.2vw,9rem)] font-bold leading-[0.94]">
+        <section data-hero aria-labelledby="hero-title" className="relative flex min-h-svh flex-col justify-end lg:justify-center">
+          <div data-hero-copy className="mx-auto w-full max-w-[1500px] px-4 pb-10 sm:px-10 lg:pb-0">
+            <h1 id="hero-title" aria-label="Recurring revenue, kept in time." className="display max-w-[760px] text-[clamp(3.25rem,6.6vw,7rem)] font-bold leading-[0.96]">
               <span className="block"><Words words={LINE_ONE} /></span>
               <span className="block"><Words words={LINE_TWO} /></span>
             </h1>
-            <div className="mt-7 flex flex-wrap items-end justify-between gap-x-12 gap-y-6">
-              <p data-hero-fade className="lift max-w-[32rem] text-lg leading-relaxed text-[var(--l-text-2)]">
+            <div className="mt-7 flex max-w-[560px] flex-col gap-7">
+              <p data-hero-fade className="max-w-[32rem] text-lg leading-relaxed text-[var(--l-text-2)]">
                 Plans, subscriptions, invoices and payments for businesses that earn every month, in one system that bills each period exactly once.
               </p>
               <div data-hero-fade className="flex flex-wrap gap-3.5">
@@ -220,15 +209,15 @@ export function Landing() {
         <MonthStrip />
         <BillingDay />
 
-        <section id="guarantees" data-chapter="3" aria-labelledby="guarantees-title" className="py-40">
+        <section id="guarantees" data-chapter="4" aria-labelledby="guarantees-title" className="py-40">
           <div className="mx-auto flex max-w-[1500px] flex-col gap-14 px-4 sm:px-10">
-            <h2 id="guarantees-title" className="display lift max-w-5xl text-[clamp(2.75rem,6.4vw,6.5rem)] font-bold leading-[0.98]">
+            <h2 id="guarantees-title" className="display max-w-[760px] text-[clamp(2.75rem,5.2vw,5.25rem)] font-bold leading-[1]">
               Money that can’t go wrong, because the database won’t let it
             </h2>
             <div className="grid gap-6 md:grid-cols-3">
               {GUARANTEES.map((g) => (
                 <figure key={g.plain} className="glass flex flex-col justify-between gap-8 rounded-3xl p-8">
-                  <pre className="whitespace-pre-wrap font-[inherit] text-lg leading-normal text-[var(--l-marigold-text)]">{g.sql}</pre>
+                  <pre className="whitespace-pre-wrap font-[inherit] text-lg leading-normal text-[var(--l-emerald)]">{g.sql}</pre>
                   <figcaption className="text-xl leading-snug">{g.plain}</figcaption>
                 </figure>
               ))}
@@ -239,7 +228,7 @@ export function Landing() {
         <ProductPeek />
 
         <section id="roles" aria-labelledby="roles-title" className="mx-auto flex max-w-[1500px] flex-col gap-12 px-4 py-32 sm:px-10">
-          <h2 id="roles-title" className="display lift text-[clamp(2.75rem,6.4vw,6.5rem)] font-bold leading-[0.98]">One system, three ways in</h2>
+          <h2 id="roles-title" className="display text-[clamp(2.75rem,5.2vw,5.25rem)] font-bold leading-[1]">One system, three ways in</h2>
           <div className="grid gap-6 md:grid-cols-3">
             {ROLES.map((role) => (
               <div key={role.name} className="glass flex flex-col gap-3 rounded-3xl border-t-[3px] p-8" style={{ borderTopColor: role.color }}>
@@ -252,15 +241,13 @@ export function Landing() {
 
         <LiveStats />
 
-        <section data-chapter="5" aria-labelledby="cta-title" className="finale flex min-h-[135vh] flex-col justify-end text-[#2a1730]">
-          <div className="mx-auto flex w-full max-w-[1500px] flex-col items-start gap-8 px-4 pb-16 sm:px-10">
-            <h2 id="cta-title" className="display max-w-6xl text-[clamp(3rem,8.4vw,9rem)] font-bold leading-[0.94]">
+        <section data-chapter="6" aria-labelledby="cta-title" className="flex min-h-[125vh] flex-col justify-end">
+          <div className="mx-auto flex w-full max-w-[1500px] flex-col items-start gap-8 px-4 pb-12 sm:px-10">
+            <h2 id="cta-title" className="display max-w-[760px] text-[clamp(3rem,6.6vw,7rem)] font-bold leading-[0.96]">
               Run next month’s billing before lunch.
             </h2>
-            <Link href="/login" className="magnetic inline-flex min-h-14 items-center rounded-full bg-[#2a1730] px-8 text-lg font-semibold text-[#ffe6a8] transition-colors hover:bg-[#3f2248]">
-              Open the live demo
-            </Link>
-            <footer className="mt-10 flex w-full flex-wrap justify-between gap-4 border-t border-[#2a1730]/25 pt-6 text-sm">
+            <Link href="/login" className={primaryCta}>Open the live demo</Link>
+            <footer className="mt-12 flex w-full flex-wrap justify-between gap-4 border-t border-[var(--l-line)] pt-6 text-sm text-[var(--l-text-2)]">
               <span>Cadence, built for the Odoo Hackathon by Harsha, Loktrishal, Sanjjith and Cholan.</span>
               <a href="https://github.com/Harsha-code-per/Cadence" className="underline-offset-4 hover:underline" rel="noopener noreferrer">
                 Source on GitHub

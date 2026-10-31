@@ -1,6 +1,6 @@
 'use client';
 
-/** The thesis, read at scroll speed: each word lights up as you pass it. */
+/** The thesis, read at scroll speed: each word darkens as you pass it. */
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,7 +8,7 @@ import { useRef } from 'react';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const TEXT = 'Every subscription runs on its own clock. Daily, weekly, monthly, yearly. Spreadsheets lose the beat. Cadence keeps every one of them in time.';
+const TEXT = 'A subscription business earns every month, not just once. Twelve invoices a year, for every customer. Spreadsheets lose track. Cadence keeps every one exact.';
 
 export default function Statement() {
   const root = useRef<HTMLElement>(null);
@@ -18,7 +18,7 @@ export default function Statement() {
       const mm = gsap.matchMedia();
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap.from('[data-lit]', {
-          opacity: 0.16,
+          opacity: 0.14,
           stagger: 0.1,
           ease: 'none',
           scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1500', pin: true, scrub: 0.6 },
@@ -30,11 +30,13 @@ export default function Statement() {
   );
 
   return (
-    <section ref={root} aria-label="Why Cadence" className="flex min-h-svh items-center">
-      <p className="display lift mx-auto max-w-[1300px] px-4 text-[clamp(2.25rem,5.6vw,5.75rem)] font-semibold leading-[1.06] sm:px-10">
-        {TEXT.split(' ').map((word, i) => (
-          <span key={i} data-lit className="mr-[0.24em] inline-block">{word}</span>
-        ))}
+    <section ref={root} data-chapter="1" aria-label="Why Cadence" className="flex min-h-svh items-center">
+      <p className="display mx-auto w-full max-w-[1500px] px-4 text-[clamp(2.25rem,4vw,4.25rem)] font-semibold leading-[1.1] sm:px-10">
+        <span className="block max-w-[760px]">
+          {TEXT.split(' ').map((word, i) => (
+            <span key={i} data-lit className="mr-[0.24em] inline-block">{word}</span>
+          ))}
+        </span>
       </p>
     </section>
   );

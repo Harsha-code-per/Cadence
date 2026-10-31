@@ -2,22 +2,18 @@
 
 > Owner: **M4**. Everyone runs the matrix on their slice before 16:15. Log failures as GitHub issues assigned to the owner.
 
-## Demo accounts (created by `python manage.py seed_demo`)
-Credentials live in `backend/.env.example` comments for local use only. Production demo passwords are shared privately, never committed.
+## Accounts
+The public demo logins are on the login page and in the README. They are read-only, so record the video with a writable local admin from `seed_demo`.
 
-| Role | Email |
-|---|---|
-| Admin | `admin@brightloop.test` |
-| Staff | `staff@brightloop.test` |
-| Customer | `asha@raotraders.test` |
+## Video story (about 6 minutes, everyone speaks)
+Record from `main` on a local production build, so the flow can write data. Open with the live URL.
 
-## Story (≈ 6 minutes, everyone speaks)
-1. **M1 (60 s)**: Landing page: the cycle dial and the "month at Brightloop" scroll. Then the problem ("renewals missed, invoices wrong, nobody knows MRR") and the architecture slide.
-2. **M4 (60 s)**: Sign up a new customer live. Show the password feedback (weak → each rule turns green) and the duplicate-email error. Log in as admin, add a staff member, try the same as staff (blocked).
-3. **M2 (60 s)**: Admin creates product "Brightloop CRM" with variant Brand=Odoo; the price shows +560. Create the plan "Growth monthly" (pausable, closable). Create a discount "10% for 10+ seats", usage limit 3.
-4. **M3 (90 s)**: Staff picks the quotation template → quotation (valid 15 days) → customer accepts in the portal → activate → invoice INV/… appears with GST and the discount. Click **Run billing now** twice: still one invoice for the period. Confirm, send, print.
-5. **M4 (60 s)**: Record a partial UPI payment → status stays confirmed with outstanding shown; record the rest → Paid. Dashboard: MRR, collected and outstanding move. Overdue list. The customer portal shows only Asha's data (try another invoice ID in the URL → 404).
-6. **M1 (30 s)**: Database design: partial unique index, CHECK constraints, snapshots; perf numbers on 5k subscriptions; CI and the commit graph.
+1. **Harsha (60 s)**: The problem: renewals missed, invoices typed by hand, nobody knows MRR. Landing page: invoices scattered as a galaxy collapse into one ledger. Architecture in one line: Django API, Next.js, PostgreSQL, no backend-as-a-service.
+2. **Cholan (60 s)**: Sign up a customer. Password rules turn green, a duplicate email is refused. Log in as admin, add staff, show staff being blocked from admin pages. Show the demo logins being read-only.
+3. **Loktrishal (75 s)**: Create a product with Brand = Odoo: 1,200 becomes 1,760. Create a plan and a quotation template. Create a "10% for 10+ seats" discount with a usage limit, without a code. Ask Cadence a finance question and show that the numbers come from our own database.
+4. **Sanjjith (90 s)**: Create a subscription from the template, send, customer accepts, activate. The invoice appears with GST and the discount, with nobody attaching it. Preview billing as of next month, run it, run it again: 0 new invoices. Show the unique index that guarantees it, and the concurrency tests.
+5. **Cholan (60 s)**: Record a partial UPI payment: still Confirmed. Record the rest: Paid. Dashboard moves, overdue aging. Portal: Asha pauses, is offered pause before cancel, resumes, and gets a 404 on someone else's invoice.
+6. **Harsha (30 s)**: Database design: CHECK constraints, snapshots, partial indexes. Timings from the README, the footer timing badge, CI and the commit graph.
 
 ## QA matrix
 | # | Scenario | Expected | Owner |

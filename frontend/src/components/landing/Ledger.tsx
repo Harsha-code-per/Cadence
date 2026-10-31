@@ -2,10 +2,10 @@
 /* eslint-disable react-hooks/immutability -- three.js objects are mutated every frame by design */
 
 /**
- * The glass ledger: twelve slabs of glass, one per billing month, each carrying its
- * invoice. Scrolling moves the camera around them while they fan out, line up as a year,
- * flip through billing day, lock into a block, rise as revenue bars and close the page
- * as a monolith again.
+ * The glass ledger: the page opens on a galaxy of loose invoices, one particle each, that
+ * collapses into twelve slabs of glass, one per billing month. Scrolling moves the camera
+ * around them while they fan out, line up as a year, flip through billing day, lock into a
+ * block and rise as revenue bars, before the ledger scatters back into a galaxy.
  *
  * Drive it by mutating `world` (see LedgerState); nothing here re-renders React.
  */
@@ -22,6 +22,8 @@ export type LedgerState = {
   sub: number;
   /** Progress along the year while the month strip scrolls sideways. */
   track: number;
+  /** 0 a loose galaxy of invoices · 1 the solid glass ledger. */
+  form: number;
 };
 
 const COUNT = 12;
@@ -208,6 +210,118 @@ function sheenTexture() {
   return texture;
 }
 
+const GALAXY_VERTEX = /* glsl */ `
+  uniform float uTime, uForm, uScale, uPhone;
+  attribute vec3 aGalaxy; // radius, angle, height in the disc
+  attribute vec2 aSeed; // arrival delay, size
+  attribute vec3 aColor;
+  varying vec3 vColor;
+  varying float vAlpha;
+
+  const float TILT = 1.25;
+  const float FACE = 0.62; // cancels the ledger's opening turn, so the disc faces the viewer
+
+  void main() {
+    float settled = smoothstep(aSeed.x * 0.55, aSeed.x * 0.55 + 0.45, uForm);
+
+    // Inner stars orbit faster, like a real disc.
+    float angle = aGalaxy.y + uTime * 0.2 / (1.0 + aGalaxy.x * 0.4);
+    vec3 star = vec3(cos(angle) * aGalaxy.x, aGalaxy.z, sin(angle) * aGalaxy.x);
+    star.yz = mat2(cos(TILT), -sin(TILT), sin(TILT), cos(TILT)) * star.yz;
+    star.xz = mat2(cos(FACE), -sin(FACE), sin(FACE), cos(FACE)) * star.xz;
+    star += 0.07 * sin(uTime * 0.5 + aSeed.x * 40.0);
+
+    // Falling into the ledger, the cloud spirals in rather than sliding straight.
+    vec3 p = mix(star, position, settled);
+    float swirl = settled * (1.0 - settled) * 6.0; // only while in flight
+    p.xz = mat2(cos(swirl), -sin(swirl), sin(swirl), cos(swirl)) * p.xz;
+
+    vec4 view = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * view;
+
+    // Keep the galaxy thin behind the text: left of it on desktop, below it on phones.
+    vec2 ndc = gl_Position.xy / gl_Position.w;
+    float clear = uPhone > 0.5 ? smoothstep(-0.4, 0.08, ndc.y) : smoothstep(-0.34, 0.14, ndc.x);
+    clear *= 1.0 - smoothstep(0.74, 0.92, ndc.y); // and off the header
+    vAlpha = (1.0 - smoothstep(0.86, 1.0, uForm)) * mix(mix(0.05, 1.0, clear), 1.0, settled);
+    vColor = aColor;
+    gl_PointSize = aSeed.y * mix(1.0, 0.6, settled) * uScale / -view.z;
+  }
+`;
+
+const GALAXY_FRAGMENT = /* glsl */ `
+  varying vec3 vColor;
+  varying float vAlpha;
+
+  void main() {
+    float alpha = (1.0 - smoothstep(0.16, 0.5, length(gl_PointCoord - 0.5))) * vAlpha;
+    if (alpha < 0.01) discard;
+    gl_FragColor = vec4(vColor, alpha);
+    #include <colorspace_fragment>
+  }
+`;
+
+/** Every particle knows two homes: a place in the spiral, and a place on a slab of the ledger. */
+function buildGalaxy() {
+  const count = window.innerWidth < 1024 ? 10000 : 30000;
+  const position = new Float32Array(count * 3);
+  const galaxy = new Float32Array(count * 3);
+  const seed = new Float32Array(count * 2);
+  const color = new Float32Array(count * 3);
+
+  let state = 20261031;
+  const rand = () => (state = (state * 16807) % 2147483647) / 2147483647;
+  const gauss = () => (rand() + rand() + rand() - 1.5) / 1.5;
+  const deep = new THREE.Color(DEEP);
+  const emerald = new THREE.Color(EMERALD);
+  const mint = new THREE.Color(MINT);
+  const tint = new THREE.Color();
+  const ARMS = 3;
+
+  for (let i = 0; i < count; i++) {
+    // On the ledger: most sit on the glass edges, so the outline forms first.
+    const onEdge = rand() < 0.6;
+    let x = (rand() - 0.5) * WIDTH;
+    let y = (rand() - 0.5) * HEIGHT;
+    if (onEdge) {
+      if (rand() < 0.5) x = (rand() < 0.5 ? -0.5 : 0.5) * WIDTH;
+      else y = (rand() < 0.5 ? -0.5 : 0.5) * HEIGHT;
+    }
+    position.set([x, y, offset(Math.floor(rand() * COUNT)) * 0.15], i * 3);
+
+    // In the galaxy: a bright core, then three spiral arms thinning towards the rim.
+    const bulge = rand() < 0.16;
+    const r = bulge ? Math.abs(gauss()) * 3 : 0.5 + 14 * Math.pow(rand(), 1.4);
+    const arm = (Math.floor(rand() * ARMS) / ARMS) * Math.PI * 2;
+    const spread = rand() < 0.84 ? 0.2 + 0.45 / (1 + r * 0.4) : 2.2; // arms that fray, with dust between
+    const angle = bulge ? rand() * Math.PI * 2 : arm + r * 0.82 + gauss() * spread;
+    galaxy.set([r, angle, gauss() * (0.3 + 1.7 * Math.exp(-r * 0.55))], i * 3);
+
+    seed.set([rand(), 0.022 + Math.pow(rand(), 5) * 0.085], i * 2);
+
+    const edge = Math.min(1, r / 8.5);
+    if (edge < 0.4) tint.copy(deep).lerp(emerald, edge / 0.4);
+    else tint.copy(emerald).lerp(mint, ((edge - 0.4) / 0.6) * (0.35 + rand() * 0.65));
+    color.set([tint.r, tint.g, tint.b], i * 3);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
+  geometry.setAttribute('aGalaxy', new THREE.BufferAttribute(galaxy, 3));
+  geometry.setAttribute('aSeed', new THREE.BufferAttribute(seed, 2));
+  geometry.setAttribute('aColor', new THREE.BufferAttribute(color, 3));
+  const material = new THREE.ShaderMaterial({
+    vertexShader: GALAXY_VERTEX,
+    fragmentShader: GALAXY_FRAGMENT,
+    uniforms: { uTime: { value: 0 }, uForm: { value: 0 }, uScale: { value: 1 }, uPhone: { value: 0 } },
+    transparent: true,
+    depthWrite: false,
+  });
+  const points = new THREE.Points(geometry, material);
+  points.frustumCulled = false; // the shader moves every point, so the bounds mean nothing
+  return points;
+}
+
 function build() {
   const root = new THREE.Group();
 
@@ -296,14 +410,19 @@ function build() {
   glow.rotation.z = -0.42;
   glow.position.set(6.4, FLOOR + 0.01, 3);
 
+  const galaxy = buildGalaxy();
+  root.add(galaxy);
+
   const dispose = () => {
+    galaxy.geometry.dispose();
+    (galaxy.material as THREE.ShaderMaterial).dispose();
     for (const g of [bodyGeometry, frameGeometry, printGeometry, beadGeometry, floorGeometry, glow.geometry]) g.dispose();
     for (const m of [glass, frame, sheen, ...beadMaterials, ...prints]) m.dispose();
     for (const m of prints) m.map?.dispose();
     for (const t of [sheenMap, causticMap]) t.dispose();
   };
 
-  return { root, slabs, prints, floaters, accents, shadow, glow, sheenMap, dispose };
+  return { root, slabs, prints, floaters, accents, shadow, glow, sheenMap, glass, frame, sheen, galaxy, dispose };
 }
 
 function Scene({ world }: { world: LedgerState }) {
@@ -341,6 +460,24 @@ function Scene({ world }: { world: LedgerState }) {
     const m = THREE.MathUtils.clamp(world.morph, 0, POSES.length - 1);
     const k = Math.min(POSES.length - 2, Math.floor(m));
     const f = m - k;
+    // Phones: 0 on a tall screen, 1 once there's room beside the text.
+    const narrow = THREE.MathUtils.clamp((aspect - 0.65) / 0.75, 0, 1);
+
+    // The glass only appears as the particles arrive.
+    const form = THREE.MathUtils.clamp(world.form, 0, 1);
+    const glassIn = THREE.MathUtils.smoothstep(form, 0.72, 1);
+    parts.glass.opacity = 0.13 * glassIn;
+    parts.frame.opacity = 0.5 * glassIn;
+    parts.sheen.opacity = glassIn;
+    (parts.shadow.material as THREE.ShadowMaterial).opacity = 0.2 * glassIn;
+    parts.accents.scale.setScalar(glassIn);
+
+    const uniforms = (parts.galaxy.material as THREE.ShaderMaterial).uniforms;
+    parts.galaxy.visible = form < 0.995;
+    uniforms.uTime.value = t;
+    uniforms.uForm.value = form;
+    uniforms.uPhone.value = narrow < 0.5 ? 1 : 0;
+    uniforms.uScale.value = state.size.height * state.viewport.dpr * 2 * (1 + (1 - narrow) * 0.9);
 
     const solid = THREE.MathUtils.lerp(SOLID[k], SOLID[k + 1], f);
     const frontPrint = THREE.MathUtils.lerp(FRONT_PRINT[k], FRONT_PRINT[k + 1], f);
@@ -354,11 +491,12 @@ function Scene({ world }: { world: LedgerState }) {
       slab.position.set(x, y, z);
       slab.rotation.set(rx, ry, rz);
       slab.scale.y = h;
+      slab.visible = glassIn > 0.005;
 
       // Solid chapters print only the front invoice; the rest stay pure glass.
       const flip = k === 3 || (k === 2 && f > 0.5) ? Math.exp(-((world.sub * 13 - 1 - i) ** 2) / 0.9) : 0;
       const shown = Math.max(1 - solid, flip, i === COUNT - 1 ? frontPrint : 0);
-      parts.prints[i].opacity = 0.03 + shown * 0.93;
+      parts.prints[i].opacity = (0.03 + shown * 0.93) * glassIn;
     });
     parts.sheenMap.offset.x = (t * 0.07) % 1;
 
@@ -373,7 +511,7 @@ function Scene({ world }: { world: LedgerState }) {
     parts.accents.rotation.y = t * 0.03 + pointer.current.x * 0.12;
 
     // Light through the glass is strongest while the object stands solid, and breathes a little.
-    (parts.glow.material as THREE.MeshBasicMaterial).opacity = (0.45 + solid * 0.55) * (0.9 + Math.sin(t * 0.6) * 0.1);
+    (parts.glow.material as THREE.MeshBasicMaterial).opacity = (0.45 + solid * 0.55) * (0.9 + Math.sin(t * 0.6) * 0.1) * glassIn;
 
     // Camera, with the year panning sideways while the month strip scrolls.
     const eased = THREE.MathUtils.smootherstep(f, 0, 1);
@@ -384,10 +522,10 @@ function Scene({ world }: { world: LedgerState }) {
     cam.from.x += pan;
     cam.look.x += pan;
     // Phones: centre the object above the text instead of beside it.
-    const narrow = THREE.MathUtils.clamp((aspect - 0.65) / 0.75, 0, 1);
     cam.look.x *= yearFocus > 0.5 ? 1 : narrow;
     cam.look.y -= (1 - narrow) * 5.2;
     cam.from.z += (1 - narrow) * 22; // small and high on phones, clear of the headline
+    cam.from.z += (1 - form) * 3; // the galaxy is seen from further out
     cam.from.x += pointer.current.x * 0.4;
     cam.from.y += pointer.current.y * 0.25;
     camera.position.lerp(cam.from, 1 - Math.exp(-delta * 4.5));

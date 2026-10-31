@@ -11,7 +11,7 @@ import { canUseWebGL } from "@/components/landing/support";
 const Ledger = dynamic(() => import("@/components/landing/Ledger"), { ssr: false });
 
 /** The landing page's opening shot, held still: the glass ledger beside a frosted card. */
-const scene: LedgerState = { morph: 0, sub: 0, track: 0.5 };
+const scene: LedgerState = { morph: 0, sub: 0, track: 0.5, form: 1 };
 
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode }) {
   const [three, setThree] = useState(false);

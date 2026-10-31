@@ -349,6 +349,13 @@ export default function SubscriptionDetailPage() {
                   </li>
                 ))}
               </ul>
+            ) : invoices.isError ? (
+              <div role="alert" className="text-sm">
+                Could not load invoices.{" "}
+                <Button variant="link" onClick={() => invoices.refetch()}>
+                  Try again
+                </Button>
+              </div>
             ) : (
               <p className="text-sm text-ink-2">{invoices.isLoading ? "Loading invoices…" : "No invoices yet."}</p>
             )}

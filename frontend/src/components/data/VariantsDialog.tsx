@@ -53,7 +53,17 @@ export function VariantsDialog({
           <DialogTitle>Variants of {product?.name}</DialogTitle>
         </DialogHeader>
         <ul className="divide-y rounded-md border">
-          {variants.data?.results.length === 0 && <li className="p-4 text-sm text-ink-2">No variants yet. The base price applies.</li>}
+          {variants.isError && (
+            <li className="flex items-center justify-between p-4 text-sm text-destructive">
+              <span>Variants couldn&apos;t be loaded.</span>
+              <Button variant="outline" size="sm" onClick={() => variants.refetch()}>
+                Try again
+              </Button>
+            </li>
+          )}
+          {!variants.isError && variants.data?.results.length === 0 && (
+            <li className="p-4 text-sm text-ink-2">No variants yet. The base price applies.</li>
+          )}
           {variants.data?.results.map((v) => (
             <li key={v.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
               <span>

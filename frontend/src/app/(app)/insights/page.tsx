@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowRight, CheckCircle, ShieldAlert } from "lucide-react";
 
+import { EmptyState } from "@/components/data/EmptyState";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 
@@ -19,7 +21,7 @@ interface InsightItem {
 }
 
 export default function InsightsPage() {
-  const { data: insights = [], isLoading } = useQuery({
+  const { data: insights = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["analytics-insights"],
     queryFn: () => api.get<InsightItem[]>("/analytics/insights/"),
     staleTime: 60_000,
@@ -37,6 +39,17 @@ export default function InsightsPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-32 w-full rounded-xl" />
           ))}
+        </div>
+      ) : isError ? (
+        <div className="rounded-xl border border-line bg-surface p-6">
+          <EmptyState
+            message="Risk insights couldn't be loaded."
+            action={
+              <Button variant="outline" onClick={() => refetch()}>
+                Try again
+              </Button>
+            }
+          />
         </div>
       ) : insights.length === 0 ? (
         <div className="rounded-xl border border-line bg-surface p-12 text-center">

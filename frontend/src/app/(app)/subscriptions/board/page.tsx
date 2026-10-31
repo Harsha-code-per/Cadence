@@ -230,7 +230,16 @@ function Column({
       </div>
     );
   }
-  if (list.isError) return <p className="p-4 text-sm text-rose">Couldn’t load this stage.</p>;
+  if (list.isError) {
+    return (
+      <div className="flex flex-col items-center gap-2 p-4 text-center">
+        <p className="text-sm text-rose">Couldn&apos;t load this stage.</p>
+        <Button variant="outline" size="sm" onClick={() => list.refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
   const cards = list.data.results;
 
   return (

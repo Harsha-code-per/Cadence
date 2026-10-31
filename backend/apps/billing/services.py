@@ -5,8 +5,9 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+from django.db.models import F, Q
 
-from apps.billing.models import DiscountRedemption, Invoice, InvoiceLine, InvoiceLineTax
+from apps.billing.models import BillingRun, DiscountRedemption, Invoice, InvoiceLine, InvoiceLineTax
 from apps.catalog.models import Discount
 from apps.core.audit import record
 from apps.core.sequences import next_number
@@ -189,6 +190,64 @@ def generate_invoice(subscription_id, today):
     return invoice
 
 
-def run_due_billing(today, limit=500, triggered_by="manual"):
-    """Scheduler integration will be implemented as the next billing feature."""
-    raise NotImplementedError("Recurring billing runner is not implemented yet")
+def run_due_billing(today, limit=500, triggered_by="manual", dry_run=False):
+    """Process up to limit due subscriptions, catching up all their due periods.
+
+    The batch retains its row locks until commit. Concurrent runners skip locked
+    subscriptions; failures roll back the batch and its BillingRun record.
+    A dry run executes the same code and rolls back all writes.
+    """
+    if limit < 1:
+        raise ValueError("limit must be positive")
+    from apps.subscriptions.state import transition_subscription
+
+    due = Q(status=SubscriptionStatus.ACTIVE, next_invoice_date__lte=today) & (
+        Q(expiration_date__isnull=True) | Q(next_invoice_date__lte=F("expiration_date"))
+    )
+    activate = Q(status=SubscriptionStatus.CONFIRMED, start_date__lte=today) & (
+        Q(expiration_date__isnull=True) | Q(expiration_date__gte=today)
+    )
+    expire = Q(
+        status__in=[SubscriptionStatus.ACTIVE, SubscriptionStatus.PAUSED],
+        plan__auto_close=True,
+        expiration_date__lt=today,
+    )
+    counts = {"activated": 0, "closed": 0, "invoiced": 0, "skipped": 0}
+    with transaction.atomic():
+        subscriptions = list(
+            Subscription.objects.filter(due | activate | expire)
+            .order_by("pk")
+            .select_for_update(skip_locked=True, of=("self",))[:limit]
+        )
+        for sub in subscriptions:
+            if (
+                sub.status in (SubscriptionStatus.ACTIVE, SubscriptionStatus.PAUSED)
+                and sub.plan.auto_close
+                and sub.expiration_date
+                and sub.expiration_date < today
+            ):
+                transition_subscription(sub.pk, "auto_close", today=today, note="Plan expired")
+                counts["closed"] += 1
+                continue
+            if sub.status == SubscriptionStatus.CONFIRMED:
+                transition_subscription(sub.pk, "activate", today=today)
+                counts["activated"] += 1
+                counts["invoiced"] += 1
+                sub.refresh_from_db()
+            while (
+                sub.status == SubscriptionStatus.ACTIVE
+                and sub.next_invoice_date
+                and sub.next_invoice_date <= today
+                and (sub.expiration_date is None or sub.next_invoice_date <= sub.expiration_date)
+            ):
+                previous = sub.next_invoice_date
+                invoice = generate_invoice(sub.pk, today)
+                counts["invoiced" if invoice else "skipped"] += 1
+                sub.refresh_from_db()
+                if sub.next_invoice_date <= previous:
+                    raise RuntimeError("Billing did not advance the subscription period")
+        run = BillingRun.objects.create(run_date=today, triggered_by=triggered_by, **counts)
+        result = {**counts, "ran_at": run.created_at.isoformat(), "dry_run": dry_run}
+        if dry_run:
+            transaction.set_rollback(True)
+    return result

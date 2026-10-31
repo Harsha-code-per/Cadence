@@ -33,7 +33,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <SidebarNav onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
-        <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 p-4 md:p-6">
+        <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 p-4 md:p-6 has-[[data-pipeline-board]]:max-w-none">
           <Suspense>{children}</Suspense>
         </main>
         <footer className="mx-auto w-full max-w-[1400px] px-4 pb-4 text-right text-xs tabular-nums text-ink-2 md:px-6">

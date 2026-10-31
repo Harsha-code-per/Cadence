@@ -1,9 +1,20 @@
-export function CycleMark({ size = 22 }: { size?: number }) {
+/** The Cadence mark: a ring with a marigold arc. `className` sets the ring colour (currentColor). */
+export function CycleMark({ size = 28 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity=".35" strokeWidth="2.5" />
-      <path d="M12 3a9 9 0 0 1 9 9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="12" cy="3" r="2" className="fill-marigold" />
+    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden>
+      <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" strokeWidth="3" />
+      <circle
+        cx="20"
+        cy="20"
+        r="16"
+        fill="none"
+        className="stroke-marigold"
+        strokeWidth="3"
+        strokeDasharray="25 100"
+        strokeLinecap="round"
+        transform="rotate(-90 20 20)"
+      />
+      <circle cx="20" cy="20" r="3" fill="currentColor" />
     </svg>
   );
 }

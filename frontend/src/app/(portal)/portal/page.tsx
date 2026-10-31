@@ -1,13 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Receipt } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { CycleRing } from "@/components/data/CycleRing";
 import { StatusBadge } from "@/components/data/StatusBadge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api, type Paginated } from "@/lib/api";
-import { formatMoney } from "@/lib/format";
+import { api, ApiError, type Paginated } from "@/lib/api";
+import { formatDate, formatMoney } from "@/lib/format";
 
 interface PortalSummary {
   customer: {
@@ -50,6 +53,71 @@ interface SubscriptionItem {
   allowed_actions?: string[];
 }
 
+const ACTIONS: Record<string, { label: string; done: string; ask?: string }> = {
+  confirm: { label: "Accept quotation", done: "Quotation accepted." },
+  pause: { label: "Pause", done: "Subscription paused.", ask: "Billing stops until you resume, and the paused days are never charged." },
+  resume: { label: "Resume", done: "Subscription resumed." },
+  renew: { label: "Renew", done: "Renewal quotation created." },
+  close: { label: "Cancel subscription", done: "Subscription cancelled.", ask: "This ends your subscription." },
+};
+
+/** Exactly the buttons the backend says this customer may use on this plan. */
+function PortalActions({ subscription }: { subscription: SubscriptionItem }) {
+  const client = useQueryClient();
+  const [asking, setAsking] = useState<string | null>(null);
+  const allowed = (subscription.allowed_actions ?? []).filter((name) => ACTIONS[name]);
+  const run = useMutation({
+    mutationFn: (name: string) => api.post(`/subscriptions/${subscription.id}/${name}/`, { note: "" }),
+    onSuccess: async (_, name) => {
+      setAsking(null);
+      toast.success(ACTIONS[name].done);
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["portal-subscriptions"] }),
+        client.invalidateQueries({ queryKey: ["portal-summary"] }),
+      ]);
+    },
+    onError: (error) => toast.error(error instanceof ApiError ? error.message : "That didn't work. Please try again."),
+  });
+  if (!allowed.length) return null;
+
+  if (asking) {
+    return (
+      <div className="mt-4 space-y-3 border-t border-line pt-3 text-sm">
+        <p className="text-ink-2">{ACTIONS[asking].ask}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant={asking === "close" ? "destructive" : "default"} disabled={run.isPending} onClick={() => run.mutate(asking)}>
+            {run.isPending ? "Working…" : `Yes, ${ACTIONS[asking].label.toLowerCase()}`}
+          </Button>
+          {asking === "close" && allowed.includes("pause") && (
+            <Button size="sm" variant="outline" disabled={run.isPending} onClick={() => run.mutate("pause")}>
+              Pause instead
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" onClick={() => setAsking(null)}>
+            Keep it
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-3">
+      {allowed.map((name) => (
+        <Button
+          key={name}
+          size="sm"
+          variant={name === "confirm" || name === "resume" ? "default" : "outline"}
+          disabled={run.isPending}
+          onClick={() => (ACTIONS[name].ask ? setAsking(name) : run.mutate(name))}
+        >
+          {ACTIONS[name].label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 export default function PortalPage() {
   const { data: summary, isLoading: loadingSummary } = useQuery({
     queryKey: ["portal-summary"],
@@ -74,9 +142,6 @@ export default function PortalPage() {
         ) : (
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-brand">
-                Customer Portal
-              </span>
               <h1 className="font-display text-2xl font-bold text-ink">
                 Welcome, {summary.customer.name}
               </h1>
@@ -88,7 +153,7 @@ export default function PortalPage() {
             <div className="flex items-center gap-3">
               <div className="rounded-xl border border-line bg-canvas p-3 text-right">
                 <span className="text-xs text-ink-2">Total Outstanding</span>
-                <p className="font-mono text-lg font-bold text-rose">
+                <p className={`tabular-nums text-lg font-bold ${Number(summary.outstanding) > 0 ? "text-rose" : "text-ink"}`}>
                   {formatMoney(summary.outstanding)}
                 </p>
               </div>
@@ -124,7 +189,7 @@ export default function PortalPage() {
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm font-bold text-ink">{sub.number}</span>
+                    <span className="tabular-nums text-sm font-bold text-ink">{sub.number}</span>
                     <StatusBadge domain="subscription" status={sub.status} />
                   </div>
 
@@ -138,26 +203,21 @@ export default function PortalPage() {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-line pt-3">
-                    <CycleRing
-                      progress={0.65}
-                      size={54}
-                      caption={
-                        sub.next_invoice_date
-                          ? `Next bill: ${sub.next_invoice_date}`
-                          : "Current cycle"
-                      }
-                    />
+                    <p className="text-sm text-ink-2">
+                      {sub.next_invoice_date ? `Next bill ${formatDate(sub.next_invoice_date)}` : "No upcoming bill"}
+                    </p>
 
                     {sub.recurring_total && (
                       <div className="text-right">
                         <span className="text-xs text-ink-3">Recurring</span>
-                        <p className="font-mono font-bold text-teal">
+                        <p className="tabular-nums font-bold text-teal">
                           {formatMoney(sub.recurring_total)}
                         </p>
                       </div>
                     )}
                   </div>
                 </div>
+                <PortalActions subscription={sub} />
               </div>
             ))}
           </div>
@@ -190,9 +250,11 @@ export default function PortalPage() {
                       <FileText className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-mono font-semibold text-ink">{inv.number}</p>
+                      <Link href={`/invoices/${inv.id}/print`} className="tabular-nums font-semibold text-brand hover:underline">
+                        {inv.number}
+                      </Link>
                       <p className="text-xs text-ink-2">
-                        Issued {inv.invoice_date} • Due {inv.due_date}
+                        Issued {formatDate(inv.invoice_date)} · Due {formatDate(inv.due_date)}
                       </p>
                     </div>
                   </div>
@@ -201,7 +263,7 @@ export default function PortalPage() {
                     <StatusBadge domain="invoice" status={inv.status} />
 
                     <div className="text-right">
-                      <p className="font-mono font-semibold text-ink">
+                      <p className="tabular-nums font-semibold text-ink">
                         {formatMoney(inv.total)}
                       </p>
                       {parseFloat(inv.outstanding) > 0 && inv.status !== "paid" && (
@@ -244,16 +306,16 @@ export default function PortalPage() {
                       <Receipt className="h-5 w-5" />
                     </div>
                     <div>
-                      <p className="font-mono font-semibold text-ink">{pmt.number}</p>
+                      <p className="tabular-nums font-semibold text-ink">{pmt.number}</p>
                       <p className="text-xs text-ink-2">
-                        {pmt.payment_date} • {pmt.method.toUpperCase().replace("_", " ")}
-                        {pmt.reference ? ` • Ref: ${pmt.reference}` : ""}
+                        {formatDate(pmt.payment_date)} · {pmt.method.toUpperCase().replace("_", " ")}
+                        {pmt.reference ? ` · Ref: ${pmt.reference}` : ""}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <p className="font-mono font-semibold text-teal">
+                    <p className="tabular-nums font-semibold text-teal">
                       {formatMoney(pmt.amount)}
                     </p>
                     <span className="inline-block rounded-full bg-teal/10 px-2 py-0.5 text-[10px] font-medium text-teal">

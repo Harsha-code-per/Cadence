@@ -84,7 +84,7 @@ Example product with variant:
 | POST | `/api/subscriptions/{id}/{action}/` | see below | `action ∈ send, revise, confirm, activate, pause, resume, close, renew`; body `{note?, reason?}` → updated Subscription |
 | GET | `/api/subscriptions/{id}/events/` | A,S,C(own) | timeline |
 
-Customer actions in the portal: `confirm` (accept own quotation), `pause`/`close`/`renew` **only if the plan allows**. Everything else is A,S.
+Customer actions in the portal: `confirm` (accept own quotation), `resume` (own paused subscription), `pause`/`close`/`renew` **only if the plan allows**. Everything else is A,S.
 
 Subscription response:
 ```json

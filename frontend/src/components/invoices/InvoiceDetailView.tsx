@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ActionDialog } from "@/components/invoices/ActionDialog";
+import { RecordPaymentDialog } from "@/components/payments/RecordPaymentDialog";
 import { errorMessage } from "@/components/invoices/errors";
 import { formatDateTime, paymentMethodLabel, sentence } from "@/components/invoices/format";
 import type { InvoiceDetail } from "@/components/invoices/types";
@@ -88,6 +89,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
   const hydrated = useHydrated();
   const [action, setAction] = useState<InvoiceAction | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   const invoiceQuery = useQuery({
     queryKey: ["invoice", id],
@@ -141,6 +143,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
   const canCancel =
     internal && (invoice.status === "draft" || (invoice.status === "confirmed" && isZeroMoney(invoice.amount_paid)));
   const canSend = internal && (invoice.status === "confirmed" || invoice.status === "paid");
+  const canRecordPayment = internal && invoice.status === "confirmed" && !isZeroMoney(invoice.outstanding);
   const payable = invoice.status === "confirmed" || invoice.status === "paid";
 
   const openAction = (kind: InvoiceAction) => {
@@ -173,6 +176,9 @@ export function InvoiceDetailView({ id }: { id: string }) {
                   <Button variant="outline" onClick={() => openAction("send")}>
                     <Send aria-hidden /> {invoice.sent_at ? "Resend invoice" : "Send invoice"}
                   </Button>
+                )}
+                {canRecordPayment && (
+                  <Button onClick={() => setPaymentOpen(true)}>Record payment</Button>
                 )}
                 {canCancel && (
                   <Button variant="outline" onClick={() => openAction("cancel")}>
@@ -240,7 +246,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
                         <ul className="mt-1 space-y-0.5 text-xs text-ink-3">
                           {line.taxes.map((tax) => (
                             <li key={tax.id}>
-                              {tax.name} {formatPercent(tax.rate)} · <Money value={tax.amount} />
+                              {tax.name.includes("%") ? tax.name : `${tax.name} ${formatPercent(tax.rate)}`} · <Money value={tax.amount} />
                             </li>
                           ))}
                         </ul>
@@ -415,6 +421,10 @@ export function InvoiceDetailView({ id }: { id: string }) {
           error={actionError}
           onConfirm={() => act.mutate(action)}
         />
+      )}
+
+      {canRecordPayment && (
+        <RecordPaymentDialog key={invoice.outstanding} open={paymentOpen} onOpenChange={setPaymentOpen} invoice={invoice} />
       )}
     </>
   );

@@ -13,7 +13,7 @@ import { DateText, Money } from "@/components/data/Money";
 import { StatusBadge } from "@/components/data/StatusBadge";
 import { RunBillingDialog } from "@/components/invoices/RunBillingDialog";
 import { formatDateTime, sentence } from "@/components/invoices/format";
-import type { CustomerOption, Invoice, LastBillingRun } from "@/components/invoices/types";
+import type { Invoice, LastBillingRun } from "@/components/invoices/types";
 import { useHydrated } from "@/components/invoices/useHydrated";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -117,14 +117,6 @@ export function InvoicesView() {
     placeholderData: keepPreviousData,
   });
 
-  const customers = useQuery({
-    queryKey: ["invoice-customers"],
-    queryFn: () => api.get<Paginated<CustomerOption>>("/customers/", { page_size: 100 }),
-    enabled: internal,
-    retry: false,
-    staleTime: 5 * 60_000,
-  });
-
   // The last-run strip comes from the manual billing-controls PR (GET /api/billing/last-run/).
   const lastRun = useQuery({
     queryKey: ["billing-last-run"],
@@ -188,32 +180,6 @@ export function InvoicesView() {
             </option>
           ))}
         </select>
-
-        {internal && (
-          <select
-            aria-label="Filter by customer"
-            className="h-8 max-w-56 rounded-lg border border-input bg-background px-2.5 text-sm"
-            value={customer}
-            disabled={customers.isLoading || customers.isError}
-            onChange={(event) => url.set({ customer: event.target.value })}
-          >
-            <option value="">
-              {customers.isLoading
-                ? "Loading customers…"
-                : customers.isError
-                  ? "Customer list unavailable"
-                  : "All customers"}
-            </option>
-            {customer && !customers.data?.results.some((item) => String(item.id) === customer) && (
-              <option value={customer}>Customer #{customer}</option>
-            )}
-            {customers.data?.results.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.company || item.name}
-              </option>
-            ))}
-          </select>
-        )}
 
         <label className="flex items-center gap-1.5 text-sm text-ink-2">
           From

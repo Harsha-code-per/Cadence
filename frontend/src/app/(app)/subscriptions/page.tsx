@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { CustomerPicker } from "@/components/data/CustomerPicker";
 import { DataTable } from "@/components/data/DataTable";
 import { EmptyState } from "@/components/data/EmptyState";
 import { DateText, Money } from "@/components/data/Money";
@@ -52,12 +53,7 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
   const [customer, setCustomer] = useState("");
   const [template, setTemplate] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [customerPage, setCustomerPage] = useState(1);
   const [templatePage, setTemplatePage] = useState(1);
-  const customers = useQuery({
-    queryKey: ["subscription-customers", customerPage],
-    queryFn: () => api.get<Paginated<Option>>("/customers/", { page_size: 100, page: customerPage }),
-  });
   const templates = useQuery({
     queryKey: ["subscription-templates", templatePage],
     queryFn: () => api.get<Paginated<Option>>("/quotation-templates/", { page_size: 100, page: templatePage }),
@@ -85,57 +81,13 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
         Create from a quotation template
       </h2>
       <p className="mt-1 text-sm text-ink-2">Start a draft using an existing customer and template.</p>
-      {customers.isError || templates.isError ? (
+      {templates.isError ? (
         <p role="alert" className="mt-4 text-sm text-destructive">
-          Could not load customers or templates. Please refresh and try again.
+          Could not load quotation templates. Please refresh and try again.
         </p>
       ) : null}
       <form onSubmit={submit} className="mt-4 grid gap-4 md:grid-cols-3">
-        <div className="grid content-start gap-1.5 text-sm font-medium">
-          <label htmlFor="customer">Customer</label>
-          <select
-            id="customer"
-            required
-            value={customer}
-            onChange={(e) => setCustomer(e.target.value)}
-            className="h-11 rounded-md border border-input bg-surface px-3 font-normal"
-            disabled={customers.isLoading || customers.isError}
-          >
-            <option value="">Select a customer</option>
-            {customers.data?.results.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.company ? `${item.name} · ${item.company}` : item.name}
-              </option>
-            ))}
-          </select>
-          <span className="flex items-center gap-2 font-normal">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={customerPage === 1 || customers.isFetching}
-              onClick={() => {
-                setCustomer("");
-                setCustomerPage(customerPage - 1);
-              }}
-            >
-              Previous
-            </Button>{" "}
-            Page {customerPage}{" "}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={!customers.data?.next || customers.isFetching}
-              onClick={() => {
-                setCustomer("");
-                setCustomerPage(customerPage + 1);
-              }}
-            >
-              Next
-            </Button>
-          </span>
-        </div>
+        <CustomerPicker value={customer} onChange={setCustomer} />
         <div className="grid content-start gap-1.5 text-sm font-medium">
           <label htmlFor="template">Quotation template</label>
           <select
@@ -200,7 +152,7 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
           <Button
             type="submit"
             disabled={
-              create.isPending || customers.isLoading || templates.isLoading || customers.isError || templates.isError
+              create.isPending || templates.isLoading || templates.isError
             }
           >
             {create.isPending ? "Creating…" : "Create draft"}

@@ -1,7 +1,7 @@
-import { PageHeader } from "@/components/layout/PageHeader";
+import { SignupForm } from "./SignupForm";
 
-export const metadata = { title: "Sign up" };
+export const metadata = { title: "Create an account" };
 
 export default function SignupPage() {
-  return <PageHeader title="Sign up" description="This page is being built." />;
+  return <SignupForm />;
 }

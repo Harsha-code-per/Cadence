@@ -45,6 +45,7 @@ def test_login_requires_a_csrf_token(db, make_user):
     strict = APIClient(enforce_csrf_checks=True)
     blocked = _login(strict, "csrf@example.test", PASSWORD)
     assert blocked.status_code == 403  # a cross-site form can't log a victim in
+    assert blocked.json()["error"]["code"] == "csrf_failed"
 
     strict.get("/api/auth/csrf/")
     token = strict.cookies["csrftoken"].value

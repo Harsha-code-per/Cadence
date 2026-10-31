@@ -9,14 +9,15 @@ import { FilterBar } from "@/components/data/FilterBar";
 import { ResourceDialog, type FieldDef } from "@/components/forms/ResourceDialog";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useMe } from "@/hooks/useMe";
+import { useMe, type Role } from "@/hooks/useMe";
 import { useUrlState } from "@/hooks/useUrlState";
 import { ApiError } from "@/lib/api";
 import { useList, useRemove, useSave } from "@/lib/crud";
 
-type Row = { id: number; name: string };
+type Row = { id: number; name?: string; full_name?: string };
+const labelOf = (r: Row | null | undefined) => r?.name ?? r?.full_name;
 
-/** List + create/edit/delete for one catalog resource. Writes are admin-only (the API enforces it too). */
+/** List + create/edit/delete for one resource. Writes default to admins (the API enforces roles too). */
 export function CatalogPage<T extends Row>({
   title,
   description,
@@ -30,6 +31,8 @@ export function CatalogPage<T extends Row>({
   rowActions,
   headerActions,
   belowHeader,
+  writeRoles = ["admin"],
+  deleteLabel,
 }: {
   title: string;
   description?: string;
@@ -43,10 +46,14 @@ export function CatalogPage<T extends Row>({
   rowActions?: (row: T) => React.ReactNode;
   headerActions?: React.ReactNode;
   belowHeader?: React.ReactNode;
+  /** Roles that may create/edit/delete. */
+  writeRoles?: Role[];
+  /** Overrides the delete wording, e.g. "Deactivate". */
+  deleteLabel?: string;
 }) {
   const url = useUrlState();
   const { data: me } = useMe();
-  const canWrite = me?.role === "admin";
+  const canWrite = !!me && writeRoles.includes(me.role);
   const params = { page: url.page, search: url.get("search") || undefined, ...extraParams };
   const list = useList<T>(resource, params);
   const save = useSave<T>(resource, noun);
@@ -67,10 +74,10 @@ export function CatalogPage<T extends Row>({
                 <div className="flex justify-end gap-1">
                   {rowActions?.(row.original)}
                   {canWrite && (<>
-                  <Button variant="ghost" size="icon" aria-label={`Edit ${row.original.name}`} onClick={() => setEditing(row.original)}>
+                  <Button variant="ghost" size="icon" aria-label={`Edit ${labelOf(row.original)}`} onClick={() => setEditing(row.original)}>
                     <Pencil size={16} />
                   </Button>
-                  <Button variant="ghost" size="icon" aria-label={`Delete ${row.original.name}`} onClick={() => setDeleting(row.original)}>
+                  <Button variant="ghost" size="icon" aria-label={`${deleteLabel ?? "Delete"} ${labelOf(row.original)}`} onClick={() => setDeleting(row.original)}>
                     <Trash2 size={16} />
                   </Button>
                   </>)}
@@ -79,7 +86,7 @@ export function CatalogPage<T extends Row>({
             },
           ]
         : columns,
-    [columns, canWrite, rowActions],
+    [columns, canWrite, rowActions, deleteLabel],
   );
 
   const create = (
@@ -124,9 +131,9 @@ export function CatalogPage<T extends Row>({
       <ConfirmDialog
         open={deleting !== null}
         onOpenChange={(o) => !o && setDeleting(null)}
-        title={`Delete ${deleting?.name ?? noun.toLowerCase()}?`}
-        description="This cannot be undone. Items already used on subscriptions or invoices keep their history."
-        confirmLabel={`Delete ${noun.toLowerCase()}`}
+        title={`${deleteLabel ?? "Delete"} ${labelOf(deleting) ?? noun.toLowerCase()}?`}
+        description={deleteLabel ? `${labelOf(deleting) ?? "They"} will no longer be able to log in. Their history stays intact.` : "This cannot be undone. Items already used on subscriptions or invoices keep their history."}
+        confirmLabel={`${deleteLabel ?? "Delete"} ${noun.toLowerCase()}`}
         destructive
         pending={remove.isPending}
         onConfirm={() =>

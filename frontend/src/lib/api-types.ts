@@ -4,6 +4,70 @@
  */
 
 export interface paths {
+    "/api/analytics/insights/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["analytics_insights_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/analytics/revenue-series/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["analytics_revenue_series_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/analytics/status-breakdown/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["analytics_status_breakdown_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/analytics/summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["analytics_summary_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/attributes/": {
         parameters: {
             query?: never;
@@ -34,6 +98,198 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["attributes_partial_update"];
+        trace?: never;
+    };
+    "/api/auth/change-password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_change_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/csrf/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_csrf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_login_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_logout_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_me_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password-reset/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_password_reset_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/password-reset/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_password_reset_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/signup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_signup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/last-run/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["billing_last_run_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/billing/run/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["billing_run_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["customers_list"];
+        put?: never;
+        post: operations["customers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["customers_retrieve"];
+        put: operations["customers_update"];
+        post?: never;
+        delete: operations["customers_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["customers_partial_update"];
         trace?: never;
     };
     "/api/discounts/": {
@@ -101,6 +357,144 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/invoices/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description A,S see every invoice; C sees only their own rows (404 outside scope).
+         *
+         *     Writes are lifecycle actions only (confirm / cancel / send / confirm-bulk) and are
+         *     admin/staff only. There is deliberately no create endpoint: invoices come from the
+         *     billing engine, never from a client payload.
+         */
+        get: operations["invoices_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description A,S see every invoice; C sees only their own rows (404 outside scope).
+         *
+         *     Writes are lifecycle actions only (confirm / cancel / send / confirm-bulk) and are
+         *     admin/staff only. There is deliberately no create endpoint: invoices come from the
+         *     billing engine, never from a client payload.
+         */
+        get: operations["invoices_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description A,S see every invoice; C sees only their own rows (404 outside scope).
+         *
+         *     Writes are lifecycle actions only (confirm / cancel / send / confirm-bulk) and are
+         *     admin/staff only. There is deliberately no create endpoint: invoices come from the
+         *     billing engine, never from a client payload.
+         */
+        post: operations["invoices_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/{id}/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description A,S see every invoice; C sees only their own rows (404 outside scope).
+         *
+         *     Writes are lifecycle actions only (confirm / cancel / send / confirm-bulk) and are
+         *     admin/staff only. There is deliberately no create endpoint: invoices come from the
+         *     billing engine, never from a client payload.
+         */
+        post: operations["invoices_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/{id}/send/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description A,S see every invoice; C sees only their own rows (404 outside scope).
+         *
+         *     Writes are lifecycle actions only (confirm / cancel / send / confirm-bulk) and are
+         *     admin/staff only. There is deliberately no create endpoint: invoices come from the
+         *     billing engine, never from a client payload.
+         */
+        post: operations["invoices_send_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/confirm-bulk/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description A,S see every invoice; C sees only their own rows (404 outside scope).
+         *
+         *     Writes are lifecycle actions only (confirm / cancel / send / confirm-bulk) and are
+         *     admin/staff only. There is deliberately no create endpoint: invoices come from the
+         *     billing engine, never from a client payload.
+         */
+        post: operations["invoices_confirm_bulk_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payment-terms/": {
         parameters: {
             query?: never;
@@ -133,6 +527,50 @@ export interface paths {
         patch: operations["payment_terms_partial_update"];
         trace?: never;
     };
+    "/api/payments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Payments are an append-only ledger: editing or deleting one would desync
+         *     invoice.amount_paid, so only list, retrieve and create are exposed.
+         */
+        get: operations["payments_list"];
+        put?: never;
+        /**
+         * @description Payments are an append-only ledger: editing or deleting one would desync
+         *     invoice.amount_paid, so only list, retrieve and create are exposed.
+         */
+        post: operations["payments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/payments/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Payments are an append-only ledger: editing or deleting one would desync
+         *     invoice.amount_paid, so only list, retrieve and create are exposed.
+         */
+        get: operations["payments_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/plans/": {
         parameters: {
             query?: never;
@@ -163,6 +601,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["plans_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["portal_summary_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/products/": {
@@ -246,6 +700,280 @@ export interface paths {
         patch: operations["quotation_templates_partial_update"];
         trace?: never;
     };
+    "/api/staff/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["staff_list"];
+        put?: never;
+        post: operations["staff_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/staff/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["staff_retrieve"];
+        put: operations["staff_update"];
+        post?: never;
+        delete: operations["staff_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["staff_partial_update"];
+        trace?: never;
+    };
+    "/api/subscriptions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        get: operations["subscriptions_list"];
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        get: operations["subscriptions_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        patch: operations["subscriptions_partial_update"];
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/activate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_activate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/close/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_close_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/confirm/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        get: operations["subscriptions_events_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/lines/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        get: operations["subscriptions_lines_list"];
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_lines_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/lines/{line_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        delete: operations["subscriptions_lines_destroy"];
+        options?: never;
+        head?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        patch: operations["subscriptions_lines_partial_update"];
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/pause/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_pause_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/renew/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_renew_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/resume/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_resume_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/revise/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_revise_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/{id}/send/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_send_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/subscriptions/from-template/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A,S see everything; C sees only their own rows (404 outside scope). */
+        post: operations["subscriptions_from_template_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/taxes/": {
         parameters: {
             query?: never;
@@ -314,6 +1042,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AnalyticsSummary: {
+            active_subscriptions: number;
+            mrr: string;
+            arr: string;
+            invoiced: string;
+            collected: string;
+            outstanding: string;
+            overdue_count: number;
+            overdue_amount: string;
+        };
         Attribute: {
             readonly id: number;
             name: string;
@@ -343,6 +1081,61 @@ export interface components {
          * @enum {string}
          */
         BillingPeriodEnum: "daily" | "weekly" | "monthly" | "yearly";
+        BillingRunRequestRequest: {
+            /** Format: date */
+            date?: string;
+            /** @default 500 */
+            limit: number;
+            /** @default false */
+            dry_run: boolean;
+        };
+        BillingRunResponse: {
+            activated: number;
+            closed: number;
+            invoiced: number;
+            skipped: number;
+            /** Format: date-time */
+            ran_at: string;
+            dry_run: boolean;
+        };
+        ChangePasswordRequest: {
+            old_password: string;
+            new_password: string;
+        };
+        CsrfResponse: {
+            status: string;
+            csrf_token: string;
+        };
+        Customer: {
+            readonly id: number;
+            readonly user: number | null;
+            name: string;
+            company?: string;
+            /** Format: email */
+            email: string;
+            phone?: string;
+            address?: string;
+            assigned_staff?: number | null;
+            readonly assigned_staff_name: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        CustomerRequest: {
+            name: string;
+            company?: string;
+            /** Format: email */
+            email: string;
+            phone?: string;
+            address?: string;
+            assigned_staff?: number | null;
+        };
+        CustomerSummary: {
+            readonly id: number;
+            name: string;
+            company?: string;
+        };
         Discount: {
             readonly id: number;
             name: string;
@@ -354,16 +1147,12 @@ export interface components {
             product_ids?: number[];
             /** Format: decimal */
             min_amount?: string;
-            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
             /** Format: date */
             end_date?: string | null;
-            /**
-             * Format: int64
-             * @description Empty = unlimited
-             */
+            /** @description Empty = unlimited */
             usage_limit?: number | null;
             /** @default 0 */
             readonly times_used: number;
@@ -379,18 +1168,23 @@ export interface components {
             product_ids?: number[];
             /** Format: decimal */
             min_amount?: string;
-            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
             /** Format: date */
             end_date?: string | null;
-            /**
-             * Format: int64
-             * @description Empty = unlimited
-             */
+            /** @description Empty = unlimited */
             usage_limit?: number | null;
             is_active?: boolean;
+        };
+        DiscountSummary: {
+            readonly id: number;
+            name: string;
+            code?: string | null;
+            discount_type: components["schemas"]["DiscountTypeEnum"];
+            /** Format: decimal */
+            value?: string;
+            scope?: components["schemas"]["ScopeEnum"];
         };
         /**
          * @description * `percent` - Percentage
@@ -402,6 +1196,134 @@ export interface components {
             status: string;
             db: string;
         };
+        InsightItem: {
+            subscription_id: number;
+            number: string;
+            customer_name: string;
+            plan_name: string;
+            risk_score: number;
+            reasons: string[];
+        };
+        Invoice: {
+            readonly id: number;
+            number: string;
+            /** @default draft */
+            status: components["schemas"]["StatusA3eEnum"];
+            readonly customer: components["schemas"]["CustomerSummary"];
+            readonly subscription: components["schemas"]["SubscriptionSummary"];
+            /** Format: date */
+            invoice_date: string;
+            /** Format: date */
+            due_date: string;
+            /** Format: date */
+            period_start: string;
+            /** Format: date */
+            period_end: string;
+            /** Format: decimal */
+            subtotal?: string;
+            /** Format: decimal */
+            discount_total?: string;
+            /** Format: decimal */
+            tax_total?: string;
+            /** Format: decimal */
+            total?: string;
+            /** Format: decimal */
+            amount_paid?: string;
+            readonly outstanding: string;
+            readonly is_overdue: boolean;
+            /** Format: date-time */
+            sent_at?: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        InvoiceBulkConfirmRequest: {
+            ids: number[];
+        };
+        InvoiceBulkConfirmResponse: {
+            confirmed: number;
+        };
+        InvoiceDetail: {
+            readonly id: number;
+            number: string;
+            /** @default draft */
+            status: components["schemas"]["StatusA3eEnum"];
+            readonly customer: components["schemas"]["CustomerSummary"];
+            readonly subscription: components["schemas"]["SubscriptionSummary"];
+            /** Format: date */
+            invoice_date: string;
+            /** Format: date */
+            due_date: string;
+            /** Format: date */
+            period_start: string;
+            /** Format: date */
+            period_end: string;
+            /** Format: decimal */
+            subtotal?: string;
+            /** Format: decimal */
+            discount_total?: string;
+            /** Format: decimal */
+            tax_total?: string;
+            /** Format: decimal */
+            total?: string;
+            /** Format: decimal */
+            amount_paid?: string;
+            readonly outstanding: string;
+            readonly is_overdue: boolean;
+            /** Format: date-time */
+            sent_at?: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly lines: components["schemas"]["InvoiceLine"][];
+            readonly payments: components["schemas"]["PaymentSummary"][];
+            readonly changes: {
+                [key: string]: unknown;
+            }[];
+        };
+        InvoiceLine: {
+            readonly id: number;
+            product?: number | null;
+            readonly product_name: string;
+            description: string;
+            quantity?: number;
+            /** Format: decimal */
+            unit_price?: string;
+            /** Format: decimal */
+            amount?: string;
+            /** Format: decimal */
+            discount_amount?: string;
+            /** Format: decimal */
+            tax_amount?: string;
+            /** Format: decimal */
+            total?: string;
+            readonly taxes: components["schemas"]["InvoiceLineTax"][];
+        };
+        InvoiceLineTax: {
+            readonly id: number;
+            tax?: number | null;
+            name: string;
+            /** Format: decimal */
+            rate: string;
+            /** Format: decimal */
+            amount?: string;
+        };
+        LoginRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
+        };
+        /**
+         * @description * `cash` - Cash
+         *     * `bank_transfer` - Bank transfer
+         *     * `card` - Card
+         *     * `upi` - UPI
+         *     * `cheque` - Cheque
+         * @enum {string}
+         */
+        MethodEnum: "cash" | "bank_transfer" | "card" | "upi" | "cheque";
         PaginatedAttributeList: {
             /** @example 123 */
             count: number;
@@ -417,6 +1339,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Attribute"][];
         };
+        PaginatedCustomerList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Customer"][];
+        };
         PaginatedDiscountList: {
             /** @example 123 */
             count: number;
@@ -431,6 +1368,36 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Discount"][];
+        };
+        PaginatedInvoiceList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Invoice"][];
+        };
+        PaginatedPaymentList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Payment"][];
         };
         PaginatedPaymentTermList: {
             /** @example 123 */
@@ -492,6 +1459,51 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["QuotationTemplate"][];
         };
+        PaginatedSubscriptionEventList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SubscriptionEvent"][];
+        };
+        PaginatedSubscriptionLineList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SubscriptionLine"][];
+        };
+        PaginatedSubscriptionList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Subscription"][];
+        };
         PaginatedTaxList: {
             /** @example 123 */
             count: number;
@@ -506,6 +1518,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Tax"][];
+        };
+        PaginatedUserList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["User"][];
         };
         PaginatedVariantList: {
             /** @example 123 */
@@ -522,9 +1549,27 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Variant"][];
         };
+        PasswordResetConfirmRequest: {
+            uid: string;
+            token: string;
+            new_password: string;
+        };
+        PasswordResetRequestRequest: {
+            /** Format: email */
+            email: string;
+        };
         PatchedAttributeRequest: {
             name?: string;
             values?: components["schemas"]["AttributeValueRequest"][];
+        };
+        PatchedCustomerRequest: {
+            name?: string;
+            company?: string;
+            /** Format: email */
+            email?: string;
+            phone?: string;
+            address?: string;
+            assigned_staff?: number | null;
         };
         PatchedDiscountRequest: {
             name?: string;
@@ -536,22 +1581,17 @@ export interface components {
             product_ids?: number[];
             /** Format: decimal */
             min_amount?: string;
-            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date?: string;
             /** Format: date */
             end_date?: string | null;
-            /**
-             * Format: int64
-             * @description Empty = unlimited
-             */
+            /** @description Empty = unlimited */
             usage_limit?: number | null;
             is_active?: boolean;
         };
         PatchedPaymentTermRequest: {
             name?: string;
-            /** Format: int64 */
             due_days?: number;
         };
         PatchedPlanRequest: {
@@ -562,9 +1602,7 @@ export interface components {
              */
             price?: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
-            /** Format: int64 */
             interval_count?: number;
-            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date?: string;
@@ -590,12 +1628,38 @@ export interface components {
         };
         PatchedQuotationTemplateRequest: {
             name?: string;
-            /** Format: int64 */
             validity_days?: number;
             plan?: number;
             payment_term?: number | null;
             notes?: string;
             lines?: components["schemas"]["TemplateLineRequest"][];
+        };
+        PatchedStaffUpdateRequest: {
+            full_name?: string;
+            role?: components["schemas"]["RoleCa8Enum"];
+            is_active?: boolean;
+        };
+        /** @description One line in a create payload or a line PATCH (docs/API.md). */
+        PatchedSubscriptionLineWriteRequest: {
+            product?: number;
+            variant?: number | null;
+            description?: string;
+            quantity?: number;
+            /** Format: decimal */
+            unit_price?: string;
+            tax_ids?: number[];
+        };
+        /** @description PATCH in draft only; status and every derived field are rejected, never written. */
+        PatchedSubscriptionUpdateRequest: {
+            customer?: number;
+            plan?: number;
+            /** Format: date */
+            start_date?: string;
+            /** Format: date */
+            expiration_date?: string | null;
+            payment_term?: number;
+            discount?: number | null;
+            notes?: string;
         };
         PatchedTaxRequest: {
             name?: string;
@@ -611,15 +1675,61 @@ export interface components {
             value_ids?: number[];
             sku?: string | null;
         };
+        Payment: {
+            readonly id: number;
+            readonly number: string;
+            invoice: number;
+            readonly invoice_number: string;
+            readonly customer_id: number;
+            readonly customer_name: string;
+            method: components["schemas"]["MethodEnum"];
+            /** Format: decimal */
+            amount: string;
+            /** Format: date */
+            payment_date: string;
+            reference?: string;
+            note?: string;
+            readonly recorded_by: number | null;
+            readonly recorded_by_name: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        PaymentRequest: {
+            invoice: number;
+            method: components["schemas"]["MethodEnum"];
+            /** Format: decimal */
+            amount: string;
+            /** Format: date */
+            payment_date: string;
+            reference?: string;
+            note?: string;
+        };
+        /** @description Customer-safe payment row: recorded_by and other internal fields stay private. */
+        PaymentSummary: {
+            readonly id: number;
+            number: string;
+            method: components["schemas"]["MethodEnum"];
+            /** Format: decimal */
+            amount?: string;
+            /** Format: date */
+            payment_date: string;
+            reference?: string;
+            note?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
         PaymentTerm: {
             readonly id: number;
             name: string;
-            /** Format: int64 */
             due_days?: number;
         };
         PaymentTermRequest: {
             name: string;
-            /** Format: int64 */
+            due_days?: number;
+        };
+        PaymentTermSummary: {
+            readonly id: number;
+            name: string;
             due_days?: number;
         };
         Plan: {
@@ -631,9 +1741,7 @@ export interface components {
              */
             price?: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
-            /** Format: int64 */
             interval_count?: number;
-            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
@@ -654,9 +1762,7 @@ export interface components {
              */
             price?: string;
             billing_period?: components["schemas"]["BillingPeriodEnum"];
-            /** Format: int64 */
             interval_count?: number;
-            /** Format: int64 */
             min_quantity?: number;
             /** Format: date */
             start_date: string;
@@ -668,6 +1774,36 @@ export interface components {
             renewable?: boolean;
             is_active?: boolean;
             tax_ids?: number[];
+        };
+        PlanSummary: {
+            readonly id: number;
+            name: string;
+            billing_period?: components["schemas"]["BillingPeriodEnum"];
+            interval_count?: number;
+            /**
+             * Format: decimal
+             * @description Recurring plan fee per period; 0 = products only
+             */
+            price?: string;
+            min_quantity?: number;
+            auto_close?: boolean;
+            closable?: boolean;
+            pausable?: boolean;
+            renewable?: boolean;
+        };
+        PortalSummary: {
+            customer: {
+                [key: string]: unknown;
+            };
+            active_subscriptions: number;
+            next_invoice_date: string | null;
+            outstanding: string;
+            recent_invoices: {
+                [key: string]: unknown;
+            }[];
+            recent_payments: {
+                [key: string]: unknown;
+            }[];
         };
         Product: {
             readonly id: number;
@@ -709,7 +1845,6 @@ export interface components {
         QuotationTemplate: {
             readonly id: number;
             name: string;
-            /** Format: int64 */
             validity_days?: number;
             plan: number;
             payment_term?: number | null;
@@ -718,19 +1853,191 @@ export interface components {
         };
         QuotationTemplateRequest: {
             name: string;
-            /** Format: int64 */
             validity_days?: number;
             plan: number;
             payment_term?: number | null;
             notes?: string;
             lines: components["schemas"]["TemplateLineRequest"][];
         };
+        RevenueSeries: {
+            month: string;
+            invoiced: string;
+            collected: string;
+        };
+        /**
+         * @description * `admin` - admin
+         *     * `staff` - staff
+         * @enum {string}
+         */
+        RoleCa8Enum: "admin" | "staff";
         /**
          * @description * `subscription` - Whole subscription
          *     * `product` - Specific products
          * @enum {string}
          */
         ScopeEnum: "subscription" | "product";
+        SignupRequest: {
+            full_name: string;
+            /** Format: email */
+            email: string;
+            password: string;
+            company?: string;
+        };
+        StaffCreate: {
+            readonly id: number;
+            /** Format: email */
+            email: string;
+            full_name: string;
+            /** @default staff */
+            role: components["schemas"]["RoleCa8Enum"];
+            is_active?: boolean;
+            /** Format: date-time */
+            readonly date_joined: string;
+        };
+        StaffCreateRequest: {
+            /** Format: email */
+            email: string;
+            full_name: string;
+            /** @default staff */
+            role: components["schemas"]["RoleCa8Enum"];
+            password: string;
+            is_active?: boolean;
+        };
+        StaffUpdate: {
+            readonly id: number;
+            /** Format: email */
+            readonly email: string;
+            full_name: string;
+            role?: components["schemas"]["RoleCa8Enum"];
+            is_active?: boolean;
+        };
+        StaffUpdateRequest: {
+            full_name: string;
+            role?: components["schemas"]["RoleCa8Enum"];
+            is_active?: boolean;
+        };
+        /**
+         * @description * `draft` - Draft
+         *     * `confirmed` - Confirmed
+         *     * `paid` - Paid
+         *     * `cancelled` - Cancelled
+         * @enum {string}
+         */
+        StatusA3eEnum: "draft" | "confirmed" | "paid" | "cancelled";
+        StatusBreakdown: {
+            subscriptions: {
+                [key: string]: number;
+            };
+            invoices: {
+                [key: string]: number;
+            };
+        };
+        Subscription: {
+            readonly id: number;
+            readonly number: string;
+            readonly status: components["schemas"]["SubscriptionStatusEnum"];
+            readonly customer: components["schemas"]["CustomerSummary"];
+            readonly plan: components["schemas"]["PlanSummary"];
+            /** Format: date */
+            start_date: string;
+            /** Format: date */
+            expiration_date?: string | null;
+            /** Format: date */
+            readonly next_invoice_date: string | null;
+            /**
+             * Format: date
+             * @description Quotation expiry
+             */
+            readonly valid_until: string | null;
+            readonly payment_term: components["schemas"]["PaymentTermSummary"];
+            readonly discount: components["schemas"]["DiscountSummary"];
+            readonly quotation_template: number | null;
+            readonly salesperson: components["schemas"]["UserSummary"];
+            readonly renewed_from: number | null;
+            readonly close_reason: string;
+            notes?: string;
+            readonly lines: components["schemas"]["SubscriptionLine"][];
+            readonly recurring_total: string;
+            readonly allowed_actions: string[];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        SubscriptionActionRequest: {
+            note?: string;
+            reason?: string;
+        };
+        SubscriptionCreateRequest: {
+            customer: number;
+            plan: number;
+            /** Format: date */
+            start_date: string;
+            /** Format: date */
+            expiration_date?: string | null;
+            payment_term: number;
+            discount?: number | null;
+            notes?: string;
+            lines?: components["schemas"]["SubscriptionLineWriteRequest"][];
+        };
+        SubscriptionEvent: {
+            readonly id: number;
+            from_status?: string;
+            to_status: string;
+            readonly actor: components["schemas"]["UserSummary"];
+            note?: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        SubscriptionFromTemplateRequest: {
+            template: number;
+            customer: number;
+            /** Format: date */
+            start_date: string;
+        };
+        /** @description Read representation; write shapes live in SubscriptionLineWriteSerializer. */
+        SubscriptionLine: {
+            readonly id: number;
+            product: number;
+            readonly product_name: string;
+            variant?: number | null;
+            readonly variant_label: string | null;
+            description?: string;
+            quantity?: number;
+            /**
+             * Format: decimal
+             * @description Snapshot at creation; catalog edits don't change contracts
+             */
+            unit_price?: string;
+            readonly tax_ids: number[];
+            /** Format: decimal */
+            readonly amount: string;
+        };
+        /** @description One line in a create payload or a line PATCH (docs/API.md). */
+        SubscriptionLineWriteRequest: {
+            product: number;
+            variant?: number | null;
+            description?: string;
+            quantity: number;
+            /** Format: decimal */
+            unit_price?: string;
+            tax_ids?: number[];
+        };
+        /**
+         * @description * `draft` - Draft
+         *     * `quotation` - Quotation
+         *     * `confirmed` - Confirmed
+         *     * `active` - Active
+         *     * `paused` - Paused
+         *     * `closed` - Closed
+         * @enum {string}
+         */
+        SubscriptionStatusEnum: "draft" | "quotation" | "confirmed" | "active" | "paused" | "closed";
+        SubscriptionSummary: {
+            readonly id: number;
+            readonly number: string;
+            readonly status: string;
+        };
         Tax: {
             readonly id: number;
             name: string;
@@ -753,16 +2060,37 @@ export interface components {
         TemplateLine: {
             product: number;
             variant?: number | null;
-            /** Format: int64 */
             quantity?: number;
             description?: string;
         };
         TemplateLineRequest: {
             product: number;
             variant?: number | null;
-            /** Format: int64 */
             quantity?: number;
             description?: string;
+        };
+        User: {
+            readonly id: number;
+            /** Format: email */
+            email: string;
+            full_name: string;
+            role?: components["schemas"]["UserRoleEnum"];
+            readonly is_active: boolean;
+            /** Format: date-time */
+            readonly date_joined: string;
+            readonly customer_id: number | null;
+        };
+        /**
+         * @description * `admin` - Admin
+         *     * `staff` - Internal staff
+         *     * `customer` - Customer
+         * @enum {string}
+         */
+        UserRoleEnum: "admin" | "staff" | "customer";
+        /** @description Internal users referenced by a subscription; no email exposed to customers. */
+        UserSummary: {
+            readonly id: number;
+            readonly full_name: string;
         };
         Variant: {
             readonly id: number;
@@ -797,6 +2125,92 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    analytics_insights_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InsightItem"][];
+                };
+            };
+        };
+    };
+    analytics_revenue_series_list: {
+        parameters: {
+            query?: {
+                /** @description Number of past months (default 12) */
+                months?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RevenueSeries"][];
+                };
+            };
+        };
+    };
+    analytics_status_breakdown_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusBreakdown"];
+                };
+            };
+        };
+    };
+    analytics_summary_retrieve: {
+        parameters: {
+            query?: {
+                /** @description From date YYYY-MM-DD */
+                from?: string;
+                /** @description Filter by plan ID */
+                plan?: number;
+                /** @description To date YYYY-MM-DD */
+                to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsSummary"];
+                };
+            };
+        };
+    };
     attributes_list: {
         parameters: {
             query?: {
@@ -946,6 +2360,382 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Attribute"];
+                };
+            };
+        };
+    };
+    auth_change_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChangePasswordRequest"];
+                "multipart/form-data": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password changed successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_csrf_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CsrfResponse"];
+                };
+            };
+        };
+    };
+    auth_login_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LoginRequest"];
+                "multipart/form-data": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    auth_logout_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Logged out successfully */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    auth_password_reset_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordResetRequestRequest"];
+                "multipart/form-data": components["schemas"]["PasswordResetRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description Reset link sent if user exists */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_password_reset_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetConfirmRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordResetConfirmRequest"];
+                "multipart/form-data": components["schemas"]["PasswordResetConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Password reset confirmed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_signup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignupRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SignupRequest"];
+                "multipart/form-data": components["schemas"]["SignupRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    billing_last_run_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    billing_run_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["BillingRunRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BillingRunRequestRequest"];
+                "multipart/form-data": components["schemas"]["BillingRunRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingRunResponse"];
+                };
+            };
+        };
+    };
+    customers_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCustomerList"];
+                };
+            };
+        };
+    };
+    customers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomerRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CustomerRequest"];
+                "multipart/form-data": components["schemas"]["CustomerRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Customer"];
+                };
+            };
+        };
+    };
+    customers_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this customer. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Customer"];
+                };
+            };
+        };
+    };
+    customers_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this customer. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CustomerRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CustomerRequest"];
+                "multipart/form-data": components["schemas"]["CustomerRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Customer"];
+                };
+            };
+        };
+    };
+    customers_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this customer. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    customers_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this customer. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCustomerRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCustomerRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCustomerRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Customer"];
                 };
             };
         };
@@ -1153,6 +2943,161 @@ export interface operations {
             };
         };
     };
+    invoices_list: {
+        parameters: {
+            query?: {
+                customer?: number;
+                invoice_date?: string;
+                invoice_date__gte?: string;
+                invoice_date__lte?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description Only confirmed invoices past their due date. */
+                overdue?: boolean;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `draft` - Draft
+                 *     * `confirmed` - Confirmed
+                 *     * `paid` - Paid
+                 *     * `cancelled` - Cancelled
+                 */
+                status?: "cancelled" | "confirmed" | "draft" | "paid";
+                subscription?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedInvoiceList"];
+                };
+            };
+        };
+    };
+    invoices_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this invoice. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetail"];
+                };
+            };
+        };
+    };
+    invoices_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this invoice. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetail"];
+                };
+            };
+        };
+    };
+    invoices_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this invoice. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetail"];
+                };
+            };
+        };
+    };
+    invoices_send_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this invoice. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetail"];
+                };
+            };
+        };
+    };
+    invoices_confirm_bulk_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvoiceBulkConfirmRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["InvoiceBulkConfirmRequest"];
+                "multipart/form-data": components["schemas"]["InvoiceBulkConfirmRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceBulkConfirmResponse"];
+                };
+            };
+        };
+    };
     payment_terms_list: {
         parameters: {
             query?: {
@@ -1302,6 +3247,93 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaymentTerm"];
+                };
+            };
+        };
+    };
+    payments_list: {
+        parameters: {
+            query?: {
+                customer?: number;
+                invoice?: number;
+                /**
+                 * @description * `cash` - Cash
+                 *     * `bank_transfer` - Bank transfer
+                 *     * `card` - Card
+                 *     * `upi` - UPI
+                 *     * `cheque` - Cheque
+                 */
+                method?: "bank_transfer" | "card" | "cash" | "cheque" | "upi";
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                payment_date__gte?: string;
+                payment_date__lte?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPaymentList"];
+                };
+            };
+        };
+    };
+    payments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PaymentRequest"];
+                "multipart/form-data": components["schemas"]["PaymentRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
+                };
+            };
+        };
+    };
+    payments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this payment. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Payment"];
                 };
             };
         };
@@ -1466,6 +3498,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Plan"];
+                };
+            };
+        };
+    };
+    portal_summary_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalSummary"];
                 };
             };
         };
@@ -1798,6 +3849,693 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QuotationTemplate"];
+                };
+            };
+        };
+    };
+    staff_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedUserList"];
+                };
+            };
+        };
+    };
+    staff_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StaffCreateRequest"];
+                "multipart/form-data": components["schemas"]["StaffCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffCreate"];
+                };
+            };
+        };
+    };
+    staff_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this user. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["User"];
+                };
+            };
+        };
+    };
+    staff_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this user. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StaffUpdateRequest"];
+                "multipart/form-data": components["schemas"]["StaffUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffUpdate"];
+                };
+            };
+        };
+    };
+    staff_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this user. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    staff_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this user. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedStaffUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedStaffUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedStaffUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffUpdate"];
+                };
+            };
+        };
+    };
+    subscriptions_list: {
+        parameters: {
+            query?: {
+                customer?: number;
+                next_invoice_date?: string;
+                next_invoice_date__gte?: string;
+                next_invoice_date__lte?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                plan?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `draft` - Draft
+                 *     * `quotation` - Quotation
+                 *     * `confirmed` - Confirmed
+                 *     * `active` - Active
+                 *     * `paused` - Paused
+                 *     * `closed` - Closed
+                 */
+                status?: "active" | "closed" | "confirmed" | "draft" | "paused" | "quotation";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSubscriptionList"];
+                };
+            };
+        };
+    };
+    subscriptions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionCreateRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSubscriptionUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSubscriptionUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSubscriptionUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_activate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_close_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_events_list: {
+        parameters: {
+            query?: {
+                customer?: number;
+                next_invoice_date?: string;
+                next_invoice_date__gte?: string;
+                next_invoice_date__lte?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                plan?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `draft` - Draft
+                 *     * `quotation` - Quotation
+                 *     * `confirmed` - Confirmed
+                 *     * `active` - Active
+                 *     * `paused` - Paused
+                 *     * `closed` - Closed
+                 */
+                status?: "active" | "closed" | "confirmed" | "draft" | "paused" | "quotation";
+            };
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSubscriptionEventList"];
+                };
+            };
+        };
+    };
+    subscriptions_lines_list: {
+        parameters: {
+            query?: {
+                customer?: number;
+                next_invoice_date?: string;
+                next_invoice_date__gte?: string;
+                next_invoice_date__lte?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                plan?: number;
+                /** @description A search term. */
+                search?: string;
+                /**
+                 * @description * `draft` - Draft
+                 *     * `quotation` - Quotation
+                 *     * `confirmed` - Confirmed
+                 *     * `active` - Active
+                 *     * `paused` - Paused
+                 *     * `closed` - Closed
+                 */
+                status?: "active" | "closed" | "confirmed" | "draft" | "paused" | "quotation";
+            };
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSubscriptionLineList"];
+                };
+            };
+        };
+    };
+    subscriptions_lines_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionLineWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionLineWriteRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionLineWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionLine"];
+                };
+            };
+        };
+    };
+    subscriptions_lines_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+                line_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    subscriptions_lines_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+                line_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSubscriptionLineWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSubscriptionLineWriteRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSubscriptionLineWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionLine"];
+                };
+            };
+        };
+    };
+    subscriptions_pause_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_renew_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_resume_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_revise_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_send_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A unique integer value identifying this subscription. */
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionActionRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
+                };
+            };
+        };
+    };
+    subscriptions_from_template_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriptionFromTemplateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriptionFromTemplateRequest"];
+                "multipart/form-data": components["schemas"]["SubscriptionFromTemplateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscription"];
                 };
             };
         };

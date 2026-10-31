@@ -5,7 +5,6 @@ import './landing.css';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
@@ -70,12 +69,7 @@ export function Landing() {
     // The page paints first; the 3D scene is heavy to set up, so it waits for a quiet moment.
     const cancelIdle = whenIdle(() => setThree(canUseWebGL()));
 
-    // Smooth scroll, driven by GSAP's ticker so ScrollTrigger stays in sync.
-    const lenis = new Lenis({ autoRaf: false, lerp: 0.085 });
-    lenis.on('scroll', ScrollTrigger.update);
-    const tick = (time: number) => lenis.raf(time * 1000);
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
+    // Keep native wheel/trackpad momentum; ScrollTrigger already follows browser scrolling.
 
     // Magnetic CTAs lean toward the pointer (fine pointers only).
     const cleanups: (() => void)[] = [];
@@ -97,8 +91,6 @@ export function Landing() {
     return () => {
       cancelIdle();
       cleanups.forEach((c) => c());
-      gsap.ticker.remove(tick);
-      lenis.destroy();
     };
   }, []);
 

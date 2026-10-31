@@ -1,5 +1,7 @@
 'use client';
 
+import { pinDistance } from './scroll-distance';
+
 /**
  * "A month at Brightloop": the brief's seven scenes as a real timeline (Day 1 → Day 30).
  * Desktop: the section pins and scrolls sideways while a month-progress bar fills.
@@ -111,14 +113,14 @@ export default function MonthStrip() {
       const mm = gsap.matchMedia();
       mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
         const el = track.current!;
-        const distance = () => el.scrollWidth - window.innerWidth + 80;
+        const distance = () => Math.max(0, el.scrollWidth - window.innerWidth + 80);
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: section.current,
             start: 'top top',
-            end: () => `+=${distance()}`,
+            end: () => `+=${pinDistance('month', distance())}`,
             pin: true,
-            scrub: 0.6,
+            scrub: 0.3,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               world.track = self.progress;

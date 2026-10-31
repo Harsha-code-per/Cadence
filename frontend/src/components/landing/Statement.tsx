@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useRef } from 'react';
+import { pinDistance } from './scroll-distance';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -21,7 +22,11 @@ export default function Statement() {
           opacity: 0.14,
           stagger: 0.1,
           ease: 'none',
-          scrollTrigger: { trigger: root.current, start: 'top top', end: '+=1500', pin: true, scrub: 0.6 },
+          scrollTrigger: {
+            trigger: root.current, start: 'top top',
+            end: () => `+=${pinDistance('statement', window.innerHeight)}`,
+            pin: true, scrub: 0.3, invalidateOnRefresh: true,
+          },
         });
       });
       return () => mm.revert();

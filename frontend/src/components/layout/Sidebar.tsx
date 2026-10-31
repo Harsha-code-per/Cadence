@@ -177,7 +177,7 @@ export function SidebarNav({
               />
             }
           >
-            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-plum text-[13px] font-semibold text-white">
+            <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-plum text-[13px] font-semibold text-primary-foreground">
               {initials}
             </span>
             {!collapsed && (

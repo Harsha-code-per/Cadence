@@ -12,10 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { toApi } from "@/lib/resource-payload";
 
 export type Option = { value: string | number; label: string };
 
-type Base = { name: string; label: string; required?: boolean; hint?: string; wide?: boolean };
+type Base = { name: string; label: string; required?: boolean; hint?: string; wide?: boolean; emptyValue?: string | number | unknown[] };
 export type FieldDef =
   | (Base & { kind: "text" | "textarea" | "date" | "number" | "money" })
   | (Base & { kind: "checkbox" })
@@ -65,20 +66,6 @@ function toForm(fields: FieldDef[], data?: Record<string, unknown>) {
     else if (f.kind === "multi") out[f.name] = (v as number[]) ?? [];
     else if (f.kind === "custom") out[f.name] = v ?? null;
     else out[f.name] = v == null ? "" : String(v);
-  }
-  return out;
-}
-
-/** Form value → API payload. Money stays a string; empty optional values become null. */
-function toApi(fields: FieldDef[], values: FieldValues) {
-  const out: Record<string, unknown> = {};
-  for (const f of fields) {
-    const v = values[f.name];
-    if (f.kind === "number") out[f.name] = v === "" ? null : Number(v);
-    else if (f.kind === "select") out[f.name] = v === "" ? null : isNaN(Number(v)) ? v : Number(v);
-    else if (f.kind === "date") out[f.name] = v === "" ? null : v;
-    else if (f.kind === "money") out[f.name] = v === "" ? null : v;
-    else out[f.name] = v;
   }
   return out;
 }

@@ -40,6 +40,8 @@ if not SECRET_KEY:
     raise RuntimeError("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is false.")
 
 ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
+if env("RENDER_EXTERNAL_HOSTNAME"):  # set by Render for every web service
+    ALLOWED_HOSTS.append(env("RENDER_EXTERNAL_HOSTNAME"))
 FRONTEND_URL = env("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 CSRF_TRUSTED_ORIGINS = [FRONTEND_URL]
 SCHEDULER_SECRET = env("SCHEDULER_SECRET")

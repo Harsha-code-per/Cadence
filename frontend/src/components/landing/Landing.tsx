@@ -34,14 +34,14 @@ const ghost = "inline-flex min-h-12 items-center rounded-md border border-sideba
 export function Landing() {
   return (
     <div className="bg-sidebar text-sidebar-accent-foreground [--sidebar:#2a1730] [--sidebar-accent:#3a2540] [--sidebar-border:#3a2540]">
-      <header className={`${wrap} flex flex-wrap items-center justify-between gap-4 py-7`}>
+      <header className={`${wrap} flex items-center justify-between gap-4 py-7`}>
         <Link href="/" className="flex items-center gap-2.5 font-display text-[22px] font-bold tracking-[-0.02em]">
           <CycleMark size={32} /> Cadence
         </Link>
         <nav aria-label="Primary" className="flex flex-wrap items-center gap-7 text-base text-sidebar-foreground">
-          <a href="#month" className="hover:text-white">How it works</a>
-          <a href="#guarantees" className="hover:text-white">Guarantees</a>
-          <a href="#roles" className="hover:text-white">Who it&apos;s for</a>
+          <a href="#month" className="hover:text-white max-sm:hidden">How it works</a>
+          <a href="#guarantees" className="hover:text-white max-sm:hidden">Guarantees</a>
+          <a href="#roles" className="hover:text-white max-sm:hidden">Who it&apos;s for</a>
           <Link href="/login" className="rounded-md border border-sidebar-muted/50 px-4 py-2.5 text-sidebar-accent-foreground hover:bg-sidebar-accent">Log in</Link>
         </nav>
       </header>

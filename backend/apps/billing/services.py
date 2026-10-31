@@ -115,7 +115,7 @@ def generate_invoice(subscription_id, today):
         sub.status != SubscriptionStatus.ACTIVE
         or not start
         or start > today
-        or (sub.expiration_date and start > sub.expiration_date)
+        or (sub.effective_end and start > sub.effective_end)
     ):
         return None
     end = period_end(start, sub.plan, anchor_day(sub, start))
@@ -246,10 +246,10 @@ def generate_invoice_now(subscription_id, today):
             f"The next billing period for {sub.number} starts on "
             f"{start:%d %b %Y}; it is not due yet.",
         )
-    if sub.expiration_date and start > sub.expiration_date:
+    if sub.effective_end and start > sub.effective_end:
         raise DomainError(
             "subscription_expired",
-            f"{sub.number} expired on {sub.expiration_date:%d %b %Y}; a period starting "
+            f"{sub.number} expired on {sub.effective_end:%d %b %Y}; a period starting "
             "after the expiration date is never invoiced.",
         )
     if (
@@ -284,17 +284,27 @@ def run_due_billing(today, limit=500, triggered_by="manual", dry_run=False):
         raise ValueError("limit must be positive")
     from apps.subscriptions.state import transition_subscription
 
-    due = Q(status=SubscriptionStatus.ACTIVE, next_invoice_date__lte=today) & (
-        Q(expiration_date__isnull=True) | Q(next_invoice_date__lte=F("expiration_date"))
+    within_end = (
+        Q(expiration_date__isnull=False, next_invoice_date__lte=F("expiration_date"))
+        | Q(expiration_date__isnull=True, plan__auto_close=False)
+        | Q(expiration_date__isnull=True, plan__auto_close=True, plan__end_date__isnull=True)
+        | Q(
+            expiration_date__isnull=True,
+            plan__auto_close=True,
+            next_invoice_date__lte=F("plan__end_date"),
+        )
     )
+    due = Q(status=SubscriptionStatus.ACTIVE, next_invoice_date__lte=today) & within_end
     activate = Q(status=SubscriptionStatus.CONFIRMED, start_date__lte=today) & (
-        Q(expiration_date__isnull=True) | Q(expiration_date__gte=today)
+        Q(expiration_date__gte=today)
+        | Q(expiration_date__isnull=True, plan__auto_close=False)
+        | Q(expiration_date__isnull=True, plan__end_date__isnull=True)
+        | Q(expiration_date__isnull=True, plan__end_date__gte=today)
     )
     expire = Q(
         status__in=[SubscriptionStatus.ACTIVE, SubscriptionStatus.PAUSED],
         plan__auto_close=True,
-        expiration_date__lt=today,
-    )
+    ) & (Q(expiration_date__lt=today) | Q(expiration_date__isnull=True, plan__end_date__lt=today))
     counts = {"activated": 0, "closed": 0, "invoiced": 0, "skipped": 0}
     with transaction.atomic():
         subscriptions = list(
@@ -303,15 +313,6 @@ def run_due_billing(today, limit=500, triggered_by="manual", dry_run=False):
             .select_for_update(skip_locked=True, of=("self",))[:limit]
         )
         for sub in subscriptions:
-            if (
-                sub.status in (SubscriptionStatus.ACTIVE, SubscriptionStatus.PAUSED)
-                and sub.plan.auto_close
-                and sub.expiration_date
-                and sub.expiration_date < today
-            ):
-                transition_subscription(sub.pk, "auto_close", today=today, note="Plan expired")
-                counts["closed"] += 1
-                continue
             if sub.status == SubscriptionStatus.CONFIRMED:
                 transition_subscription(sub.pk, "activate", today=today)
                 counts["activated"] += 1
@@ -321,7 +322,7 @@ def run_due_billing(today, limit=500, triggered_by="manual", dry_run=False):
                 sub.status == SubscriptionStatus.ACTIVE
                 and sub.next_invoice_date
                 and sub.next_invoice_date <= today
-                and (sub.expiration_date is None or sub.next_invoice_date <= sub.expiration_date)
+                and (sub.effective_end is None or sub.next_invoice_date <= sub.effective_end)
             ):
                 previous = sub.next_invoice_date
                 invoice = generate_invoice(sub.pk, today)
@@ -329,6 +330,14 @@ def run_due_billing(today, limit=500, triggered_by="manual", dry_run=False):
                 sub.refresh_from_db()
                 if sub.next_invoice_date <= previous:
                     raise RuntimeError("Billing did not advance the subscription period")
+            if (
+                sub.status in (SubscriptionStatus.ACTIVE, SubscriptionStatus.PAUSED)
+                and sub.plan.auto_close
+                and sub.effective_end
+                and sub.effective_end < today
+            ):
+                transition_subscription(sub.pk, "auto_close", today=today, note="Plan expired")
+                counts["closed"] += 1
         run = BillingRun.objects.create(run_date=today, triggered_by=triggered_by, **counts)
         result = {**counts, "ran_at": run.created_at.isoformat(), "dry_run": dry_run}
         if dry_run:

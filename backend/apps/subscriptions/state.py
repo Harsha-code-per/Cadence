@@ -95,7 +95,7 @@ def transition_subscription(subscription_id, action, *, actor=None, note="", tod
     elif action == "close" and not plan.closable:
         _invalid("This plan cannot be closed manually.")
     elif action == "auto_close" and (
-        not plan.auto_close or not sub.expiration_date or sub.expiration_date >= today
+        not plan.auto_close or not sub.effective_end or sub.effective_end >= today
     ):
         _invalid("This subscription is not eligible for automatic closure.")
     elif action == "renew" and not plan.renewable:

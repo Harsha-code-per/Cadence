@@ -52,12 +52,51 @@ def test_activate_and_catch_up(subscription):
 
 
 @pytest.mark.django_db
-def test_expired_plan_is_closed_instead_of_billed(subscription):
+def test_expired_subscription_bills_final_period_before_closing(subscription):
     subscription.plan.auto_close = True
     subscription.plan.save()
     subscription.expiration_date = date(2026, 1, 31)
     subscription.save()
     result = run_due_billing(date(2026, 2, 1))
     subscription.refresh_from_db()
-    assert result["closed"] == 1 and result["invoiced"] == 0
-    assert subscription.status == "closed" and not Invoice.objects.exists()
+    assert result["closed"] == 1 and result["invoiced"] == 1
+    assert subscription.status == "closed"
+    assert list(Invoice.objects.values_list("period_start", flat=True)) == [date(2026, 1, 1)]
+
+
+@pytest.mark.django_db
+def test_plan_end_closes_after_billing_all_due_periods(subscription):
+    subscription.plan.auto_close = True
+    subscription.plan.end_date = date(2026, 2, 15)
+    subscription.plan.save()
+    result = run_due_billing(date(2026, 3, 1))
+    subscription.refresh_from_db()
+    assert result["closed"] == 1 and result["invoiced"] == 2
+    assert subscription.status == "closed"
+    assert list(
+        Invoice.objects.order_by("period_start").values_list("period_start", flat=True)
+    ) == [date(2026, 1, 1), date(2026, 2, 1)]
+
+
+@pytest.mark.django_db
+def test_plan_end_does_not_stop_billing_without_auto_close(subscription):
+    subscription.plan.auto_close = False
+    subscription.plan.end_date = date(2026, 1, 31)
+    subscription.plan.save()
+    result = run_due_billing(date(2026, 2, 1))
+    subscription.refresh_from_db()
+    assert result["closed"] == 0 and result["invoiced"] == 2
+    assert subscription.status == "active"
+
+
+@pytest.mark.django_db
+def test_subscription_expiration_takes_precedence_over_plan_end(subscription):
+    subscription.plan.auto_close = True
+    subscription.plan.end_date = date(2026, 1, 31)
+    subscription.plan.save()
+    subscription.expiration_date = date(2026, 2, 28)
+    subscription.save()
+    result = run_due_billing(date(2026, 2, 1))
+    subscription.refresh_from_db()
+    assert result["closed"] == 0 and result["invoiced"] == 2
+    assert subscription.status == "active"

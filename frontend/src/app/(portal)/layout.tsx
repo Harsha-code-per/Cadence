@@ -6,7 +6,7 @@ import { LogOut, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { RoleGate } from "@/components/auth/RoleGate";
-import { CycleMark } from "@/components/layout/CycleMark";
+import { LedgerMark } from "@/components/layout/LedgerMark";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/useMe";
 import { api } from "@/lib/api";
@@ -32,7 +32,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur-md">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
             <Link href="/portal" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight text-ink">
-              <CycleMark size={24} />
+              <LedgerMark size={24} />
               <span>Cadence</span>
               <span className="rounded bg-brand/10 px-1.5 py-0.5 text-[10px] font-semibold text-brand uppercase tracking-wider">
                 Portal

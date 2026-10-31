@@ -68,6 +68,7 @@
   --color-surface: var(--surface);
   --color-line: var(--line);
   --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
   --color-brand-soft: var(--brand-soft);
   --color-mint: var(--mint);
   --color-mint-soft: var(--mint-soft);

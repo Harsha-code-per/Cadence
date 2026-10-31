@@ -205,3 +205,43 @@ def test_pipeline_counts_and_values_each_stage_without_double_counting(api, make
     assert stages["active"]["count"] == 1
     assert stages["active"]["recurring_value"] == "150.00"  # 100 fee + 2×10 + 3×10
     assert stages["draft"] == {"status": "draft", "count": 0, "recurring_value": "0.00"}
+
+
+def test_aging_buckets_use_outstanding_and_exclude_paid_and_future(api, make_user, subscription):
+    today = date.today()
+
+    def invoice(number, days_late, total="100.00", paid="0.00", status=InvoiceStatus.CONFIRMED):
+        return Invoice.objects.create(
+            number=number,
+            subscription=subscription,
+            customer=subscription.customer,
+            status=status,
+            invoice_date=today - timedelta(days=days_late + 15),
+            due_date=today - timedelta(days=days_late),
+            period_start=today - timedelta(days=days_late + 400),
+            period_end=today - timedelta(days=days_late + 370),
+            subtotal=Decimal(total),
+            total=Decimal(total),
+            amount_paid=Decimal(paid),
+        )
+
+    invoice("I1", 1, paid="40.00")
+    invoice("I2", 7)
+    invoice("I3", 8)
+    invoice("I4", 31)
+    invoice("I5", 61)
+    invoice("I6", 0)  # due today: not late yet
+    invoice("I7", -5)  # not due
+    invoice("I8", 90, paid="100.00", status=InvoiceStatus.PAID)
+
+    api.force_authenticate(make_user("staff@example.test", role=Role.STAFF))
+    data = api.get("/api/analytics/aging/").json()
+    assert [(row["bucket"], row["count"], Decimal(row["amount"])) for row in data] == [
+        ("1-7", 2, Decimal("160.00")),
+        ("8-30", 1, Decimal("100.00")),
+        ("31-60", 1, Decimal("100.00")),
+        ("60+", 1, Decimal("100.00")),
+    ]
+
+    api.force_authenticate(make_user("c@example.test"))
+    assert api.get("/api/analytics/aging/").status_code == 403

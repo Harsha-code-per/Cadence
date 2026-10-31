@@ -1,9 +1,20 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
-from django.db.models import Case, Count, DecimalField, F, OuterRef, Subquery, Sum, Value, When
-from django.db.models.functions import Coalesce
+from django.db.models import (
+    Case,
+    Count,
+    DecimalField,
+    F,
+    OuterRef,
+    Q,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
+from django.db.models.functions import Coalesce, TruncMonth
 
 from apps.accounts.models import Customer
 from apps.billing.models import Invoice, InvoiceStatus
@@ -123,37 +134,33 @@ def get_analytics_summary(
 def get_revenue_series(months: int = 12) -> list[dict]:
     """Return monthly invoiced vs collected revenue for the past N months."""
     months = min(max(months, 1), 36)
-    today = date.today()
-    series = []
+    first = date.today().replace(day=1)
+    starts = [first - relativedelta(months=i) for i in range(months - 1, -1, -1)]
 
-    # Calculate month intervals from (months-1) back up to today
-    for i in range(months - 1, -1, -1):
-        target_month_date = today - relativedelta(months=i)
-        start_date = date(target_month_date.year, target_month_date.month, 1)
-        next_month = start_date + relativedelta(months=1)
-        end_date = next_month - relativedelta(days=1)
-        month_label = start_date.strftime("%Y-%m")
-
-        invoiced = Invoice.objects.filter(
-            status__in=[InvoiceStatus.CONFIRMED, InvoiceStatus.PAID],
-            invoice_date__gte=start_date,
-            invoice_date__lte=end_date,
-        ).aggregate(total=Coalesce(Sum("total"), Value(Decimal("0.00"))))["total"]
-
-        collected = Payment.objects.filter(
-            payment_date__gte=start_date,
-            payment_date__lte=end_date,
-        ).aggregate(total=Coalesce(Sum("amount"), Value(Decimal("0.00"))))["total"]
-
-        series.append(
-            {
-                "month": month_label,
-                "invoiced": str(invoiced),
-                "collected": str(collected),
-            }
+    def by_month(queryset, date_field, amount_field):
+        rows = (
+            queryset.filter(**{f"{date_field}__gte": starts[0]})
+            .annotate(month=TruncMonth(date_field))
+            .values("month")
+            .annotate(total=Sum(amount_field))
         )
+        return {row["month"]: row["total"] for row in rows}
 
-    return series
+    invoiced = by_month(
+        Invoice.objects.filter(status__in=[InvoiceStatus.CONFIRMED, InvoiceStatus.PAID]),
+        "invoice_date",
+        "total",
+    )
+    collected = by_month(Payment.objects.all(), "payment_date", "amount")
+    zero = Decimal("0.00")
+    return [
+        {
+            "month": start.strftime("%Y-%m"),
+            "invoiced": str(invoiced.get(start, zero)),
+            "collected": str(collected.get(start, zero)),
+        }
+        for start in starts
+    ]
 
 
 def get_status_breakdown() -> dict:
@@ -170,6 +177,32 @@ def get_status_breakdown() -> dict:
         "subscriptions": sub_counts,
         "invoices": inv_counts,
     }
+
+
+AGING_BUCKETS = (("1-7", 1, 7), ("8-30", 8, 30), ("31-60", 31, 60), ("60+", 61, None))
+
+
+def get_aging(today: date | None = None) -> list[dict]:
+    """Overdue money by how late it is: the older the bucket, the less likely it's collected."""
+    today = today or date.today()
+    aggregates = {}
+    for index, (_, first, last) in enumerate(AGING_BUCKETS):
+        in_bucket = Q(due_date__lte=today - timedelta(days=first))
+        if last is not None:
+            in_bucket &= Q(due_date__gte=today - timedelta(days=last))
+        aggregates[f"count_{index}"] = Count("id", filter=in_bucket)
+        aggregates[f"amount_{index}"] = Sum(
+            F("total") - F("amount_paid"), filter=in_bucket, output_field=DecimalField()
+        )
+    row = Invoice.objects.filter(status=InvoiceStatus.CONFIRMED).aggregate(**aggregates)
+    return [
+        {
+            "bucket": label,
+            "count": row[f"count_{index}"],
+            "amount": str(row[f"amount_{index}"] or Decimal("0.00")),
+        }
+        for index, (label, _, _) in enumerate(AGING_BUCKETS)
+    ]
 
 
 def get_insights() -> list[dict]:

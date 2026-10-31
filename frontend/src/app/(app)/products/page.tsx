@@ -72,6 +72,17 @@ export default function ProductsPage() {
       { accessorKey: "product_type", header: "Type", cell: ({ row }) => TYPES.find((t) => t.value === row.original.product_type)?.label },
       { accessorKey: "sales_price", header: "Sales price", meta: { align: "right" }, cell: ({ row }) => <Money value={row.original.sales_price} /> },
       { accessorKey: "cost_price", header: "Cost", meta: { align: "right" }, cell: ({ row }) => <Money value={row.original.cost_price} /> },
+      {
+        id: "margin",
+        header: "Margin",
+        meta: { align: "right" },
+        cell: ({ row }) => {
+          const sales = Number(row.original.sales_price);
+          const margin = sales ? ((sales - Number(row.original.cost_price)) / sales) * 100 : null;
+          if (margin === null) return "–";
+          return <span className={margin < 0 ? "font-medium text-rose" : undefined}>{margin.toFixed(0)}%</span>;
+        },
+      },
       { id: "variants", header: "Variants", meta: { align: "right" }, cell: ({ row }) => row.original.variants.length },
       { accessorKey: "is_active", header: "Status", cell: ({ row }) => <ActiveBadge active={!!row.original.is_active} /> },
     ],

@@ -4,7 +4,7 @@ import { LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
-import { CycleMark } from "@/components/layout/CycleMark";
+import { LedgerMark } from "@/components/layout/LedgerMark";
 import { NAV } from "@/components/layout/nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -98,7 +98,7 @@ export function SidebarNav({
           collapsed ? "justify-center" : "px-6",
         )}
       >
-        <CycleMark />
+        <LedgerMark />
         {!collapsed && "Cadence"}
       </Link>
 

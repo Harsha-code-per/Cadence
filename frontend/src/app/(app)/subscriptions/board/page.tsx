@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { api, ApiError, type Paginated } from "@/lib/api";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatDate, formatMoneyCompact } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 /* Brief, scene 3: "It moves from Draft to Quotation to Confirmed to Active and finally to
@@ -148,9 +148,9 @@ export default function SubscriptionBoardPage() {
                     {totals[stage.status]?.count?.toLocaleString("en-IN") ?? "…"}
                   </span>
                 </div>
-                <p className="flex items-baseline justify-between text-xs text-ink-2">
+                <p className="flex items-baseline justify-between gap-2 text-xs text-ink-2">
                   <span>{stage.hint}</span>
-                  <span className="tabular-nums font-medium text-ink">{totals[stage.status] ? `${formatMoney(totals[stage.status]!.recurring_value)}/cycle` : ""}</span>
+                  <span className="tabular-nums font-medium text-ink">{totals[stage.status] ? `${formatMoneyCompact(totals[stage.status]!.recurring_value)}/cycle` : ""}</span>
                 </p>
               </header>
               <Column

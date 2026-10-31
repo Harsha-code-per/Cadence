@@ -1,5 +1,6 @@
 """Invoice generation. All monetary amounts are snapshotted in a transaction."""
 
+from calendar import monthrange
 from datetime import timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -22,13 +23,22 @@ def rounded(value):
     return value.quantize(CENT, rounding=ROUND_HALF_UP)
 
 
-def period_end(start, plan, anchor_day):
-    """Return the inclusive period end, anchored to the subscription's start day."""
+def anchor_day(sub, start):
+    """The start day, unless a resumed pause moved the schedule: then the cursor's day rules.
+
+    Without this a shifted cursor would snap back to the old day and bill a short period.
+    """
+    last = monthrange(start.year, start.month)[1]
+    return sub.start_date.day if start.day == min(sub.start_date.day, last) else start.day
+
+
+def period_end(start, plan, anchor):
+    """Return the inclusive period end on the anchor day, so months never drift."""
     units = {"daily": "days", "weekly": "weeks", "monthly": "months", "yearly": "years"}
     unit = units[plan.billing_period]
     delta = relativedelta(**{unit: plan.interval_count})
     if unit in {"months", "years"}:
-        delta += relativedelta(day=anchor_day)
+        delta += relativedelta(day=anchor)
     return start + delta - timedelta(days=1)
 
 
@@ -48,7 +58,7 @@ def generate_invoice(subscription_id, today):
         or (sub.expiration_date and start > sub.expiration_date)
     ):
         return None
-    end = period_end(start, sub.plan, sub.start_date.day)
+    end = period_end(start, sub.plan, anchor_day(sub, start))
     if (
         Invoice.objects.filter(subscription=sub, period_start=start)
         .exclude(status="cancelled")

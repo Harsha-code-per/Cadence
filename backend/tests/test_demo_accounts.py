@@ -134,3 +134,19 @@ def test_real_accounts_are_unaffected(db, make_user):
 def test_command_is_repeatable(demo_admin):
     call_command("create_demo_accounts", verbosity=0)
     assert User.objects.filter(is_demo=True).count() == 3
+
+
+def test_demo_admin_never_sees_real_peoples_details(demo_admin):
+    seeded = Customer.objects.create(name="Seeded Co", email="seed@acme.test", phone="1")
+    real = Customer.objects.create(name="Real Person", email="real@gmail.com", phone="98765")
+    staff = User.objects.create_user("hire@gmail.com", "x", full_name="Real Staff", role=Role.STAFF)
+
+    client = _session(demo_admin)
+    assert client.get(f"/api/customers/{seeded.pk}/").json()["email"] == "seed@acme.test"
+    body = client.get(f"/api/customers/{real.pk}/").content.decode()
+    assert "real@gmail.com" not in body and "98765" not in body
+    assert "hire@gmail.com" not in client.get("/api/staff/").content.decode()
+    assert staff.email == "hire@gmail.com"
+
+    admin = User.objects.create_user("boss@example.test", "x", role=Role.ADMIN)
+    assert _session(admin).get(f"/api/customers/{real.pk}/").json()["email"] == "real@gmail.com"

@@ -10,7 +10,26 @@ from apps.accounts.models import Customer, Role, User
 from apps.core.exceptions import DomainError
 
 
-class UserSerializer(serializers.ModelSerializer):
+class HideRealPeopleFromDemo:
+    """The demo password is public, so demo logins never see real contact details.
+
+    Seeded records all use the reserved .test domain; anything else belongs to a real person.
+    """
+
+    private_fields = ()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if getattr(getattr(request, "user", None), "is_demo", False) and not (
+            instance.email or ""
+        ).endswith(".test"):
+            data.update(dict.fromkeys(self.private_fields, "Hidden in the demo"))
+        return data
+
+
+class UserSerializer(HideRealPeopleFromDemo, serializers.ModelSerializer):
+    private_fields = ("email", "full_name")
     customer_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -189,7 +208,8 @@ class StaffUpdateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class CustomerSerializer(serializers.ModelSerializer):
+class CustomerSerializer(HideRealPeopleFromDemo, serializers.ModelSerializer):
+    private_fields = ("email", "phone", "address")
     assigned_staff_name = serializers.CharField(source="assigned_staff.full_name", read_only=True)
 
     class Meta:

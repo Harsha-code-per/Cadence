@@ -14,6 +14,7 @@ import { api, ApiError, type Paginated } from "@/lib/api";
 
 type Line = {
   id: number;
+  product: number;
   product_name: string;
   variant_label: string | null;
   description: string;
@@ -102,6 +103,12 @@ function EditLine({ subscriptionId, line }: { subscriptionId: string; line: Line
   const [price, setPrice] = useState(line.unit_price);
   const [description, setDescription] = useState(line.description);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const cost = useQuery({
+    queryKey: ["product-cost", line.product],
+    queryFn: () => api.get<{ cost_price: string }>(`/products/${line.product}/`),
+    staleTime: 5 * 60_000,
+    select: (product) => product.cost_price,
+  });
   const refresh = () => client.invalidateQueries({ queryKey: ["subscription", subscriptionId] });
   const save = useMutation({
     mutationFn: () =>
@@ -142,6 +149,11 @@ function EditLine({ subscriptionId, line }: { subscriptionId: string; line: Line
         <Input type="number" required min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
       </label>
       <div className="sm:col-span-4">
+        {cost.data && Number(price) < Number(cost.data) && (
+          <p role="status" className="mb-2 text-sm font-medium text-amber">
+            This price is below the product&rsquo;s cost of <Money value={cost.data} />, so this line loses money.
+          </p>
+        )}
         <ErrorMessage error={save.error || remove.error} />
         {save.isSuccess && (
           <p role="status" className="mb-2 text-sm text-teal">

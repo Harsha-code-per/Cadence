@@ -73,7 +73,7 @@ _Measured on 5,000 subscriptions / 20,000 invoices; results added after seeding.
 | [@Sanjjith27](https://github.com/Sanjjith27) | Subscriptions, billing engine, invoices |
 | [@Cholan-kinnera](https://github.com/Cholan-kinnera) | Auth and roles, payments, dashboard, customer portal, QA |
 
-How we work: [CONTRIBUTING.md](CONTRIBUTING.md) · [docs/TEAM_PLAN.md](docs/TEAM_PLAN.md) · Security: [SECURITY.md](SECURITY.md)
+How we work: [Engineering standards (six pillars)](docs/ENGINEERING_STANDARDS.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [docs/TEAM_PLAN.md](docs/TEAM_PLAN.md) · Security: [SECURITY.md](SECURITY.md)
 
 ## License
 [MIT](LICENSE)

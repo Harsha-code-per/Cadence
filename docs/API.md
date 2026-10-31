@@ -26,6 +26,8 @@
   | 403 | `permission_denied` (wrong role) |
   | 404 | `not_found` (also returned for objects outside a customer's scope, so they can't tell whether a record exists) |
   | 429 | `throttled` (login, signup, password reset) |
+- **Server-Timing**: every `/api/` response carries `Server-Timing: db;dur=…;desc="N queries", app;dur=…` (frontend reads it via `performance.getEntriesByType("resource")`).
+- **cost_price** is returned to admin/staff only; never in customer-visible payloads.
 - **Roles**: `A` admin · `S` staff · `C` customer (scoped to own records).
 
 ---
@@ -101,11 +103,11 @@ Subscription response:
 | Method | Path | Roles | Notes |
 |---|---|---|---|
 | GET | `/api/invoices/` | A,S,C(own) | filters `status, customer, subscription, overdue=true, invoice_date__gte/lte, search` |
-| GET | `/api/invoices/{id}/` | A,S,C(own) | lines with tax snapshots, payments, `outstanding`, `is_overdue` |
+| GET | `/api/invoices/{id}/` | A,S,C(own) | lines with tax snapshots, payments, `outstanding`, `is_overdue`, `changes` (vs previous invoice, BILLING_RULES §9) |
 | POST | `/api/invoices/{id}/confirm/` · `/cancel/` · `/send/` | A,S | see BILLING_RULES §5 |
 | POST | `/api/invoices/confirm-bulk/` | A,S | `{ids: [..]}` → `{confirmed: n}` |
 | POST | `/api/subscriptions/{id}/invoice-now/` | A,S | bill the due period now (same engine) |
-| POST | `/api/billing/run/` | A | `{date?}` → `{activated, closed, invoiced, skipped, ran_at}` |
+| POST | `/api/billing/run/` | A | `{date?, dry_run?: bool}` → `{activated, closed, invoiced, skipped, total_billed, discounts_applied, dry_run, ran_at}`; a dry run changes nothing |
 | POST | `/api/internal/billing/run/` | Bearer `SCHEDULER_SECRET` | same, for the cron; constant-time secret compare |
 | GET | `/api/billing/last-run/` | A,S | last run time + counts (shown on the Invoices page) |
 
@@ -121,5 +123,6 @@ Subscription response:
 | GET | `/api/analytics/summary/?from=&to=&plan=` | A,S | `{active_subscriptions, mrr, arr, invoiced, collected, outstanding, overdue_count, overdue_amount}` |
 | GET | `/api/analytics/revenue-series/?months=12` | A,S | `[{month, invoiced, collected}]` |
 | GET | `/api/analytics/status-breakdown/` | A,S | subscriptions per status, invoices per status |
+| GET | `/api/analytics/aging/` | A,S | `[{bucket: "1-7"|"8-30"|"31-60"|"60+", count, amount}]` |
 | GET | `/api/analytics/insights/` | A,S | P2: churn-risk list with reasons |
 | GET | `/api/portal/summary/` | C | own: active subs, next invoice, outstanding |

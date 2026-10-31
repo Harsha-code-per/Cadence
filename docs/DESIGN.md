@@ -117,5 +117,10 @@ Quality floor: responsive down to 360px (the hero dial moves behind the text at 
 - Icons: lucide-react, 16px in tables, 18px in nav, stroke 1.75.
 
 ## 9. Claude Design reference
-- Design system artifact: _link added by M1 after generation_
-- Landing concept artifact: _link added by M1 after generation_
+Claude Design canvas: https://claude.ai/artifact/FWF3YVnpekm2kSAtVxTcUt (private until M1 shares it; ask in chat). Four artboards:
+- **Design system**: palette, type, status badges, actions, CycleRing, shape and space
+- **Landing page**: hero cycle dial, the "month at Brightloop" strip, DB guarantees, roles, live band, CTA
+- **App · Subscriptions**: sidebar with the marigold active bar, filter pills, data table
+- **App · Finance dashboard**: KPI tiles, invoiced vs collected, overdue list with "Record payment"
+
+Where the canvas and this file disagree, **this file wins**.

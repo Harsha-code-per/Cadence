@@ -46,6 +46,9 @@ FRONTEND_URL = env("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 CSRF_TRUSTED_ORIGINS = [FRONTEND_URL, *env_list("EXTRA_TRUSTED_ORIGINS")]
 CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
 SCHEDULER_SECRET = env("SCHEDULER_SECRET")
+ASSISTANT_API_KEY = env("ASSISTANT_API_KEY")
+ASSISTANT_API_URL = env("ASSISTANT_API_URL")
+ASSISTANT_MODEL = env("ASSISTANT_MODEL")
 ENABLE_DJANGO_ADMIN = env_bool("ENABLE_DJANGO_ADMIN", DEBUG)
 
 INSTALLED_APPS = [
@@ -65,6 +68,7 @@ INSTALLED_APPS = [
     "apps.billing",
     "apps.payments",
     "apps.analytics",
+    "apps.assistant",
 ]
 
 MIDDLEWARE = [

@@ -11,6 +11,7 @@ api = [
     path("", include("apps.billing.urls")),
     path("", include("apps.payments.urls")),
     path("", include("apps.analytics.urls")),
+    path("", include("apps.assistant.urls")),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
 ]

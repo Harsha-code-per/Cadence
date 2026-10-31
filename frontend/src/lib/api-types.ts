@@ -101,6 +101,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/assistant/ask/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["assistant_ask_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/status/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["assistant_status_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/attributes/": {
         parameters: {
             query?: never;
@@ -1125,6 +1157,14 @@ export interface components {
             overdue_count: number;
             overdue_amount: string;
         };
+        AssistantAnswer: {
+            answer: string;
+            tool: (components["schemas"]["ToolEnum"] | components["schemas"]["NullEnum"]) | null;
+            numbers: unknown;
+        };
+        AssistantStatus: {
+            enabled: boolean;
+        };
         Attribute: {
             readonly id: number;
             name: string;
@@ -1407,6 +1447,8 @@ export interface components {
          * @enum {string}
          */
         MethodEnum: "cash" | "bank_transfer" | "card" | "upi" | "cheque";
+        /** @enum {unknown} */
+        NullEnum: null;
         PaginatedAttributeList: {
             /** @example 123 */
             count: number;
@@ -2165,6 +2207,15 @@ export interface components {
             description?: string;
         };
         /**
+         * @description * `summary` - summary
+         *     * `aging` - aging
+         *     * `revenue_series` - revenue_series
+         *     * `status_breakdown` - status_breakdown
+         *     * `pipeline` - pipeline
+         * @enum {string}
+         */
+        ToolEnum: "summary" | "aging" | "revenue_series" | "status_breakdown" | "pipeline";
+        /**
          * @description The demo password is public, so demo logins never see real contact details.
          *
          *     Seeded records all use the reserved .test domain; anything else belongs to a real person.
@@ -2340,6 +2391,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnalyticsSummary"];
+                };
+            };
+        };
+    };
+    assistant_ask_retrieve: {
+        parameters: {
+            query: {
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantAnswer"];
+                };
+            };
+        };
+    };
+    assistant_status_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantStatus"];
                 };
             };
         };

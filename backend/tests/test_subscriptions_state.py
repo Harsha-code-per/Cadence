@@ -55,6 +55,9 @@ def test_guards_and_expired_quotation(draft):
 
 @pytest.mark.django_db
 def test_pause_close_and_renew(subscription):
+    # The shared fixture inserts its number directly, without advancing Sequence.
+    subscription.number = "SUB/2025/00001"
+    subscription.save(update_fields=["number"])
     with pytest.raises(ValidationError):
         transition_subscription(subscription.pk, "pause", today=TODAY)
     subscription.plan.pausable = True

@@ -1,4 +1,5 @@
 "use client";
+import { ActiveBadge } from "@/components/data/StatusBadge";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { CatalogPage } from "@/components/data/CatalogPage";
@@ -30,7 +31,7 @@ const columns: ColumnDef<Plan, unknown>[] = [
   },
   { accessorKey: "min_quantity", header: "Min qty", meta: { align: "right" } },
   { id: "window", header: "Available", cell: ({ row }) => <><DateText value={row.original.start_date} /> – {row.original.end_date ? <DateText value={row.original.end_date} /> : "open"}</> },
-  { accessorKey: "is_active", header: "Status", cell: ({ row }) => (row.original.is_active ? "Active" : "Inactive") },
+  { accessorKey: "is_active", header: "Status", cell: ({ row }) => <ActiveBadge active={!!row.original.is_active} /> },
 ];
 
 export default function PlansPage() {

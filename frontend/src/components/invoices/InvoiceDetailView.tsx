@@ -205,7 +205,24 @@ export function InvoiceDetailView({ id }: { id: string }) {
                 Prices, discounts and taxes are the snapshot stored on this invoice.
               </p>
             </div>
-            <Table>
+            <div className="divide-y 2xl:hidden">
+              {invoice.lines.map((line) => (
+                <div key={line.id} className="space-y-3 p-4 text-sm">
+                  <div className="break-words font-medium">{line.description}</div>
+                  {line.product_name && <div className="break-words text-xs text-ink-3">{line.product_name}</div>}
+                  <dl className="grid grid-cols-2 gap-3">
+                    <div><dt className="text-xs text-ink-2">Quantity</dt><dd>{line.quantity}</dd></div>
+                    <div><dt className="text-xs text-ink-2">Unit price</dt><dd><Money value={line.unit_price} /></dd></div>
+                    <div><dt className="text-xs text-ink-2">Amount</dt><dd><Money value={line.amount} /></dd></div>
+                    <div><dt className="text-xs text-ink-2">Discount</dt><dd><Money value={line.discount_amount} /></dd></div>
+                    <div><dt className="text-xs text-ink-2">Tax</dt><dd><Money value={line.tax_amount} /></dd></div>
+                    <div><dt className="text-xs text-ink-2">Total</dt><dd className="font-medium"><Money value={line.total} /></dd></div>
+                  </dl>
+                  {line.taxes.length > 0 && <ul className="space-y-0.5 text-xs text-ink-3">{line.taxes.map((tax) => <li key={tax.id}>{tax.name.includes("%") ? tax.name : `${tax.name} ${formatPercent(tax.rate)}`} · <Money value={tax.amount} /></li>)}</ul>}
+                </div>
+              ))}
+            </div>
+            <div className="hidden 2xl:block"><Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="text-ink-2">Item</TableHead>
@@ -258,7 +275,7 @@ export function InvoiceDetailView({ id }: { id: string }) {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </Table></div>
             <div className="flex justify-end border-t bg-canvas/40 px-4 py-4">
               <dl className="w-full max-w-xs space-y-1.5 text-sm">
                 <AmountRow label="Subtotal" value={invoice.subtotal} />
@@ -305,7 +322,21 @@ export function InvoiceDetailView({ id }: { id: string }) {
             {invoice.payments.length === 0 ? (
               <p className="px-4 py-6 text-sm text-ink-2">No payments recorded yet.</p>
             ) : (
-              <Table>
+              <>
+              <div className="divide-y 2xl:hidden">
+                {invoice.payments.map((payment) => (
+                  <div key={payment.id} className="space-y-2 p-4 text-sm">
+                    <p className="break-words font-medium">{payment.number}</p>
+                    <dl className="grid grid-cols-2 gap-3">
+                      <div><dt className="text-xs text-ink-2">Method</dt><dd>{paymentMethodLabel(payment.method)}</dd></div>
+                      <div><dt className="text-xs text-ink-2">Date</dt><dd><DateText value={payment.payment_date} /></dd></div>
+                      <div className="min-w-0 break-words"><dt className="text-xs text-ink-2">Reference</dt><dd>{payment.reference || "—"}{payment.note && <p className="text-xs text-ink-3">{payment.note}</p>}</dd></div>
+                      <div><dt className="text-xs text-ink-2">Amount</dt><dd><Money value={payment.amount} /></dd></div>
+                    </dl>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden 2xl:block"><Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
                     <TableHead className="text-ink-2">Payment</TableHead>
@@ -333,7 +364,8 @@ export function InvoiceDetailView({ id }: { id: string }) {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+              </Table></div>
+              </>
             )}
           </section>
         </div>

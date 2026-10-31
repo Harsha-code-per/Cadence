@@ -30,8 +30,8 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
 
   return (
     <div className="overflow-hidden rounded-lg border bg-surface">
-      <Table className="max-md:block">
-        <TableHeader className="max-md:hidden">
+      <Table className="max-xl:block">
+        <TableHeader className="max-xl:hidden">
           {table.getHeaderGroups().map((hg) => (
             <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((h) => (
@@ -42,7 +42,7 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className="max-md:block">
+        <TableBody className="max-xl:block">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
               <TableRow key={i}>
@@ -66,13 +66,13 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
                 tabIndex={onRowClick ? 0 : undefined}
                 onClick={() => onRowClick?.(row.original)}
                 onKeyDown={(e) => e.key === "Enter" && onRowClick?.(row.original)}
-                className={cn(compact ? "h-9" : "h-11", "max-md:grid max-md:h-auto max-md:grid-cols-2 max-md:gap-x-3 max-md:border-b max-md:p-3", onRowClick && "cursor-pointer focus-visible:bg-brand-soft")}
+                className={cn(compact ? "h-9" : "h-11", "max-xl:grid max-xl:h-auto max-xl:grid-cols-2 max-xl:gap-x-3 max-xl:border-b max-xl:p-3", onRowClick && "cursor-pointer focus-visible:bg-brand-soft")}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
                     data-label={typeof cell.column.columnDef.header === "string" ? cell.column.columnDef.header : undefined}
-                    className={cn("px-4", align(cell.column.columnDef.meta), compact && "py-1", cell.column.id === "actions" && "max-md:col-span-2 max-md:pt-2", "max-md:block max-md:p-0 max-md:py-0.5 max-md:text-left max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]")}
+                    className={cn("px-4", align(cell.column.columnDef.meta), compact && "py-1", cell.column.id === "actions" && "max-xl:col-span-2 max-xl:pt-2", "max-xl:block max-xl:min-w-0 max-xl:break-words max-xl:whitespace-normal max-xl:p-0 max-xl:py-0.5 max-xl:text-left max-xl:before:mb-0.5 max-xl:before:block max-xl:before:text-xs max-xl:before:text-ink-3 max-xl:before:content-[attr(data-label)]")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

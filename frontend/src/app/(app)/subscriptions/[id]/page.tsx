@@ -281,7 +281,22 @@ export default function SubscriptionDetailPage() {
             {sub.lines.length === 0 ? (
               <p className="p-5 pt-2 text-sm text-ink-2">No lines have been added yet.</p>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+              <div className="divide-y xl:hidden">
+                {sub.lines.map((line) => (
+                  <div key={line.id} className="space-y-2 p-4 text-sm">
+                    <p className="break-words font-medium">{line.description || line.product_name}</p>
+                    {line.variant_label && <p className="break-words text-xs text-ink-2">{line.variant_label}</p>}
+                    <dl className="grid grid-cols-2 gap-3">
+                      <div><dt className="text-xs text-ink-2">Quantity</dt><dd>{line.quantity}</dd></div>
+                      <div><dt className="text-xs text-ink-2">Unit price</dt><dd><Money value={line.unit_price} /></dd></div>
+                      <div><dt className="text-xs text-ink-2">Amount</dt><dd><Money value={line.amount} /></dd></div>
+                    </dl>
+                  </div>
+                ))}
+                <div className="flex flex-wrap justify-between gap-2 p-4 text-sm"><span className="text-ink-2">Recurring total</span><span className="font-semibold"><Money value={sub.recurring_total} /></span></div>
+              </div>
+              <div className="hidden overflow-x-auto xl:block">
                 <table className="w-full min-w-[520px] border-collapse text-left text-sm">
                   <thead className="border-y text-ink-2">
                     <tr>
@@ -320,6 +335,7 @@ export default function SubscriptionDetailPage() {
                   </tfoot>
                 </table>
               </div>
+              </>
             )}
           </Panel>
         </div>

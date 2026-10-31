@@ -82,6 +82,7 @@ Measured in production on 31 Oct 2026 with 5,000 subscriptions and 18,032 invoic
 | Revenue, 12 months | 277 ms | 31 ms | 4 |
 | Overdue aging | 164 ms | 19 ms | 3 |
 | Pipeline | 309 ms | 28 ms | 4 |
+| Churn insights | 268 ms | 74 ms | 3 |
 | Subscriptions list | 204 ms | 75 ms | 11 |
 | Subscription search | 379 ms | 92 ms | 11 |
 | Invoices list | 207 ms | 48 ms | 4 |

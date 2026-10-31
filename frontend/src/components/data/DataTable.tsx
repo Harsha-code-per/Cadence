@@ -30,10 +30,10 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
 
   return (
     <div className="overflow-hidden rounded-lg border bg-surface">
-      <Table>
-        <TableHeader>
+      <Table className="max-md:block">
+        <TableHeader className="max-md:hidden">
           {table.getHeaderGroups().map((hg) => (
-            <TableRow key={hg.id} className="hover:bg-transparent max-md:hidden">
+            <TableRow key={hg.id} className="hover:bg-transparent">
               {hg.headers.map((h) => (
                 <TableHead key={h.id} className={cn("h-10 text-ink-2", align(h.column.columnDef.meta))}>
                   {flexRender(h.column.columnDef.header, h.getContext())}
@@ -42,7 +42,7 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
+        <TableBody className="max-md:block">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
               <TableRow key={i}>
@@ -66,13 +66,13 @@ export function DataTable<T>({ columns, data, count, page, pageSize = 20, loadin
                 tabIndex={onRowClick ? 0 : undefined}
                 onClick={() => onRowClick?.(row.original)}
                 onKeyDown={(e) => e.key === "Enter" && onRowClick?.(row.original)}
-                className={cn(compact ? "h-9" : "h-11", "max-md:grid max-md:grid-cols-2 max-md:gap-x-3 max-md:border-b max-md:p-3", onRowClick && "cursor-pointer focus-visible:bg-plum-soft")}
+                className={cn(compact ? "h-9" : "h-11", "max-md:grid max-md:h-auto max-md:grid-cols-2 max-md:gap-x-3 max-md:border-b max-md:p-3", onRowClick && "cursor-pointer focus-visible:bg-plum-soft")}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
                     data-label={typeof cell.column.columnDef.header === "string" ? cell.column.columnDef.header : undefined}
-                    className={cn(align(cell.column.columnDef.meta), compact && "py-1", "max-md:p-0 max-md:py-0.5 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]")}
+                    className={cn(align(cell.column.columnDef.meta), compact && "py-1", "max-md:block max-md:p-0 max-md:py-0.5 max-md:before:mb-0.5 max-md:before:block max-md:before:text-xs max-md:before:text-ink-3 max-md:before:content-[attr(data-label)]")}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>

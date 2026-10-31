@@ -5,7 +5,6 @@ from datetime import timedelta
 from decimal import Decimal
 from importlib.util import find_spec
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import pytest
 from django.db import connection
@@ -13,6 +12,7 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from apps.accounts.models import Customer, Role
+from apps.billing.models import Invoice
 from apps.catalog.models import (
     Attribute,
     AttributeValue,
@@ -505,16 +505,12 @@ def test_staff_lifecycle_activation_guard_and_renewal(api, people, plan, term, p
     assert confirmed.status_code == 200
     assert confirmed.json()["status"] == "confirmed"
 
-    blocked = api.post(f"{url}/activate/")
-    assert blocked.status_code == 503
-    assert blocked.json()["error"]["code"] == "billing_unavailable"
-    assert Subscription.objects.get(pk=subscription_id).status == "confirmed"
-
-    with patch("apps.billing.services.generate_invoice", create=True, return_value=object()):
-        activated = api.post(f"{url}/activate/")
+    # The billing engine is live: activation bills the first period in the same transaction.
+    activated = api.post(f"{url}/activate/")
     assert activated.status_code == 200, activated.json()
     assert activated.json()["status"] == "active"
-    assert activated.json()["next_invoice_date"] == str(TODAY)
+    assert Invoice.objects.filter(subscription_id=subscription_id).count() == 1
+    assert activated.json()["next_invoice_date"] > str(TODAY)
 
     paused = api.post(f"{url}/pause/")
     assert paused.status_code == 200

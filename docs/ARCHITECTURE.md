@@ -14,7 +14,7 @@ flowchart LR
 ```
 
 - **Modular monolith**: one Django project, one Django app per business domain. Simple to deploy and transactional across domains (an invoice and its payment allocation commit together).
-- **Same-origin API**: Next rewrites `/api/:path*` to `BACKEND_URL`. Session cookies and CSRF work with no CORS config, and the Render URL is never exposed to the browser.
+- **Same-origin API**: Next rewrites `/api/:path*` to `API_URL`. Session cookies and CSRF work with no CORS config, and the Render URL is never exposed to the browser.
 - **No BaaS**: Neon is only a PostgreSQL server reached through `DATABASE_URL`. Schema, migrations, auth, permissions and business logic are all ours. Swapping hosts is a one-line env change.
 - **Third-party surface**: SMTP only (a standard protocol, swappable). No payment SDK, no AI API.
 

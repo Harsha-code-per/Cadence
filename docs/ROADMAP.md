@@ -32,3 +32,22 @@ P0 = must ship by the 14:30 checkpoint · P1 = by 16:15 freeze · P2 = only if e
 | | Rule-based churn-risk insights | P2 | M4 | `/insights` |
 | | Dark mode | P2 | M2 | |
 | | CSV export of invoices | P2 | M3 | |
+
+## Differentiators (from the team's master-report review)
+Adopted because they prove a brief requirement live or close a real failure mode, at low cost. Rejected ideas and why are at the bottom.
+
+| Feature | Proves | Priority | Owner |
+|---|---|---|---|
+| **Billing-day simulator**: "Bill as of" date + dry-run Preview on the billing dialog | Scene 4 "nothing billed twice or skipped", live in seconds | P1 | M3 |
+| **Anchor-day billing** (31 Jan → 29 Feb → 31 Mar, no drift) | Scene 4 correctness | P0 (part of the engine) | M3 |
+| **Pause shift**: resume moves the next invoice by the paused days | Scene 2 pause rule | P1 | M3 |
+| **Server-Timing header** + tiny "11 ms · 3 queries" badge in the app footer | Scene 7 "< 2 s", measured on every page | P1 | M1 header ✅, M2 badge |
+| **Gross margin + below-cost warning** (cost price is used, never shown to customers) | Scene 2 cost price has a purpose | P1 | M2 product forms, M3 subscription lines |
+| **Receivables aging buckets** 1–7 / 8–30 / 31–60 / 60+ | Scene 6 "chase overdue before it's lost" | P1 | M4 |
+| **"Why did my bill change?"** on invoice detail and portal | Scene 1 portal "without having to email anyone" | P2 | M3 (API) + M4 (portal) |
+| **Pause-before-close** prompt in the portal on pausable plans | Scene 2 pause rule, customer retention | P2 | M4 |
+| **Quotation expiring soon** badge (≤ 2 days) | Scene 3 validity days | P1 | M3 |
+| **Demo persona switcher** on the login page (only when `NEXT_PUBLIC_DEMO_MODE=true`; logs in seeded demo users) | Lets judges try all three roles in one click | P2 | M4 |
+| **Jury Q&A prep**: [JURY_QA.md](JURY_QA.md) | Everyone can defend every decision | ✅ | all |
+
+Not adopted (and why): JWT/Redis/FastAPI/microservice layers (we have sessions + one modular monolith); materialized views and cursor pagination (indexes already keep us far under 2 s at 5–10k; we'll show measurements instead); credit wallet and mid-cycle proration (not in the brief, and they add money paths to get wrong); hash-chained audit log (our append-only AuditLog covers the need); bank-CSV auto-matcher and magic-link quote acceptance (good, but only if everything else is green: P3).

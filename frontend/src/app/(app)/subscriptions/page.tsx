@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api, ApiError, type Paginated } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 type Subscription = {
   id: number;
@@ -31,7 +32,7 @@ const columns: ColumnDef<Subscription, unknown>[] = [
     header: "Subscription",
     cell: ({ row }) => (
       <Link
-        className="font-medium text-primary underline-offset-4 hover:underline"
+        className="font-medium text-plum underline-offset-4 hover:underline"
         href={`/subscriptions/${row.original.id}`}
       >
         {row.original.number}
@@ -97,7 +98,7 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
             required
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
-            className="h-9 rounded-md border bg-background px-3 font-normal"
+            className="h-11 rounded-md border border-input bg-surface px-3 font-normal"
             disabled={customers.isLoading || customers.isError}
           >
             <option value="">Select a customer</option>
@@ -142,7 +143,7 @@ function CreateFromTemplate({ onCancel }: { onCancel: () => void }) {
             required
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
-            className="h-9 rounded-md border bg-background px-3 font-normal"
+            className="h-11 rounded-md border border-input bg-surface px-3 font-normal"
             disabled={templates.isLoading || templates.isError}
           >
             <option value="">Select a template</option>
@@ -234,33 +235,42 @@ export default function SubscriptionsPage() {
         }
       />
       {creating && <CreateFromTemplate onCancel={() => setCreating(false)} />}
-      <div className="mb-4 flex flex-wrap gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
           aria-label="Search subscriptions"
           placeholder="Search number or customer"
-          className="max-w-xs"
+          className="mr-2 w-full max-w-[280px]"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
             setPage(1);
           }}
         />
-        <select
-          aria-label="Filter by status"
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All statuses</option>
-          {["draft", "quotation", "confirmed", "active", "paused", "closed"].map((value) => (
-            <option key={value} value={value}>
-              {value[0].toUpperCase() + value.slice(1)}
-            </option>
-          ))}
-        </select>
+        <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-2">
+          {["", "draft", "quotation", "confirmed", "active", "paused", "closed"].map((value) => {
+            const on = status === value;
+            return (
+              <button
+                key={value || "all"}
+                type="button"
+                aria-pressed={on}
+                onClick={() => {
+                  setStatus(value);
+                  setPage(1);
+                }}
+                className={cn(
+                  "min-h-9 rounded-full border px-3.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-ring",
+                  on ? "border-plum bg-plum-soft font-medium text-ink" : "border-line bg-surface text-ink hover:bg-plum-soft/60",
+                )}
+              >
+                {value ? value[0].toUpperCase() + value.slice(1) : "All"}
+              </button>
+            );
+          })}
+        </div>
+        <span className="ml-auto text-sm text-ink-2">
+          {subscriptions.data ? `${subscriptions.data.count.toLocaleString("en-IN")} subscriptions` : ""}
+        </span>
       </div>
       {subscriptions.isError ? (
         <div role="alert" className="rounded-lg border p-6 text-sm">
